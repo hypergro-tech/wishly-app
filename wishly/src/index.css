@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body { @apply bg-ivory text-ink font-sans antialiased; }
+  h1, h2, h3 { @apply font-bold tracking-[-0.02em]; }
+  ::selection { @apply bg-coral/40; }
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[15px] font-bold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-coral/40 disabled:cursor-not-allowed disabled:opacity-40; }
+  /* Deep teal on coral: strong actions. */
+  .btn-primary { @apply btn bg-coral text-ink hover:bg-coral-hover; }
+  .btn-dark { @apply btn bg-ink text-ivory hover:bg-ink/90; }
+  .btn-berry { @apply btn bg-berry text-white hover:bg-berry/90; }
+  .btn-ghost { @apply btn border border-ink/20 bg-white text-ink hover:border-ink/50; }
+
+  .card { @apply rounded-card bg-white p-6 shadow-[0_1px_0_rgba(20,52,56,0.06),0_12px_32px_-18px_rgba(20,52,56,0.25)]; }
+  .eyebrow { @apply text-xs font-bold uppercase tracking-[0.08em] text-berry; }
+  .accent { @apply font-accent italic; }
+
+  .label { @apply mb-2 block text-[15px] font-bold; }
+  .hint { @apply mt-1.5 text-sm text-ink/65; }
+  /* 16px minimum on form fields, per the type system. */
+  .input { @apply w-full rounded-xl border border-ink/20 bg-white px-4 py-3 text-base text-ink placeholder:text-ink/40 outline-none transition focus:border-ink focus:ring-4 focus:ring-coral/25; }
+
+  .chip { @apply rounded-full border px-4 py-2.5 text-[15px] transition; }
+  .chip-on { @apply chip border-ink bg-ink font-bold text-ivory; }
+  .chip-off { @apply chip border-ink/20 bg-white text-ink hover:border-ink/60; }
+
+  .option { @apply rounded-2xl border-2 p-4 text-left transition; }
+  .option-on { @apply option border-ink; }
+  .option-off { @apply option border-transparent bg-white shadow-[0_0_0_1px_rgba(20,52,56,0.15)] hover:shadow-[0_0_0_1px_rgba(20,52,56,0.5)]; }
+}
+
+@keyframes sheet { from { transform: translateY(40px); opacity: 0 } to { transform: none; opacity: 1 } }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

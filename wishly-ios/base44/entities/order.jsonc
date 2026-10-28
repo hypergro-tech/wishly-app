@@ -1,0 +1,115 @@
+// A song gift. Shared by the Wishly iOS app and the web app.
+// Push with `base44 entities push` (see README).
+{
+  "name": "Order",
+  "type": "object",
+  "title": "Order",
+  "description": "A personal song gift: the brief, the song, corrections and the gift link",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["in_production", "ready_for_review", "correction_requested", "approved"],
+      "default": "in_production"
+    },
+    "recipient": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "pronunciation": { "type": "string", "maxLength": 80 },
+        "pronouns": { "type": "string" },
+        "relationship": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "occasion": { "type": "string" },
+    "occasion_date": { "type": "string" },
+    "memories": {
+      "type": "object",
+      "properties": {
+        "ritual": { "type": "string", "maxLength": 600 },
+        "nickname": { "type": "string", "maxLength": 80 },
+        "inside_joke": { "type": "string", "maxLength": 600 },
+        "memory": { "type": "string", "maxLength": 600 },
+        "want_to_say": { "type": "string", "maxLength": 600 },
+        "avoid": { "type": "string", "maxLength": 300 }
+      }
+    },
+    "music": {
+      "type": "object",
+      "properties": {
+        "mood": { "type": "string" },
+        "genre": { "type": "string" },
+        "voice": { "type": "string" },
+        "language": { "type": "string" }
+      }
+    },
+    "package": {
+      "type": "object",
+      "properties": {
+        "delivery": { "type": "string", "enum": ["standard", "express"], "default": "standard" },
+        "extras": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "buyer": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      }
+    },
+    "price_total": { "type": "number", "minimum": 0 },
+    "ready_by": { "type": "string" },
+    "song": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "style": { "type": "string" },
+        "duration_sec": { "type": "number" },
+        "audio_url": { "type": "string" },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "lines": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "song_version": { "type": "integer", "minimum": 0, "default": 0 },
+    "corrections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": { "type": "string" },
+          "note": { "type": "string" },
+          "changes": { "type": "object" },
+          "at": { "type": "string" },
+          "resolved": { "type": "boolean" }
+        }
+      }
+    },
+    "gift_token": { "type": "string" },
+    "gift": {
+      "type": "object",
+      "properties": {
+        "message": { "type": "string", "maxLength": 1000 },
+        "from_name": { "type": "string" },
+        "opened_count": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "required": ["recipient", "occasion"],
+  // Buyers see and change only their own orders. Recipients never read this
+  // entity directly: the gift page should fetch through a backend function
+  // that returns only the song and message for a valid gift_token.
+  "rls": {
+    "create": true,
+    "read": { "created_by": "{{user.email}}" },
+    "update": { "created_by": "{{user.email}}" },
+    "delete": { "created_by": "{{user.email}}" }
+  }
+}

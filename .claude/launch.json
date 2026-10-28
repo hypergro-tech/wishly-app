@@ -1,0 +1,34 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "wishly",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "wishly",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "5179",
+        "--strictPort"
+      ],
+      "port": 5179
+    },
+    {
+      "name": "wishly-ios-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "wishly-ios",
+        "run",
+        "web",
+        "--",
+        "--port",
+        "8099"
+      ],
+      "port": 8099
+    }
+  ]
+}
