@@ -3,7 +3,7 @@
 
 import { quote, type Tint } from '@/lib/catalog'
 import { buildSongPrompt, SONG_SCHEMA, writeSong, type Song } from '@/lib/songwriter'
-import { b44, isBase44 } from './base44Client'
+import { b44, isBase44, realSongs } from './base44Client'
 
 export type Status = 'in_production' | 'ready_for_review' | 'correction_requested' | 'approved'
 
@@ -25,6 +25,8 @@ export type Order = {
   corrections: { kind: string; note: string; changes: Record<string, unknown>; at: string; resolved: boolean }[]
   gift_token?: string
   gift: { message: string; from_name: string; opened_count: number } | null
+  // Set by the makeSong function: which spellings were sung and whether the name was heard.
+  name_check?: { passed: boolean; needs_person: boolean; tries: { spelling: string; heard: number }[] }
 }
 
 export type Brief = Pick<Order, 'recipient' | 'occasion' | 'occasion_date' | 'memories' | 'music' | 'package' | 'buyer'>
@@ -65,7 +67,17 @@ async function compose(order: Order): Promise<Order> {
   // A model reply may omit the extras the template adds; fill them from the brief.
   const fallback = writeSong(order)
   const song: Song = typeof result === 'object' && result?.sections ? { ...fallback, ...result } : fallback
-  return Orders().update(order.id, { song, song_version: (order.song_version || 0) + 1, status: 'ready_for_review' })
+  if (!realSongs) return Orders().update(order.id, { song, song_version: (order.song_version || 0) + 1, status: 'ready_for_review' })
+  // The backend sings it, checks the name was heard, and marks it ready.
+  const updated: Order = await Orders().update(order.id, { song, song_version: (order.song_version || 0) + 1, status: 'in_production' })
+  await b44().functions.invoke('makeSong', { order_id: order.id })
+  return updated
+}
+
+// A sounds-like spelling for a tricky name nobody has tested yet (Gemini, on the backend).
+export async function suggestSpelling(name: string): Promise<string | null> {
+  const res = await b44().functions.invoke('suggestSpelling', { name })
+  return res?.data?.spellings?.[0] ?? null
 }
 
 // In production the backend does this once the song is recorded.

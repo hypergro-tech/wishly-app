@@ -15,7 +15,7 @@
       "type": "object",
       "properties": {
         "name": { "type": "string", "minLength": 1, "maxLength": 80 },
-        "pronunciation": { "type": "string", "maxLength": 80 },
+        "pronunciation": { "type": "string", "maxLength": 80 }, // the sounds-like spelling that gets sung
         "pronouns": { "type": "string" },
         "relationship": { "type": "string" }
       },
@@ -66,6 +66,8 @@
         "style": { "type": "string" },
         "duration_sec": { "type": "number" },
         "audio_url": { "type": "string" },
+        // The spelling the singer was given, e.g. "Shivawn" for Siobhan.
+        "sung_as": { "type": "string" },
         "sections": {
           "type": "array",
           "items": {
@@ -89,6 +91,23 @@
           "changes": { "type": "object" },
           "at": { "type": "string" },
           "resolved": { "type": "boolean" }
+        }
+      }
+    },
+    // Set by the makeSong function: each spelling sung and how many of three
+    // listens heard the name. needs_person: no try passed, so someone listens first.
+    "name_check": {
+      "type": "object",
+      "properties": {
+        "passed": { "type": "boolean" },
+        "needs_person": { "type": "boolean" },
+        "error": { "type": "string" },
+        "tries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": { "spelling": { "type": "string" }, "heard": { "type": "integer" } }
+          }
         }
       }
     },

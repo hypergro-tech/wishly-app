@@ -3,6 +3,8 @@ export type Song = {
   style?: string
   duration_sec?: number
   audio_url?: string | null
+  // The spelling the singer was given, e.g. "Shivawn" for Siobhan.
+  sung_as?: string
   sections: { label: string; lines: string[] }[]
 }
 

@@ -124,15 +124,37 @@ Point the web app at the same app ID (`wishly/src/api/base44Client.js`) so both 
 - Sign-out drops the token and creates a fresh client. The SDK's `auth.logout()` redirects a
   browser window, so the app never calls it.
 
+### Names and real songs (`makeSong`, `suggestSpelling`)
+
+The music model (Lyria 3 Pro) sings a name the way an English reader would sound out its
+spelling, so Irish and Welsh names come out wrong (Siobhan as "see over"). The fix, tested
+29 Oct 2026:
+
+- **Sounds-like box** on Create (`SoundsLike` in `src/app/(tabs)/create.tsx`). Tricky names
+  (`base44/shared/names.ts`) fill in a tested spelling (Siobhan as Shivawn) or, for a signed-in
+  buyer, one suggested by Gemini (`suggestSpelling`). The buyer can play it and change it. It's
+  saved as `recipient.pronunciation`; the lyrics and gift page keep the real name.
+- **`makeSong`** sings the lyrics with that spelling, has OpenAI's transcriber listen three
+  times, and remakes the song with the next spelling until the name is heard at least twice
+  (up to three tries). It saves the MP3 to `song.audio_url` and the result to `name_check`.
+  If no try passes, the order stays in production with `name_check.needs_person` set, so
+  someone listens before the buyer does.
+- A pronunciation guide in brackets next to the name does not work; the sung word has to be
+  the sounds-like spelling.
+
+To switch it on: deploy the functions (`base44 functions deploy`), set the `GEMINI_API_KEY`
+and `OPENAI_API_KEY` secrets (`base44 secrets set`), and set `EXPO_PUBLIC_REAL_SONGS=true`.
+Lyrics are still written on the phone when "Finish the song" is tapped; in production an
+automation on new orders should run that and `makeSong` instead.
+
 ### Still to build on Base44
 
 - **Gift page for recipients.** The web gift page should fetch through a backend function that
   returns only the song and message for a valid `gift_token`, so the Order entity never needs
   public read access.
-- **The song itself.** "Finish the song" currently asks `InvokeLLM` for lyrics. A real pipeline
-  (lyrics, vocals, recording) should run server-side and set `song.audio_url`; the player then
-  plays the recording instead of the music box. Keep the demo buttons while testing with
-  `EXPO_PUBLIC_DEMO_TOOLS=true`.
+- **The song itself.** `makeSong` now records the vocals (see above). Still to do: write the
+  lyrics server-side too, and run both from an automation when an order is placed, so the
+  phone doesn't have to. Keep the demo buttons while testing with `EXPO_PUBLIC_DEMO_TOOLS=true`.
 - **Gift links.** Set `EXPO_PUBLIC_GIFT_BASE_URL` to wherever the web app is hosted.
 - **Payment.** Checkout takes no payment yet. Before choosing Stripe or in-app purchase, check
   Apple's App Store rules for selling digital goods in an app.

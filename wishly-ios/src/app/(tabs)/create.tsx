@@ -10,7 +10,10 @@ import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { Squish } from '@/components/motion'
 import { Body, Button, Field, Label, Pill, Pills, Segmented, SpeakButton, Title, nudge, styles as ui, tap } from '@/components/ui'
 import { CORE_PACKAGE, DELIVERY, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
+import { realSongs } from '@/api/base44Client'
+import { suggestSpelling } from '@/api/orders'
 import { filledMemories, missing, useDraft } from '@/lib/draft'
+import { isTricky, singable, testedSpelling } from '@/lib/names'
 import { focusSafe, useRise } from '@/lib/motion'
 import { colors, tint, type } from '@/theme'
 
@@ -84,16 +87,8 @@ function CreateForm() {
           </View>
 
           <Section title="Who’s it for?">
-            <Field label="Their name, as it should be sung" big value={r.name} onChangeText={(name) => set('recipient', { name })} placeholder="e.g. Grace" autoCapitalize="words" autoCorrect={false} />
-            <View style={{ gap: 8 }}>
-              <Text style={[type.bold, { fontSize: 13, color: colors.muted }]}>How you say it</Text>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <View style={{ flex: 1 }}>
-                  <Field value={r.pronunciation} onChangeText={(pronunciation) => set('recipient', { pronunciation })} placeholder="e.g. PREE-yah" autoCorrect={false} accessibilityLabel="How you say it" />
-                </View>
-                <SpeakButton text={r.pronunciation || r.name} size={50} />
-              </View>
-            </View>
+            <Field label="Their name, as it’s written" big value={r.name} onChangeText={(name) => set('recipient', { name })} placeholder="e.g. Grace" autoCapitalize="words" autoCorrect={false} />
+            <SoundsLike name={r.name} value={r.pronunciation} onChange={(pronunciation) => set('recipient', { pronunciation })} />
             <View>
               <Label>They are your…</Label>
               <Pills options={RELATIONSHIPS} value={r.relationship} onChange={(relationship) => set('recipient', { relationship })} />
@@ -227,6 +222,72 @@ function CreateForm() {
         </LayoutAnimationConfig>
       </ScrollView>
       <ScrollHeader title="Create" solid={header.solid} />
+    </View>
+  )
+}
+
+// What the singer actually sings. The music model reads names the way an English
+// reader would, so Siobhan comes out as "see over". Tricky names fill in a
+// tested or suggested sounds-like spelling (Shivawn); anyone can type their own.
+function SoundsLike({ name, value, onChange }: { name: string; value: string; onChange: (v: string) => void }) {
+  const tricky = isTricky(name)
+  // The last spelling filled in for them. Anything else they typed is kept.
+  const filled = useRef(value && value === testedSpelling(name) ? value : '')
+  const [looking, setLooking] = useState(false)
+
+  useEffect(() => {
+    if (value && value !== filled.current) return
+    const fill = (v: string) => { filled.current = v; if (v !== value) onChange(v) }
+    const n = name.trim()
+    if (!n || !isTricky(n)) return fill('')
+    const tested = testedSpelling(n)
+    if (tested) return fill(tested)
+    if (!realSongs) return fill('')
+    // Ask the backend once they stop typing.
+    let live = true
+    const timer = setTimeout(() => {
+      setLooking(true)
+      suggestSpelling(n)
+        .then((s) => { if (live && s) fill(s) })
+        .catch(() => {})
+        .finally(() => { if (live) setLooking(false) })
+    }, 700)
+    return () => { live = false; clearTimeout(timer); setLooking(false) }
+    // Only a new name should refill it; `value` is read to protect their own typing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name])
+
+  const sung = singable(value)
+  const hint = looking
+    ? 'Finding how to sing it…'
+    : /[-]/.test(value) && sung
+      ? `One word works best. We’ll sing “${sung}”.`
+      : tricky
+        ? value
+          ? 'Tap the speaker to hear it. Sounds wrong? Type it the way it sounds, as one word.'
+          : 'Type it the way it sounds, as one word, so the singer gets it right.'
+        : undefined
+
+  return (
+    <View style={[{ gap: 8 }, tricky ? { borderWidth: 1, borderColor: colors.coral, borderRadius: 16, padding: 12 } : null]}>
+      <Text style={[type.bold, { fontSize: 13, color: colors.muted }]}>
+        {tricky ? <Text style={{ color: colors.coral }}>✱ </Text> : null}
+        {tricky ? 'Tricky name. We’ll sing it as' : 'Sounds like (optional)'}
+      </Text>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flex: 1 }}>
+          <Field
+            value={value}
+            onChangeText={onChange}
+            placeholder={tricky ? 'Type it the way it sounds' : 'e.g. Keeva, for Caoimhe'}
+            autoCapitalize="words"
+            autoCorrect={false}
+            accessibilityLabel="Sounds like"
+          />
+        </View>
+        <SpeakButton text={sung || name} size={50} />
+      </View>
+      {hint ? <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>{hint}</Text> : null}
     </View>
   )
 }

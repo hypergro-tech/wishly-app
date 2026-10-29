@@ -80,9 +80,9 @@ export default function FixSomething() {
             <Body>That name needs another look? You can correct it here.</Body>
             <Field label="Name" value={name} onChangeText={setName} autoCorrect={false} style={{ fontWeight: '700' }} />
             <View style={{ gap: 8 }}>
-              <Text style={[type.bold, { fontSize: 13, color: colors.muted }]}>How it’s said</Text>
+              <Text style={[type.bold, { fontSize: 13, color: colors.muted }]}>Sounds like (one word)</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <View style={{ flex: 1 }}><Field value={pronunciation} onChangeText={setPronunciation} autoCorrect={false} accessibilityLabel="How it’s said" /></View>
+                <View style={{ flex: 1 }}><Field value={pronunciation} onChangeText={setPronunciation} autoCorrect={false} accessibilityLabel="Sounds like" autoCapitalize="words" /></View>
                 <SpeakButton text={pronunciation || name} size={50} />
               </View>
             </View>
@@ -112,7 +112,7 @@ export default function FixSomething() {
           value={note}
           onChangeText={setNote}
           multiline
-          placeholder={kind === 'name' ? `e.g. It’s ${pronunciation || 'PREE-yah'}, not PRY-ah` : undefined}
+          placeholder={kind === 'name' ? `e.g. It should sound like ${pronunciation || 'Keeva'}, not Kay-oh-im` : undefined}
         />
 
         <Button label="Send correction" disabled={!canSend} busy={sending} onPress={send} style={{ marginTop: 4 }} />

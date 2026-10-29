@@ -16,5 +16,10 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
+  ],
+  "exclude": [
+    "base44/functions",
+    "base44/shared/ai.ts",
+    "node_modules"
   ]
 }

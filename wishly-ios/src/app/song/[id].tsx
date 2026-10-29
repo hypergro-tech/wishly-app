@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Share, Text, View } from 'react-native'
 import Animated, { useReducedMotion } from 'react-native-reanimated'
 
-import { showDemoTools } from '@/api/base44Client'
+import { realSongs, showDemoTools } from '@/api/base44Client'
 import { applyCorrection, finishProduction, getOrder, giftUrl, type Order } from '@/api/orders'
 import { Rhythm, Ribbon, Spark } from '@/components/brand'
 import Cover from '@/components/Cover'
@@ -33,6 +33,14 @@ export default function SongScreen() {
     setBusy(true)
     try { setOrder(await fn()); success() } finally { setBusy(false) }
   }
+
+  // While the backend sings and checks the song, look again every few seconds.
+  const making = realSongs && (order?.status === 'in_production' || order?.status === 'correction_requested')
+  useEffect(() => {
+    if (!making) return
+    const timer = setInterval(() => { getOrder(id).then(setOrder, () => {}) }, 8000)
+    return () => clearInterval(timer)
+  }, [making, id])
 
   if (missing) return <Centered><Body muted>We couldn’t find that song.</Body></Centered>
   if (!order) return <Centered><ActivityIndicator color={colors.muted} /></Centered>
