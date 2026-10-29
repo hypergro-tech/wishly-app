@@ -15,11 +15,15 @@ app you're working on.
 | `wishly/` | The web app (React, Vite, Tailwind). Recipients open their gift here (`/gift/:token`), so they never need the app. It also holds the earlier web version of the buying flow. See `wishly/README.md`. |
 
 Both apps are built to share one Base44 backend through an `Order` entity
-(`wishly-ios/base44/entities/order.jsonc`). It isn't connected yet.
+(`wishly-ios/base44/entities/order.jsonc`). Since 29 Oct 2026 the iPhone app is connected to the
+Base44 app **Wishly** in Kakuli's workspace (app ID in `wishly-ios/.env.local` and the
+git-ignored `wishly-ios/base44/.app.jsonc`; web address https://wishly-61fd03a5.base44.app).
+The Order entity is pushed. The web app still runs on its local stand-in.
 
 ## Where things stand
 
-- **It's a demo for now.** With no Base44 app ID set, the iPhone app runs on its own:
+- **Demo mode still exists.** With `.env.local` set, sign-in and orders are real Base44. With no
+  Base44 app ID set, the iPhone app runs on its own:
   - orders are saved on the phone
   - sign-in is simulated
   - "Demo only" buttons stand in for writing the song and making corrections

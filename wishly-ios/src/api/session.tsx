@@ -13,7 +13,7 @@ import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 
-import { BASE44_APP_ID, b44, forgetSession, initBase44, isBase44, rememberToken } from './base44Client'
+import { BASE44_APP_ID, b44, forgetSession, initBase44, isBase44, rememberToken, tokenStore } from './base44Client'
 
 export type User = { id: string; email: string; full_name?: string }
 export type Provider = 'apple' | 'google'
@@ -52,6 +52,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     ;(async () => {
       await initBase44()
+      // No saved login: skip asking Base44, which would only answer 401.
+      if (isBase44 && !(await tokenStore.get())) {
+        setReady(true)
+        return
+      }
       try {
         latest.current = await b44().auth.me()
         setUser(latest.current)
