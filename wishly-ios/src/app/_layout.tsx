@@ -79,6 +79,7 @@ function RootStack() {
         <Stack.Screen name="sign-in" options={{ ...sheet, sheetAllowedDetents: [0.62, 0.95] }} />
         <Stack.Screen name="notify" options={{ ...sheet, sheetAllowedDetents: 'fitToContents' }} />
         <Stack.Screen name="gift/[token]" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+        <Stack.Screen name="auth" options={{ headerShown: false, animation: 'none' }} />
       </Stack>
     </>
   )
