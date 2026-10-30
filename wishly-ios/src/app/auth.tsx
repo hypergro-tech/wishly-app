@@ -6,17 +6,32 @@
 import { router } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import { useEffect } from 'react'
-import { ActivityIndicator, View } from 'react-native'
+import { ActivityIndicator, Platform, View } from 'react-native'
 
+import { rememberToken } from '@/api/base44Client'
 import { Body } from '@/components/ui'
 import { colors } from '@/theme'
 
-WebBrowser.maybeCompleteAuthSession()
+const handedBack = WebBrowser.maybeCompleteAuthSession()
 
 export default function AuthReturn() {
-  // Opened on its own (no sign-in waiting for it): go home instead of staying here.
   useEffect(() => {
-    const timer = setTimeout(() => router.replace('/'), 1500)
+    let timer: ReturnType<typeof setTimeout> | undefined
+    ;(async () => {
+      // Base44's sign-in page cuts the popup off from the window that opened it,
+      // so in the web preview the hand-back above fails. Keep the login from the
+      // address instead: both windows share storage, and the app picks it up on
+      // its next load.
+      if (Platform.OS === 'web' && handedBack.type !== 'success') {
+        const token = new URLSearchParams(window.location.search).get('access_token')
+        if (token) {
+          await rememberToken(token)
+          window.close()
+        }
+      }
+      // Opened on its own, or the window couldn't close: go home.
+      timer = setTimeout(() => router.replace('/'), 1500)
+    })()
     return () => clearTimeout(timer)
   }, [])
 
