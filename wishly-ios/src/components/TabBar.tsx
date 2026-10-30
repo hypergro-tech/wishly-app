@@ -6,7 +6,7 @@ import Animated, { FadeIn, useAnimatedStyle } from 'react-native-reanimated'
 import { openPlayer } from '@/lib/flight'
 import { useGlide, usePop, useRise } from '@/lib/motion'
 import { usePlayer } from '@/lib/player'
-import { colors, type } from '@/theme'
+import { colors, type, shade } from '@/theme'
 import Cover from './Cover'
 import { Glass } from './glass'
 import { HomeIcon, PlusIcon, SongsIcon } from './icons'
@@ -99,8 +99,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginBottom: 8,
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.4,
+    shadowColor: '#5A2A1A',
+    shadowOpacity: 0.14,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 10 },
   },
@@ -114,5 +114,5 @@ const styles = StyleSheet.create({
     gap: 12,
     overflow: 'hidden',
   },
-  track: { position: 'absolute', left: 12, right: 12, bottom: 0, height: 2, backgroundColor: 'rgba(255,250,245,0.15)' },
+  track: { position: 'absolute', left: 12, right: 12, bottom: 0, height: 2, backgroundColor: shade(0.15) },
 })

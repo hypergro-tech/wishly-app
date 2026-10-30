@@ -44,9 +44,10 @@ The Order entity is pushed. The web app still runs on its local stand-in.
   `wishly/src/lib/catalog.js`. Choices and examples for India and other markets are still in
   those files, tagged with their market; leave them there. Prices are in US dollars and the
   copy uses US English.
-- **Design.** A dark music app (Suno was the reference) on a warm near-black. The colours are
-  in `wishly-ios/src/theme.ts`:
-  - background `#121110`, surface `#1E1C1B`, text `#FFFAF5`
+- **Design.** Bright and happy (since 30 Oct 2026; it was a dark music app before): a warm
+  cream canvas, white cards and sunny pastel covers. The colours are in `wishly-ios/src/theme.ts`:
+  - background `#FFF5EB`, surface `#FFFFFF`, text `#143438`
+  - `shade(opacity)` for tracks, borders and placeholders; `ivory` for text on teal or photos
   - coral `#FF6B7A` for actions
   - teal `#143438` for brand moments and for text on coral
 - **Where the designs live.** The Claude Design canvas **Wishly App Screens**, iOS page

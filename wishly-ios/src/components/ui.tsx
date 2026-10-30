@@ -6,7 +6,7 @@ import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSprin
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { spring, usePop } from '@/lib/motion'
-import { colors, radius, type } from '@/theme'
+import { colors, radius, type, shade } from '@/theme'
 import { CheckIcon, SpeakerIcon } from './icons'
 import { Squish } from './motion'
 
@@ -46,8 +46,8 @@ export function Label({ children }: { children: ReactNode }) {
 type Variant = 'primary' | 'light' | 'ghost'
 const BUTTON: Record<Variant, { bg: string; pressed: string; fg: string; border?: string }> = {
   primary: { bg: colors.coral, pressed: colors.coralPressed, fg: colors.ink }, // deep teal on coral
-  light: { bg: colors.text, pressed: '#EDE7E1', fg: colors.ink },
-  ghost: { bg: 'transparent', pressed: colors.fill, fg: colors.text, border: 'rgba(255,250,245,0.28)' },
+  light: { bg: colors.surface, pressed: '#F2ECE6', fg: colors.ink },
+  ghost: { bg: 'transparent', pressed: colors.fill, fg: colors.text, border: shade(0.28) },
 }
 
 export function Button({ label, onPress, variant = 'primary', disabled, busy, done, celebrate, size = 'lg', icon, style }: {
@@ -136,7 +136,7 @@ export function Pill({ label, selected, onPress, dashed }: { label: string; sele
       onPress={() => { tap(); onPress() }}
       style={({ pressed }) => [
         styles.pill,
-        selected ? { backgroundColor: colors.text, borderColor: colors.text } : { borderStyle: dashed ? 'dashed' : 'solid', borderColor: dashed ? 'rgba(255,250,245,0.35)' : colors.outline },
+        selected ? { backgroundColor: colors.text, borderColor: colors.text } : { borderStyle: dashed ? 'dashed' : 'solid', borderColor: dashed ? shade(0.35) : colors.outline },
         pressed && !selected ? { backgroundColor: colors.fill } : null,
         fillChange,
       ]}
@@ -208,7 +208,7 @@ export function CheckCircle({ checked, size = 26 }: { checked: boolean; size?: n
       <CheckIcon size={size * 0.55} />
     </Animated.View>
   ) : (
-    <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 2, borderColor: 'rgba(255,250,245,0.35)' }} />
+    <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 2, borderColor: shade(0.35) }} />
   )
 }
 
@@ -220,7 +220,7 @@ export function Field({ label, hint, big, multiline, style, ...input }: TextInpu
       {label ? <Text style={[type.bold, { fontSize: 13, color: colors.muted }]}>{label}</Text> : null}
       <TextInput
         accessibilityLabel={label}
-        placeholderTextColor="rgba(255,250,245,0.4)"
+        placeholderTextColor={shade(0.4)}
         keyboardAppearance="dark"
         selectionColor={colors.coral}
         multiline={multiline}
@@ -294,7 +294,7 @@ export const styles = StyleSheet.create({
   label: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   centre: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   pill: { minHeight: 40, justifyContent: 'center', borderRadius: radius.pill, borderWidth: 1, paddingHorizontal: 15 },
-  input: { color: colors.text, backgroundColor: colors.fill, borderWidth: 1, borderColor: 'rgba(255,250,245,0.14)', borderRadius: radius.field, paddingHorizontal: 16 },
+  input: { color: colors.text, backgroundColor: colors.fill, borderWidth: 1, borderColor: shade(0.14), borderRadius: radius.field, paddingHorizontal: 16 },
   card: { backgroundColor: colors.surface, borderRadius: radius.card, padding: 18 },
   footer: { paddingHorizontal: 20, paddingTop: 14, backgroundColor: colors.bg, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },
 })

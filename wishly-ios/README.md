@@ -24,7 +24,7 @@ To see the first launch again, delete the app (or clear site data in the web pre
 
 ## What's in the app
 
-A dark, music-app design (canvas **Wishly App Screens**, iOS page) on a warm near-black: every
+A bright, happy design on a warm cream canvas (it began as a dark music app; canvas **Wishly App Screens**, iOS page): every
 song has cover art, one player follows you around the app, and creating a song is one screen.
 
 **First time and sign-in.** Nobody needs an account to look around, play examples or fill in a

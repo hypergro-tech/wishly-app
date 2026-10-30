@@ -11,9 +11,9 @@ import { colors, type } from '@/theme'
 
 export const hasGlass = isLiquidGlassAvailable() && isGlassEffectAPIAvailable()
 
-export function Glass({ children, style, fallback = 'rgba(18,17,16,0.96)' }: { children?: ReactNode; style?: StyleProp<ViewStyle>; fallback?: string }) {
+export function Glass({ children, style, fallback = 'rgba(255,245,235,0.96)' }: { children?: ReactNode; style?: StyleProp<ViewStyle>; fallback?: string }) {
   if (hasGlass) {
-    return <GlassView glassEffectStyle="regular" colorScheme="dark" style={style}>{children}</GlassView>
+    return <GlassView glassEffectStyle="regular" colorScheme="light" style={style}>{children}</GlassView>
   }
   return <View style={[{ backgroundColor: fallback }, style]}>{children}</View>
 }
@@ -35,9 +35,9 @@ export function ScrollHeader({ title, solid }: { title: string; solid: boolean }
     <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top + 44 }}>
       {hasGlass ? (
         // Glass mustn't be faded with opacity; its own style change animates.
-        <GlassView glassEffectStyle={{ style: solid ? 'regular' : 'none', animate: true, animationDuration: 0.25 }} colorScheme="dark" style={StyleSheet.absoluteFill} />
+        <GlassView glassEffectStyle={{ style: solid ? 'regular' : 'none', animate: true, animationDuration: 0.25 }} colorScheme="light" style={StyleSheet.absoluteFill} />
       ) : (
-        <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(18,17,16,0.94)', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line }, fade(solid)]} />
+        <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,245,235,0.94)', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line }, fade(solid)]} />
       )}
       <Animated.View style={[{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 44, alignItems: 'center', justifyContent: 'center' }, fade(solid), { transform: [{ translateY: solid ? 0 : 6 }] }]}>
         <Text style={[type.bold, { fontSize: 16, color: colors.text }]}>{title}</Text>

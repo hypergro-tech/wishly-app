@@ -15,7 +15,7 @@ import { suggestSpelling } from '@/api/orders'
 import { filledMemories, missing, useDraft } from '@/lib/draft'
 import { isTricky, singable, testedSpelling } from '@/lib/names'
 import { focusSafe, useRise } from '@/lib/motion'
-import { colors, tint, type } from '@/theme'
+import { colors, tint, type, shade } from '@/theme'
 
 // Cards and choices glide to their new places when details are added.
 const settle = LinearTransition.springify(420).dampingRatio(0.92)
@@ -116,7 +116,7 @@ function CreateForm() {
                   value={draft.memories[m.key]}
                   onChangeText={(v) => set('memories', { [m.key]: v })}
                   placeholder={m.placeholder}
-                  placeholderTextColor="rgba(255,250,245,0.4)"
+                  placeholderTextColor={shade(0.4)}
                   keyboardAppearance="dark"
                   selectionColor={colors.coral}
                   multiline={!m.short}
@@ -132,7 +132,7 @@ function CreateForm() {
                   value={draft.memories.avoid}
                   onChangeText={(avoid) => set('memories', { avoid })}
                   placeholder="Topics, words or names that shouldn’t appear"
-                  placeholderTextColor="rgba(255,250,245,0.4)"
+                  placeholderTextColor={shade(0.4)}
                   keyboardAppearance="dark"
                   selectionColor={colors.coral}
                   autoFocus={opened.includes('avoid') && !draft.memories.avoid}

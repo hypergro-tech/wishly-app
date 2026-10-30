@@ -14,7 +14,7 @@ import Animated, {
 import { useGlide, spring } from '@/lib/motion'
 import { formatTime } from '@/lib/player'
 import type { Song } from '@/lib/songwriter'
-import { colors, type } from '@/theme'
+import { colors, type, shade } from '@/theme'
 import { Spark } from './brand'
 import { PlayPause, Squish } from './motion'
 import { tap } from './ui'
@@ -26,7 +26,7 @@ export function Scrubber({ elapsed, total }: { elapsed: number; total: number })
   const knob = useAnimatedStyle(() => ({ left: `${glide.get() * 100}%` }))
   return (
     <View accessible accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: Math.round(total), now: Math.round(elapsed) }}>
-      <View style={{ height: 4, borderRadius: 2, backgroundColor: 'rgba(255,250,245,0.18)' }}>
+      <View style={{ height: 4, borderRadius: 2, backgroundColor: shade(0.18) }}>
         <Animated.View style={[{ height: 4, borderRadius: 2, backgroundColor: colors.text }, fill]} />
         <Animated.View style={[{ position: 'absolute', top: -4, marginLeft: -6, width: 12, height: 12, borderRadius: 6, backgroundColor: colors.text }, knob]} />
       </View>

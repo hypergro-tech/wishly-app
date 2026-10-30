@@ -13,7 +13,7 @@ import { ChevronRightIcon } from '@/components/icons'
 import { Squish } from '@/components/motion'
 import { Body, Button, Chip, Pill, Title, tap } from '@/components/ui'
 import { orderCover, orderedLine, statusChip } from '@/lib/songs'
-import { colors, type } from '@/theme'
+import { colors, type, shade } from '@/theme'
 
 const FILTERS = [
   { id: 'all', label: 'All', match: () => true },
@@ -74,7 +74,7 @@ export default function MySongs() {
                     accessibilityRole="button"
                     to={0.98}
                     onPress={() => { tap(); router.push(`/song/${o.id}`) }}
-                    style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, borderBottomWidth: i < shown.length - 1 ? 1 : 0, borderBottomColor: 'rgba(255,250,245,0.08)', opacity: pressed ? 0.85 : 1 })}
+                    style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, borderBottomWidth: i < shown.length - 1 ? 1 : 0, borderBottomColor: shade(0.08), opacity: pressed ? 0.85 : 1 })}
                   >
                     <Cover spec={orderCover(o)} size={68} />
                     <View style={{ flex: 1, minWidth: 0 }}>

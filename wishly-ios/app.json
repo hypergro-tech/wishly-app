@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "wishly",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
       "icon": "./assets/images/icon.png"
@@ -44,6 +44,6 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "backgroundColor": "#121110"
+    "backgroundColor": "#FFF5EB"
   }
 }

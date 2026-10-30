@@ -61,7 +61,7 @@ export function Logo({ size = 26, reversed = false }: { size?: number; reversed?
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: size * 0.16 }} accessible accessibilityLabel="wishly">
       <Spark size={size * 0.95} />
-      <Text style={[type.bold, { fontSize: size, letterSpacing: -size * 0.045, color: reversed ? colors.text : colors.ink }]}>
+      <Text style={[type.bold, { fontSize: size, letterSpacing: -size * 0.045, color: reversed ? colors.ivory : colors.ink }]}>
         wishly<Text style={{ color: colors.coral }}>.</Text>
       </Text>
     </View>

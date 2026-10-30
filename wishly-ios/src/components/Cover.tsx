@@ -17,7 +17,7 @@ export default function Cover({ spec, size, badge, shadow, style }: {
   style?: ViewStyle
 }) {
   const r = Math.max(9, Math.round(size * 0.09))
-  const lift = shadow ? { shadowColor: '#000', shadowOpacity: 0.45, shadowRadius: 20, shadowOffset: { width: 0, height: 18 } } : null
+  const lift = shadow ? { shadowColor: '#5A2A1A', shadowOpacity: 0.18, shadowRadius: 20, shadowOffset: { width: 0, height: 18 } } : null
 
   if (spec.photo) {
     return (

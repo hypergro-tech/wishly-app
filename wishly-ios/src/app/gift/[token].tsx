@@ -38,18 +38,18 @@ export default function GiftPreview() {
       accessibilityLabel="Close preview"
       hitSlop={12}
       onPress={() => { tap(); router.back() }}
-      style={{ position: 'absolute', top: insets.top + 8, right: 16, zIndex: 2, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: 'rgba(255,250,245,0.12)' }}
+      style={{ position: 'absolute', top: insets.top + 8, right: 16, zIndex: 2, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.92)' }}
     >
-      <Text style={[type.bold, { fontSize: 15, color: colors.text }]}>Close</Text>
+      <Text style={[type.bold, { fontSize: 15, color: colors.ink }]}>Close</Text>
     </Pressable>
   )
 
-  if (order === undefined) return <View style={{ flex: 1, backgroundColor: colors.teal, justifyContent: 'center' }}><ActivityIndicator color={colors.text} /></View>
+  if (order === undefined) return <View style={{ flex: 1, backgroundColor: colors.teal, justifyContent: 'center' }}><ActivityIndicator color={colors.ivory} /></View>
   if (!order || !order.song || !track) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.teal, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
         {close}
-        <Body style={{ textAlign: 'center' }}>This gift isn’t available.</Body>
+        <Body style={{ textAlign: 'center', color: colors.ivory }}>This gift isn’t available.</Body>
       </View>
     )
   }
@@ -84,7 +84,7 @@ export default function GiftPreview() {
       >
         <Spark size={120} bloom />
       </Animated.View>
-      <Animated.Text entering={rise(750, 18)} accessibilityRole="header" style={[type.bold, { fontSize: 46, lineHeight: 50, letterSpacing: -1.2, color: colors.text, textAlign: 'center', marginTop: 40 }]}>
+      <Animated.Text entering={rise(750, 18)} accessibilityRole="header" style={[type.bold, { fontSize: 46, lineHeight: 50, letterSpacing: -1.2, color: colors.ivory, textAlign: 'center', marginTop: 40 }]}>
         A song for {order.recipient.name}
       </Animated.Text>
       <Animated.Text entering={rise(900)} style={[type.regular, { fontSize: 18, color: 'rgba(255,250,245,0.78)', marginTop: 14 }]}>From someone who knows you.</Animated.Text>
@@ -99,7 +99,7 @@ export default function GiftPreview() {
     <View style={{ flex: 1, backgroundColor: stage === 'cover' ? colors.teal : colors.bg }}>
       {stage !== 'cover' && (
         <Animated.ScrollView {...follow.scrollProps} entering={FadeIn.duration(500)} contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
-          <View style={{ alignItems: 'center' }}><Logo reversed size={20} /></View>
+          <View style={{ alignItems: 'center' }}><Logo size={20} /></View>
           <View style={{ alignItems: 'center', marginTop: 18 }}>
             <Cover spec={{ ...orderCover(order), caption: `for ${order.recipient.name}` }} size={260} shadow />
           </View>

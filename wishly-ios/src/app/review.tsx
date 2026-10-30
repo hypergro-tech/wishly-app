@@ -14,7 +14,7 @@ import { wait } from '@/lib/motion'
 import { shouldAskForNotifications } from '@/lib/notifications'
 import { pronoun } from '@/lib/songs'
 import { quoted } from '@/lib/text'
-import { colors, type } from '@/theme'
+import { colors, type, shade } from '@/theme'
 
 // The labels read as if about one person ("Something she does").
 const ABOUT: Record<string, (p: string, s: string) => string> = {
@@ -116,7 +116,7 @@ export default function Review() {
           <Switch
             value={confirmed}
             onValueChange={(v) => { tap(); setConfirmed(v) }}
-            trackColor={{ true: colors.coral, false: 'rgba(255,250,245,0.2)' }}
+            trackColor={{ true: colors.coral, false: shade(0.2) }}
             accessibilityLabel="I’ve checked the name and the facts. I’ll hear the song before it’s given."
           />
         </View>

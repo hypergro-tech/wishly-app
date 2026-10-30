@@ -18,7 +18,7 @@ import { openPlayer } from '@/lib/flight'
 import { WELCOMED, seen } from '@/lib/once'
 import { exampleTrack, usePlayer } from '@/lib/player'
 import { orderCover, songTitle } from '@/lib/songs'
-import { colors, tint, type } from '@/theme'
+import { colors, tint, type, shade } from '@/theme'
 
 const OCCASION_TILES = ['Birthday', 'Anniversary', "Mother's Day", 'Just because']
 const TILE_COLOUR: Record<string, string> = { 'Just because': colors.coral }
@@ -83,7 +83,7 @@ export default function Home() {
         automaticallyAdjustKeyboardInsets
       >
         <View style={{ paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Logo size={25} reversed />
+          <Logo size={25} />
           {user ? (
             <Squish
               accessibilityRole="button"
@@ -99,7 +99,7 @@ export default function Home() {
               accessibilityRole="button"
               to={0.94}
               onPress={() => { tap(); router.push('/sign-in') }}
-              style={({ pressed }) => ({ height: 36, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1, borderColor: 'rgba(255,250,245,0.28)', justifyContent: 'center', backgroundColor: pressed ? colors.fill : 'transparent' })}
+              style={({ pressed }) => ({ height: 36, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1, borderColor: shade(0.28), justifyContent: 'center', backgroundColor: pressed ? colors.fill : 'transparent' })}
             >
               <Text style={[type.bold, { fontSize: 14, color: colors.text }]}>Sign in</Text>
             </Squish>
@@ -138,13 +138,13 @@ export default function Home() {
                       onSubmitEditing={startWith}
                       returnKeyType="go"
                       placeholder="Their name, e.g. Grace"
-                      placeholderTextColor="rgba(255,250,245,0.45)"
+                      placeholderTextColor={shade(0.45)}
                       keyboardAppearance="dark"
                       selectionColor={colors.coral}
                       autoCapitalize="words"
                       autoCorrect={false}
                       accessibilityLabel="Their name"
-                      style={[type.bold, { flex: 1, height: 56, paddingHorizontal: 16, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,250,245,0.14)', backgroundColor: colors.fill, color: colors.text, fontSize: 18 }]}
+                      style={[type.bold, { flex: 1, height: 56, paddingHorizontal: 16, borderRadius: 16, borderWidth: 1, borderColor: shade(0.14), backgroundColor: colors.fill, color: colors.text, fontSize: 18 }]}
                     />
                     <Squish
                       accessibilityRole="button"
@@ -214,7 +214,7 @@ export default function Home() {
               <Text style={[type.bold, { fontSize: 15, color: colors.text }]}>
                 {o.status === 'correction_requested' ? `Making your correction to ${songTitle(o)}` : `Writing ${o.recipient.name}’s song`}
               </Text>
-              <View style={{ marginTop: 8, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,250,245,0.12)' }}>
+              <View style={{ marginTop: 8, height: 4, borderRadius: 2, backgroundColor: shade(0.12) }}>
                 <View style={{ width: o.status === 'correction_requested' ? '75%' : '40%', height: 4, borderRadius: 2, backgroundColor: tint(orderCover(o).tint) }} />
               </View>
             </View>
@@ -258,13 +258,13 @@ export default function Home() {
             const t = exampleTrack(e)
             const on = player.track?.key === t.key && player.playing
             return (
-              <View key={e.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 10, borderBottomWidth: i < all.length - 1 ? 1 : 0, borderBottomColor: 'rgba(255,250,245,0.08)' }}>
+              <View key={e.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 10, borderBottomWidth: i < all.length - 1 ? 1 : 0, borderBottomColor: shade(0.08) }}>
                 <Cover spec={t.cover} size={56} />
                 <View style={{ flex: 1 }}>
                   <Text numberOfLines={1} style={[type.bold, { fontSize: 16, color: colors.text }]}>{e.title}</Text>
                   <Text numberOfLines={1} style={[type.regular, { fontSize: 13, color: colors.muted, marginTop: 2 }]}>For {e.coverName} · {e.tags[0]} · {e.tags[2]}</Text>
                 </View>
-                <IconButton label={on ? `Pause ${e.title}` : `Play ${e.title}`} onPress={() => (on ? player.pause() : player.play(t))} style={{ backgroundColor: 'rgba(255,250,245,0.08)' }}>
+                <IconButton label={on ? `Pause ${e.title}` : `Play ${e.title}`} onPress={() => (on ? player.pause() : player.play(t))} style={{ backgroundColor: shade(0.08) }}>
                   <PlayPause playing={on} size={16} />
                 </IconButton>
               </View>

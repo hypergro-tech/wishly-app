@@ -17,7 +17,7 @@ import { Body, Button, Field, IconButton, success, tap } from '@/components/ui'
 import { OCCASION_TONES } from '@/lib/catalog'
 import { useDraft } from '@/lib/draft'
 import { focusSafe, popIn, slideIn, stillFade, useShake } from '@/lib/motion'
-import { colors, radius, type } from '@/theme'
+import { colors, radius, type, shade } from '@/theme'
 
 type Mode = 'choose' | 'email' | 'code'
 const STEPS: Mode[] = ['choose', 'email', 'code']
@@ -144,14 +144,14 @@ export default function SignIn() {
 
             <View style={{ marginTop: 22, gap: 10 }}>
               {/* Apple's own button artwork can replace this in a native build. */}
-              <ProviderButton label="Continue with Apple" busy={busy === 'apple'} onPress={() => withProvider('apple')} light icon={<AppleIcon />} />
+              <ProviderButton label="Continue with Apple" busy={busy === 'apple'} onPress={() => withProvider('apple')} solid icon={<AppleIcon color="#FFFFFF" />} />
               <ProviderButton
                 label="Continue with Google"
                 busy={busy === 'google'}
                 onPress={() => withProvider('google')}
                 icon={
                   <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: colors.text, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={[type.bold, { fontSize: 14, color: colors.ink }]}>G</Text>
+                    <Text style={[type.bold, { fontSize: 14, color: colors.bg }]}>G</Text>
                   </View>
                 }
               />
@@ -246,7 +246,7 @@ export default function SignIn() {
                       borderRadius: radius.field,
                       backgroundColor: colors.fill,
                       borderWidth: 1,
-                      borderColor: 'rgba(255,250,245,0.14)',
+                      borderColor: shade(0.14),
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
@@ -319,7 +319,8 @@ export default function SignIn() {
   )
 }
 
-function ProviderButton({ label, onPress, icon, light, busy }: { label: string; onPress: () => void; icon: ReactNode; light?: boolean; busy?: boolean }) {
+// `solid` is Apple's black button, the style Apple asks for on light screens.
+function ProviderButton({ label, onPress, icon, solid, busy }: { label: string; onPress: () => void; icon: ReactNode; solid?: boolean; busy?: boolean }) {
   return (
     <Squish
       accessibilityRole="button"
@@ -334,14 +335,14 @@ function ProviderButton({ label, onPress, icon, light, busy }: { label: string; 
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
-        backgroundColor: light ? (pressed ? '#E8E8E8' : '#FFFFFF') : pressed ? colors.fill : 'transparent',
-        borderWidth: light ? 0 : 1,
-        borderColor: 'rgba(255,250,245,0.28)',
+        backgroundColor: solid ? (pressed ? '#333333' : '#000000') : pressed ? colors.fill : 'transparent',
+        borderWidth: solid ? 0 : 1,
+        borderColor: shade(0.28),
         opacity: busy ? 0.6 : 1,
       })}
     >
       {icon}
-      <Text style={[type.bold, { fontSize: 17, color: light ? '#000000' : colors.text }]}>{busy ? 'Opening…' : label}</Text>
+      <Text style={[type.bold, { fontSize: 17, color: solid ? '#FFFFFF' : colors.text }]}>{busy ? 'Opening…' : label}</Text>
     </Squish>
   )
 }
@@ -371,5 +372,5 @@ function Doc({ label, url }: { label: string; url?: string }) {
 
 const styles = StyleSheet.create({
   title: { ...type.bold, fontSize: 24, lineHeight: 28, letterSpacing: -0.4, color: colors.text },
-  input: { minHeight: 50, fontSize: 17, color: colors.text, backgroundColor: colors.fill, borderWidth: 1, borderColor: 'rgba(255,250,245,0.14)', borderRadius: radius.field, paddingHorizontal: 16 },
+  input: { minHeight: 50, fontSize: 17, color: colors.text, backgroundColor: colors.fill, borderWidth: 1, borderColor: shade(0.14), borderRadius: radius.field, paddingHorizontal: 16 },
 })

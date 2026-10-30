@@ -17,7 +17,7 @@ import { useDraft } from '@/lib/draft'
 import { playerOrigin } from '@/lib/flight'
 import { spring } from '@/lib/motion'
 import { usePlayer } from '@/lib/player'
-import { colors, type } from '@/theme'
+import { colors, type, shade } from '@/theme'
 
 const PAUSED = 0.86 // how far the cover sits back while paused
 
@@ -143,7 +143,7 @@ export default function NowPlaying() {
 
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
                 {track.tags.map((t) => (
-                  <View key={t} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: 'rgba(255,250,245,0.1)' }}>
+                  <View key={t} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: shade(0.1) }}>
                     <Text style={[type.bold, { fontSize: 12, color: colors.text }]}>{t}</Text>
                   </View>
                 ))}

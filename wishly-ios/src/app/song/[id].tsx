@@ -18,7 +18,7 @@ import { markSeen, seen } from '@/lib/once'
 import { usePlayer, useTrack } from '@/lib/player'
 import { orderCover, orderTrack, pronoun, songTitle } from '@/lib/songs'
 import { quoted } from '@/lib/text'
-import { colors, tint, type } from '@/theme'
+import { colors, tint, type, shade } from '@/theme'
 
 export default function SongScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -117,7 +117,7 @@ function Writing({ order, demo }: { order: Order; demo: ReactNode }) {
       <View style={{ flexDirection: 'row', gap: 6, marginTop: 22, marginHorizontal: 4 }}>
         {stages.map(([label, state]) => (
           <View key={label} style={{ flex: 1 }}>
-            <View style={{ height: 5, borderRadius: 3, overflow: 'hidden', backgroundColor: state === 'done' ? colors.text : state === 'now' ? colors.coral : 'rgba(255,250,245,0.15)' }}>
+            <View style={{ height: 5, borderRadius: 3, overflow: 'hidden', backgroundColor: state === 'done' ? colors.text : state === 'now' ? colors.coral : shade(0.15) }}>
               {state === 'now' && <Sheen />}
             </View>
             <Text style={[state === 'next' ? type.regular : type.bold, { fontSize: 12, marginTop: 7, color: state === 'next' ? colors.muted : colors.text }]}>{label}</Text>
@@ -263,7 +263,7 @@ function Give({ order }: { order: Order }) {
         <View style={{ flexDirection: 'row', marginTop: 16 }}>
           {targets.map((t) => (
             <Squish key={t.label} accessibilityRole="button" accessibilityLabel={t.label} to={0.92} onPress={() => { tap(); t.go() }} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(255,250,245,0.08)', alignItems: 'center', justifyContent: 'center' }}>{t.icon}</View>
+              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: shade(0.08), alignItems: 'center', justifyContent: 'center' }}>{t.icon}</View>
               <Text style={[type.bold, { fontSize: 12, color: colors.text }]}>{t.label}</Text>
             </Squish>
           ))}
@@ -307,7 +307,7 @@ function Sheen() {
         top: 0,
         bottom: 0,
         width: '40%',
-        backgroundColor: 'rgba(255,250,245,0.45)',
+        backgroundColor: 'rgba(255,255,255,0.6)',
         animationName: SWEEP,
         animationDuration: 1800,
         animationIterationCount: 'infinite',

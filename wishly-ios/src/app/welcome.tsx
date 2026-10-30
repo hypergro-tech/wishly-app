@@ -53,13 +53,13 @@ export default function Welcome() {
             style={{ width: '100%', height: Math.min(380, (width - 32) * 1.06) }}
           />
         </Animated.View>
-        <Animated.View entering={rise(450)} style={{ position: 'absolute', left: 14, right: 60, bottom: 14, padding: 12, paddingHorizontal: 14, borderRadius: 16, backgroundColor: 'rgba(18,17,16,0.88)' }}>
-          <Text style={[type.accent, { fontSize: 15, lineHeight: 20, color: colors.text }]}>“Sunday pancakes, and the first one always burns. Ten years in, it’s still my favorite turn.”</Text>
+        <Animated.View entering={rise(450)} style={{ position: 'absolute', left: 14, right: 60, bottom: 14, padding: 12, paddingHorizontal: 14, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.92)' }}>
+          <Text style={[type.accent, { fontSize: 15, lineHeight: 20, color: colors.ink }]}>“Sunday pancakes, and the first one always burns. Ten years in, it’s still my favorite turn.”</Text>
         </Animated.View>
       </Animated.View>
 
       <View style={{ paddingHorizontal: 24 }}>
-        <Animated.View entering={rise(200)} style={{ marginTop: 26 }}><Logo size={24} reversed /></Animated.View>
+        <Animated.View entering={rise(200)} style={{ marginTop: 26 }}><Logo size={24} /></Animated.View>
         <Animated.View entering={rise(280)}>
           <Title size={34} style={{ marginTop: 12 }}>A song only they could recognize.</Title>
         </Animated.View>
