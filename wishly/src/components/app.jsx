@@ -15,7 +15,7 @@ export function AppFrame() {
   }, [pathname])
 
   return (
-    <div className={`min-h-[100dvh] lg:flex lg:items-center lg:justify-center lg:gap-20 lg:p-8 ${isGift ? 'bg-ink' : 'bg-[#FBE5D3]'}`}>
+    <div className={`min-h-[100dvh] lg:flex lg:items-center lg:justify-center lg:gap-20 lg:p-8 ${isGift ? 'bg-butter' : 'bg-[#FBE5D3]'}`}>
       {!isGift && <BrandAside />}
       <div
         id="app-frame"

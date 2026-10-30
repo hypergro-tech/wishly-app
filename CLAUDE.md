@@ -49,7 +49,7 @@ The Order entity is pushed. The web app still runs on its local stand-in.
   - background `#FFF5EB`, surface `#FFFFFF`, text `#143438`
   - `shade(opacity)` for tracks, borders and placeholders; `ivory` for text on teal or photos
   - coral `#FF6B7A` for actions
-  - teal `#143438` for brand moments and for text on coral
+  - teal `#143438` for the splash and for text on coral; the gift cover is butter `#FFE07A`
 - **Where the designs live.** The Claude Design canvas **Wishly App Screens**, iOS page
   (https://claude.ai/artifact/Qd6NLARSQRfW5rV7jLyfuo). It's private to the owner's account until
   they share it. It hasn't been updated for US only: the code wins where they differ.

@@ -14,7 +14,7 @@ export default function Gift() {
   useEffect(() => { getGift(token).then(setOrder) }, [token])
 
   if (order === undefined) return <Cover><Spinner /></Cover>
-  if (order === null) return <Cover><p className="text-lg text-ivory/80">This gift link isn’t available.</p></Cover>
+  if (order === null) return <Cover><p className="text-lg text-ink/80">This gift link isn’t available.</p></Cover>
 
   const { recipient, song, gift } = order
 
@@ -23,10 +23,10 @@ export default function Gift() {
     return (
       <Cover>
         <Spark size={112} className="text-coral" />
-        <h1 className="mt-10 text-[44px] leading-[1.05] text-ivory">A song for {recipient.name}</h1>
-        <p className="mt-4 text-lg text-ivory/75">From someone who knows you.</p>
+        <h1 className="mt-10 text-[44px] leading-[1.05] text-ink">A song for {recipient.name}</h1>
+        <p className="mt-4 text-lg text-ink/75">From someone who knows you.</p>
         <button onClick={() => setOpened(true)} className="btn-primary mt-10 w-full max-w-xs !py-4 !text-base">Listen to your song</button>
-        <div className="absolute bottom-[max(env(safe-area-inset-bottom),28px)]"><Logo reversed size={22} /></div>
+        <div className="absolute bottom-[max(env(safe-area-inset-bottom),28px)]"><Logo size={22} /></div>
       </Cover>
     )
   }
@@ -58,5 +58,5 @@ export default function Gift() {
 }
 
 function Cover({ children }) {
-  return <div className="relative flex flex-1 flex-col items-center justify-center bg-ink px-6 py-16 text-center">{children}</div>
+  return <div className="relative flex flex-1 flex-col items-center justify-center bg-butter px-6 py-16 text-center">{children}</div>
 }

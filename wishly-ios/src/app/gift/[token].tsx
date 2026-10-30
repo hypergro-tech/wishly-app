@@ -15,7 +15,7 @@ import { useRise, wait } from '@/lib/motion'
 import { usePlayer, useTrack } from '@/lib/player'
 import { orderCover, orderTrack, songTitle } from '@/lib/songs'
 import { quoted } from '@/lib/text'
-import { colors, type } from '@/theme'
+import { colors, type, shade } from '@/theme'
 
 export default function GiftPreview() {
   const { token } = useLocalSearchParams<{ token: string }>()
@@ -44,12 +44,12 @@ export default function GiftPreview() {
     </Pressable>
   )
 
-  if (order === undefined) return <View style={{ flex: 1, backgroundColor: colors.teal, justifyContent: 'center' }}><ActivityIndicator color={colors.ivory} /></View>
+  if (order === undefined) return <View style={{ flex: 1, backgroundColor: colors.butter, justifyContent: 'center' }}><ActivityIndicator color={colors.ink} /></View>
   if (!order || !order.song || !track) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.teal, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
+      <View style={{ flex: 1, backgroundColor: colors.butter, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
         {close}
-        <Body style={{ textAlign: 'center', color: colors.ivory }}>This gift isn’t available.</Body>
+        <Body style={{ textAlign: 'center', color: colors.ink }}>This gift isn’t available.</Body>
       </View>
     )
   }
@@ -69,7 +69,7 @@ export default function GiftPreview() {
       pointerEvents={stage === 'cover' ? 'auto' : 'none'}
       style={[
         StyleSheet.absoluteFill,
-        { backgroundColor: colors.teal, alignItems: 'center', justifyContent: 'center', padding: 28 },
+        { backgroundColor: colors.butter, alignItems: 'center', justifyContent: 'center', padding: 28 },
         { opacity: stage === 'cover' ? 1 : 0, transitionProperty: 'opacity', transitionDuration: 600, transitionTimingFunction: 'ease-in-out' },
       ]}
     >
@@ -84,19 +84,19 @@ export default function GiftPreview() {
       >
         <Spark size={120} bloom />
       </Animated.View>
-      <Animated.Text entering={rise(750, 18)} accessibilityRole="header" style={[type.bold, { fontSize: 46, lineHeight: 50, letterSpacing: -1.2, color: colors.ivory, textAlign: 'center', marginTop: 40 }]}>
+      <Animated.Text entering={rise(750, 18)} accessibilityRole="header" style={[type.bold, { fontSize: 46, lineHeight: 50, letterSpacing: -1.2, color: colors.ink, textAlign: 'center', marginTop: 40 }]}>
         A song for {order.recipient.name}
       </Animated.Text>
-      <Animated.Text entering={rise(900)} style={[type.regular, { fontSize: 18, color: 'rgba(255,250,245,0.78)', marginTop: 14 }]}>From someone who knows you.</Animated.Text>
+      <Animated.Text entering={rise(900)} style={[type.regular, { fontSize: 18, color: shade(0.75), marginTop: 14 }]}>From someone who knows you.</Animated.Text>
       <Animated.View entering={rise(1100)} style={{ marginTop: 40, alignSelf: 'stretch' }}>
         <Button label="Listen to your song" onPress={listen} style={{ minHeight: 58 }} />
       </Animated.View>
-      <View style={{ position: 'absolute', bottom: Math.max(insets.bottom, 24) + 8 }}><Logo reversed size={22} /></View>
+      <View style={{ position: 'absolute', bottom: Math.max(insets.bottom, 24) + 8 }}><Logo size={22} /></View>
     </Animated.View>
   )
 
   return (
-    <View style={{ flex: 1, backgroundColor: stage === 'cover' ? colors.teal : colors.bg }}>
+    <View style={{ flex: 1, backgroundColor: stage === 'cover' ? colors.butter : colors.bg }}>
       {stage !== 'cover' && (
         <Animated.ScrollView {...follow.scrollProps} entering={FadeIn.duration(500)} contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
           <View style={{ alignItems: 'center' }}><Logo size={20} /></View>
