@@ -29,7 +29,7 @@ export const showDemoTools = !isBase44 || process.env.EXPO_PUBLIC_DEMO_TOOLS ===
 // Off until those functions and their secrets are set up on Base44.
 export const realSongs = isBase44 && process.env.EXPO_PUBLIC_REAL_SONGS === 'true'
 
-const TOKEN_KEY = 'wishly.base44.token'
+export const TOKEN_KEY = 'wishly.base44.token'
 
 // SecureStore isn't available on web, where the app is only previewed.
 export const tokenStore = {

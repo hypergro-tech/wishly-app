@@ -12,8 +12,9 @@
 import * as Linking from 'expo-linking'
 import * as WebBrowser from 'expo-web-browser'
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Platform } from 'react-native'
 
-import { BASE44_APP_ID, b44, forgetSession, initBase44, isBase44, rememberToken, tokenStore } from './base44Client'
+import { BASE44_APP_ID, b44, forgetSession, initBase44, isBase44, rememberToken, TOKEN_KEY, tokenStore } from './base44Client'
 
 export type User = { id: string; email: string; full_name?: string }
 export type Provider = 'apple' | 'google'
@@ -65,6 +66,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       }
       setReady(true)
     })()
+  }, [])
+
+  // Web preview: Apple / Google sign-in finishes in another tab (src/app/auth.tsx),
+  // which saves the login. Pick it up here as soon as it lands.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !isBase44) return
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === TOKEN_KEY && e.newValue) finish(e.newValue).catch(() => {})
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
   }, [])
 
   async function finish(token: string, signedIn?: User) {

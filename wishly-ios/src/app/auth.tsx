@@ -27,6 +27,9 @@ export default function AuthReturn() {
         if (token) {
           await rememberToken(token)
           window.close()
+          // Still open: load the app afresh so it starts signed in.
+          window.location.replace('/')
+          return
         }
       }
       // Opened on its own, or the window couldn't close: go home.
