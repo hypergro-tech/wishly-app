@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  body { @apply bg-ivory text-ink font-sans antialiased; }
+  body { @apply bg-cream text-ink font-sans antialiased; }
   h1, h2, h3 { @apply font-bold tracking-[-0.02em]; }
   ::selection { @apply bg-coral/40; }
 }

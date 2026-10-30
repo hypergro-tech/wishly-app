@@ -32,7 +32,7 @@ export default function Gift() {
   }
 
   return (
-    <div className="flex-1 bg-ivory px-5 pb-12 pt-[max(env(safe-area-inset-top),28px)]">
+    <div className="flex-1 bg-cream px-5 pb-12 pt-[max(env(safe-area-inset-top),28px)]">
       <p className="eyebrow">A song for {recipient.name}</p>
       <h1 className="mt-2 text-[34px] leading-tight">{song.title}</h1>
 

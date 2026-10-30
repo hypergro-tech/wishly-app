@@ -13,10 +13,11 @@ export default {
         ink: '#143438', // deep teal: text, anchor
         coral: { DEFAULT: '#FF6B7A', hover: '#F7586A' }, // signature, celebration
         berry: '#A3364A', // labels and white-text actions (coral can't carry small white type)
-        ivory: '#FFFAF5', // main canvas
-        lilac: '#F2E8FF', // reflective, intimate
-        butter: '#FFF2C7', // joyful, optimistic
-        mint: '#E1FAED', // quiet, reassuring
+        cream: '#FFF5EB', // main canvas: warm cream, same as the iPhone app
+        ivory: '#FFFAF5', // text on deep teal
+        lilac: '#E6D6FF', // reflective, intimate
+        butter: '#FFE07A', // joyful, optimistic
+        mint: '#BDF2D5', // quiet, reassuring
       },
       borderRadius: { card: '18px' },
     },

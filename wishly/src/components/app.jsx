@@ -15,11 +15,11 @@ export function AppFrame() {
   }, [pathname])
 
   return (
-    <div className={`min-h-[100dvh] lg:flex lg:items-center lg:justify-center lg:gap-20 lg:p-8 ${isGift ? 'bg-ink' : 'bg-[#F3ECE3]'}`}>
+    <div className={`min-h-[100dvh] lg:flex lg:items-center lg:justify-center lg:gap-20 lg:p-8 ${isGift ? 'bg-ink' : 'bg-[#FBE5D3]'}`}>
       {!isGift && <BrandAside />}
       <div
         id="app-frame"
-        className="relative mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col bg-ivory lg:mx-0 lg:h-[min(880px,calc(100dvh-4rem))] lg:min-h-0 lg:overflow-hidden lg:rounded-[40px] lg:shadow-[0_40px_80px_-30px_rgba(20,52,56,0.45)] lg:ring-[10px] lg:ring-ink"
+        className="relative mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col bg-cream lg:mx-0 lg:h-[min(880px,calc(100dvh-4rem))] lg:min-h-0 lg:overflow-hidden lg:rounded-[40px] lg:shadow-[0_40px_80px_-30px_rgba(20,52,56,0.45)] lg:ring-[10px] lg:ring-ink"
       >
         <div id="app-scroll" className="flex flex-1 flex-col lg:overflow-y-auto">
           <Outlet />
@@ -60,7 +60,7 @@ export function TabsLayout() {
 function TabBar() {
   const item = ({ isActive }) => `flex flex-1 flex-col items-center gap-1 pt-2.5 text-[11px] font-bold ${isActive ? 'text-ink' : 'text-ink/45'}`
   return (
-    <nav className="sticky bottom-0 z-20 border-t border-ink/10 bg-ivory/95 pb-[max(env(safe-area-inset-bottom),10px)] backdrop-blur" aria-label="Main">
+    <nav className="sticky bottom-0 z-20 border-t border-ink/10 bg-cream/95 pb-[max(env(safe-area-inset-bottom),10px)] backdrop-blur" aria-label="Main">
       <div className="flex items-end">
         <NavLink to="/" end className={item}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1v-9.5Z" /></svg>
@@ -84,7 +84,7 @@ function TabBar() {
 export function TopBar({ back, title, right, children }) {
   const navigate = useNavigate()
   return (
-    <header className="sticky top-0 z-20 border-b border-ink/10 bg-ivory/95 pt-[env(safe-area-inset-top)] backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-ink/10 bg-cream/95 pt-[env(safe-area-inset-top)] backdrop-blur">
       <div className="flex h-14 items-center gap-2 px-2">
         <div className="flex w-12 justify-start">
           {back && (
@@ -116,7 +116,7 @@ export const CloseIcon = () => (
 // Pinned action area at the bottom of a screen.
 export function ActionBar({ children }) {
   return (
-    <div className="sticky bottom-0 z-10 mt-auto border-t border-ink/10 bg-ivory/95 px-4 pb-[max(env(safe-area-inset-bottom),16px)] pt-3 backdrop-blur">
+    <div className="sticky bottom-0 z-10 mt-auto border-t border-ink/10 bg-cream/95 px-4 pb-[max(env(safe-area-inset-bottom),16px)] pt-3 backdrop-blur">
       {children}
     </div>
   )
@@ -137,7 +137,7 @@ export function Sheet({ title, sub, onClose, children }) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="max-h-[90%] w-full overflow-y-auto rounded-t-[28px] bg-ivory px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-3 animate-[sheet_.25s_ease-out]"
+        className="max-h-[90%] w-full overflow-y-auto rounded-t-[28px] bg-cream px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-3 animate-[sheet_.25s_ease-out]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-ink/15" />

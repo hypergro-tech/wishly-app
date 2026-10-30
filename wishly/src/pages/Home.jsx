@@ -30,7 +30,7 @@ export default function Home() {
 
   return (
     <div className="pb-6">
-      <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-ink/10 bg-ivory/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur">
+      <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-ink/10 bg-cream/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur">
         <Logo size={24} />
       </header>
 
@@ -60,7 +60,7 @@ export default function Home() {
           Share their name and a moment you remember. We turn it into a song they’ll want to hear again.
         </p>
         <img src="/brand/sunday-pancakes.jpg" alt="A couple sharing earphones on the kitchen floor over a stack of pancakes" className="mt-6 aspect-[4/3] w-full rounded-[24px] object-cover" />
-        <figure className="relative mx-3 -mt-8 rounded-2xl bg-ivory p-4 shadow-[0_10px_30px_-12px_rgba(20,52,56,0.35)]">
+        <figure className="relative mx-3 -mt-8 rounded-2xl bg-cream p-4 shadow-[0_10px_30px_-12px_rgba(20,52,56,0.35)]">
           <blockquote className="accent text-[17px] leading-snug">“Sunday pancakes, and the first one always burns. Ten years in, it’s still my favorite turn.”</blockquote>
           <figcaption className="mt-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-ink/55">Example lyric · Anniversary</figcaption>
         </figure>

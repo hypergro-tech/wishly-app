@@ -11,7 +11,7 @@ export default function MyGifts() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-20 border-b border-ink/10 bg-ivory/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-ink/10 bg-cream/95 px-4 pt-[env(safe-area-inset-top)] backdrop-blur">
         <h1 className="flex h-14 items-center text-[22px]">My gifts</h1>
       </header>
       <div className="flex-1 px-4 py-5">
