@@ -46,10 +46,12 @@ export function writeSong(order) {
   }
   const catchphrase = catchphraseOf(memories.inside_joke)
 
-  const verse1 = [
+  // About a minute sung: one verse, then the chorus twice.
+  const verse = [
     OPENERS[mood] || OPENERS.tender,
     m.ritual ? `Like ${lower(m.ritual)}` : 'Like the way you hum when you think no one hears',
     m.joke ? `And you still say "${catchphrase}"` : 'And you laugh before the punchline every time',
+    m.memory ? `And I think about ${lower(m.memory)}` : 'And the nights we stayed up way too late',
     `${call}, that’s the stuff I wouldn’t trade`,
   ]
 
@@ -58,18 +60,6 @@ export function writeSong(order) {
     m.say ? lower(m.say) : 'you make the ordinary feel like more',
     OCCASION_LINES[occasion] || OCCASION_LINES['Just because'],
     `Oh ${name}, this one’s yours`,
-  ]
-
-  const verse2 = [
-    m.memory ? `I think about ${lower(m.memory)}` : 'I think about the nights we stayed up way too late',
-    'How we didn’t know then it would matter this much',
-    'All the little things that only we would catch',
-    `${call}, that’s the story, that’s us`,
-  ]
-
-  const bridge = [
-    'If I could write it down in one line',
-    `It would just be your name, ${name}, every time`,
   ]
 
   const title = memories.nickname
@@ -81,14 +71,11 @@ export function writeSong(order) {
   return {
     title,
     style: [music.genre, music.voice !== 'No preference' && music.voice, music.language].filter(Boolean).join(' · '),
-    duration_sec: 168,
+    duration_sec: 60,
     audio_url: null,
     sections: [
-      { label: 'Verse 1', lines: verse1 },
+      { label: 'Verse', lines: verse },
       { label: 'Chorus', lines: chorus },
-      { label: 'Verse 2', lines: verse2 },
-      { label: 'Chorus', lines: chorus },
-      { label: 'Bridge', lines: bridge },
       { label: 'Chorus', lines: chorus },
     ],
   }
@@ -96,7 +83,7 @@ export function writeSong(order) {
 
 export function buildSongPrompt(order) {
   return [
-    'Write lyrics for a personal gift song. Specific details must carry the emotion;',
+    'Write lyrics for a personal gift song, about one minute long when sung. Specific details must carry the emotion;',
     'use the details verbatim where natural and never invent facts about the people.',
     JSON.stringify({
       recipient: order.recipient,

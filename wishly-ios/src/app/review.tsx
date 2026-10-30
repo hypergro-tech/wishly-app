@@ -126,7 +126,7 @@ export default function Review() {
             <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>{CORE_PACKAGE.name}</Text>
             <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>{formatPrice(CORE_PACKAGE.price)}</Text>
           </View>
-          <Body muted size={14}>A complete 2½–3 minute song, a private page {she} opens without an account, and one correction round.</Body>
+          <Body muted size={14}>A complete one-minute song, a private page {she} opens without an account, and one correction round.</Body>
 
           <View accessibilityRole="radiogroup" accessibilityLabel="When it’s ready" style={{ flexDirection: 'row', gap: 8 }}>
             {DELIVERY.map((d) => {

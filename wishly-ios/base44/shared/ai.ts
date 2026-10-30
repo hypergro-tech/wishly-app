@@ -40,7 +40,7 @@ Return JSON with:
 export async function writeLyrics(prompt: string, schema: object, name: string, key: string) {
   const ask = `${prompt}
 
-Rules: use the name "${name}" at least four times, including in every chorus. Write original lines; don't quote existing songs. Reply only with JSON matching this schema:
+Rules: about one minute when sung: one verse of 4 or 5 lines, then a 4-line chorus sung twice (two sections, both labelled "Chorus"). No second verse, no bridge. Use the name "${name}" at least four times, including in every chorus. Write original lines; don't quote existing songs. Reply only with JSON matching this schema:
 ${JSON.stringify(schema)}`
   const res = await gemini('gemini-3.5-flash', key, ask, { responseMimeType: 'application/json', temperature: 0.9 })
   return JSON.parse(res.candidates[0].content.parts[0].text)

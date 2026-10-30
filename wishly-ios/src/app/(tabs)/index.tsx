@@ -32,7 +32,7 @@ const weekday = (iso: string) => new Date(iso).toLocaleDateString('en-US', { wee
 
 const STEPS = [
   { tint: colors.lilac, title: 'Tell us one memory', sub: 'The nickname, the joke, the Sunday ritual.' },
-  { tint: colors.butter, title: 'We write and sing it', sub: `A full song, ready in ${DELIVERY[0].days} days.` },
+  { tint: colors.butter, title: 'We write and sing it', sub: `A one-minute song, ready in ${DELIVERY[0].days} days.` },
   { tint: colors.mint, title: 'You listen, check, then give', sub: 'Fix any name or fact before it’s sent.' },
 ]
 

@@ -77,7 +77,7 @@ export const CORE_PACKAGE = {
   name: 'Personal Song',
   price: 59,
   includes: [
-    'A complete song, about 2½ to 3 minutes',
+    'A complete song, about 1 minute',
     'Lyrics written from the details you share',
     'A private listening page with your message. No account needed to listen',
     'You listen and check names, pronunciation and facts before it is given',

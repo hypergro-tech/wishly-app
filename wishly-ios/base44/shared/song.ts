@@ -140,6 +140,6 @@ export function songPrompt(order: Order, spelling: string) {
   const occasion = (order.occasion || 'celebration').toLowerCase()
   // A plain style line, then the lyrics. Wording like "a song for Birthday, a
   // personal gift" made Lyria refuse whole songs, even for Emily (30 Oct 2026).
-  const style = `${sound} ${occasion} song${singer}, ${language || 'English'}, about 2 minutes 30 seconds.`
+  const style = `${sound} ${occasion} song${singer}, ${language || 'English'}, about 1 minute.`
   return `${style[0].toUpperCase()}${style.slice(1)}\n\nLyrics:\n${lyrics}`
 }
