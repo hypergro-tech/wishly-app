@@ -16,11 +16,15 @@ export type Try = { spelling: string; heard: number; audio?: Uint8Array<ArrayBuf
 // Lowercase letters and spaces only: "O'Sheen!" -> "osheen".
 const spoken = (s: string) => plainName(s).replace(/['’-]/g, '').replace(/[^a-z]+/g, ' ').trim()
 
-// Within a letter or two (one per four letters), so a near-miss in how the
-// transcriber spells a sung name still counts, but Ava doesn't pass for Alvah.
+// Spellings of the same sound made equal, so "Kiva" heard matches Keeva sung.
+const sound = (s: string) => s.replace(/ee|ea|ie|y/g, 'i').replace(/oo/g, 'u').replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/(.)\1+/g, '$1')
+
+// Within a letter or two (one per four letters; none under four), so a
+// near-miss in how the transcriber spells a sung name still counts, but Ava
+// doesn't pass for Alvah, or "tag" for Tig.
 function near(a: string, b: string) {
   if (!a || !b) return false
-  const allowed = Math.max(1, Math.floor(b.length / 4))
+  const allowed = Math.floor(b.length / 4)
   if (Math.abs(a.length - b.length) > allowed) return false
   let prev = Array.from({ length: b.length + 1 }, (_, j) => j)
   for (let i = 1; i <= a.length; i++) {
@@ -50,14 +54,12 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
   // Counts as heard: the transcriber wrote the real name, or something within a
   // letter or two of it or of a spelling we sang ("Oshin" for Osheen, "Kiva" for
   // Keeva). Not Gemini's list of how a listener might write it: that included
-  // wrong names like Alba and Ocean, so wrong songs passed.
+  // wrong names like Alba and Ocean, so wrong songs passed. Spaces don't count,
+  // so "Mary-Kate" heard matches Mary Kate sung, and "Anne Marie" matches Annmarie.
   const heardIn = (text: string) => {
-    const targets = [name, ...spellings].map(spoken)
+    const targets = [name, ...spellings].map((s) => sound(spoken(s).replace(/ /g, '')))
     const words = spoken(text).split(' ')
-    return targets.some((target) => {
-      const size = target.split(' ').length
-      return words.some((_, i) => near(words.slice(i, i + size).join(' '), target))
-    })
+    return targets.some((target) => words.some((_, i) => [1, 2, 3].some((size) => near(sound(words.slice(i, i + size).join('')), target))))
   }
 
   // Each try is sung and listened to. Lyria refuses some names outright: famous
