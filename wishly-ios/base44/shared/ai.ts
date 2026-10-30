@@ -1,6 +1,9 @@
 // Calls to Gemini (spellings, singing with Lyria) and OpenAI (listening for the
 // name). Backend functions only: the keys come from Base44 secrets.
 
+// A key pasted into Base44 can pick up quotes or spaces around it.
+export const cleanKey = (key?: string) => key?.trim().replace(/^["']|["']$/g, '').trim() || undefined
+
 const GEMINI = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 async function post(url: string, body: BodyInit, headers: Record<string, string>) {
@@ -33,10 +36,17 @@ Return JSON with:
 
 // The song as an MP3, from Lyria 3 Pro.
 export async function sing(prompt: string, key: string): Promise<Uint8Array> {
-  const res = await gemini('lyria-3-pro-preview', key, prompt, { responseModalities: ['AUDIO'] })
-  const part = res.candidates?.[0]?.content?.parts?.find((p: { inlineData?: unknown }) => p.inlineData)
-  if (!part) throw new Error('Lyria returned no audio')
-  return Uint8Array.from(atob(part.inlineData.data), (c) => c.charCodeAt(0))
+  let why = ''
+  // Lyria sometimes answers with no audio; once more usually works.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const res = await gemini('lyria-3-pro-preview', key, prompt, { responseModalities: ['AUDIO'] })
+    const candidate = res.candidates?.[0]
+    const part = candidate?.content?.parts?.find((p: { inlineData?: unknown }) => p.inlineData)
+    if (part) return Uint8Array.from(atob(part.inlineData.data), (c) => c.charCodeAt(0))
+    const said = candidate?.content?.parts?.map((p: { text?: string }) => p.text).filter(Boolean).join(' ')
+    why = [candidate?.finishReason, res.promptFeedback?.blockReason, said?.slice(0, 200)].filter(Boolean).join(' | ') || JSON.stringify(res).slice(0, 300)
+  }
+  throw new Error(`Lyria returned no audio: ${why}`)
 }
 
 // What a listener hears, as text. Not told the name, so it can't be led.

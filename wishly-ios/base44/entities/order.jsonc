@@ -106,7 +106,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "properties": { "spelling": { "type": "string" }, "heard": { "type": "integer" } }
+            "properties": { "spelling": { "type": "string" }, "heard": { "type": "integer" }, "refused": { "type": "boolean" } }
           }
         }
       }

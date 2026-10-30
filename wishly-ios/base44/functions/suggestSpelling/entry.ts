@@ -4,7 +4,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk'
 import { secrets } from 'base44:runtime'
 
-import { suggestSpellings } from '../../shared/ai.ts'
+import { cleanKey, suggestSpellings } from '../../shared/ai.ts'
 import { isTricky, testedSpelling } from '../../shared/names.ts'
 
 export default async function (req: Request) {
@@ -21,7 +21,7 @@ export default async function (req: Request) {
     const tested = testedSpelling(name)
     if (tested) return Response.json({ said: '', spellings: [tested], heard_as: [name.trim(), tested] })
 
-    const key = secrets.get('GEMINI_API_KEY')
+    const key = cleanKey(secrets.get('GEMINI_API_KEY'))
     if (!key) return Response.json({ error: 'GEMINI_API_KEY is not set' }, { status: 500 })
     return Response.json(await suggestSpellings(name.trim(), key))
   } catch (error) {

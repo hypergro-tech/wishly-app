@@ -7,7 +7,7 @@ import { useState, type ReactNode } from 'react'
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import Animated, { LayoutAnimationConfig, cubicBezier, useReducedMotion } from 'react-native-reanimated'
 
-import { showDemoTools } from '@/api/base44Client'
+import { isBase44 } from '@/api/base44Client'
 import { AuthError, useSession, type Provider } from '@/api/session'
 import { Spark } from '@/components/brand'
 import Cover from '@/components/Cover'
@@ -297,7 +297,7 @@ export default function SignIn() {
             <View style={{ marginTop: 16, padding: 12, paddingHorizontal: 14, borderRadius: radius.field, backgroundColor: colors.bg, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <EmailIcon size={20} color={colors.muted} />
               <Text style={[type.regular, { flex: 1, fontSize: 13, lineHeight: 18, color: colors.muted }]}>
-                {showDemoTools ? 'Demo: any six digits work.' : 'Your iPhone offers the code from Mail above the keyboard.'} It confirms on its own once all six digits are in.
+                {!isBase44 ? 'Demo: any six digits work.' : 'Your iPhone offers the code from Mail above the keyboard.'} It confirms on its own once all six digits are in.
               </Text>
             </View>
 
