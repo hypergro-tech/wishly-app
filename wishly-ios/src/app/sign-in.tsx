@@ -199,7 +199,7 @@ export default function SignIn() {
                     autoCapitalize="none"
                     autoCorrect={false}
                     returnKeyType="go"
-                    onSubmitEditing={() => { if (validEmail && password.length >= 6) withEmail() }}
+                    onSubmitEditing={() => { if (validEmail && password.length >= 8) withEmail() }}
                     keyboardAppearance="dark"
                     selectionColor={colors.coral}
                     style={[type.regular, styles.input, { paddingRight: 72 }]}
@@ -214,13 +214,13 @@ export default function SignIn() {
                     <Text style={[type.bold, { fontSize: 14, color: colors.muted }]}>{showPassword ? 'Hide' : 'Show'}</Text>
                   </Pressable>
                 </View>
-                <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>At least 6 characters. Your iPhone can remember it for you.</Text>
+                <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>At least 8 characters. Your iPhone can remember it for you.</Text>
               </View>
             </Animated.View>
 
             <Problem text={error} />
 
-            <Button label="Continue" busy={busy === 'email'} disabled={!validEmail || password.length < 6} onPress={withEmail} style={{ marginTop: 20 }} />
+            <Button label="Continue" busy={busy === 'email'} disabled={!validEmail || password.length < 8} onPress={withEmail} style={{ marginTop: 20 }} />
             <Pressable accessibilityRole="button" hitSlop={10} onPress={() => { tap(); forgot() }} style={{ alignSelf: 'center', marginTop: 16 }}>
               <Text style={[type.bold, { fontSize: 14, color: colors.muted }]}>Forgot your password?</Text>
             </Pressable>

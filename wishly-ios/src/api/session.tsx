@@ -125,8 +125,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     try {
       await b44().auth.register({ email: email.trim(), password })
       return 'needs-code' as const
-    } catch {
-      throw new AuthError('That email and password don’t match. Try again, or reset your password.')
+    } catch (error) {
+      // Base44 says why a new account was refused (e.g. "Password must be at
+      // least 8 characters long"); otherwise the account exists and the
+      // password is wrong, or it was made with Apple / Google and has none.
+      const reason = (error as { data?: { detail?: string } })?.data?.detail
+      if (reason && !/exist|registered|already/i.test(reason)) throw new AuthError(reason.replace(/\.?$/, '.'))
+      throw new AuthError('That email and password don’t match. Try again, or reset your password. If you signed up with Apple or Google, use that button instead.')
     }
   }
 
