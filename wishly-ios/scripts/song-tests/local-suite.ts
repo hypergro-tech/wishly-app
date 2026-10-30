@@ -38,7 +38,7 @@ async function runCase(c: any) {
     // deno-lint-ignore no-explicit-any
     const o: any = { ...order, song: writeSong(order) }
     const { tries, best, passed } = await makeTakes(o, keys, { prompt: buildSongPrompt(o), schema: SONG_SCHEMA })
-    const nameInLyrics = o.song.sections.flatMap((s: { lines: string[] }) => s.lines).join(' ')
+    const nameInLyrics = o.song.sections.flatMap((s: { lines: string[] }) => s.lines).join(' ').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
       .split(new RegExp(`\\b${c.name.normalize('NFKD').replace(/[̀-ͯ]/g, '')}\\b`, 'i')).length - 1
     result.name_check = { passed, needs_person: !passed, tries: tries.map(({ spelling, heard, refused }) => ({ spelling, heard, refused: Boolean(refused) })) }
     result.sung_as = best.spelling

@@ -20,6 +20,8 @@
   "exclude": [
     "base44/functions",
     "base44/shared/ai.ts",
+    "base44/shared/song.ts",
+    "scripts/song-tests",
     "node_modules"
   ]
 }

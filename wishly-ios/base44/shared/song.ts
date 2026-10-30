@@ -13,6 +13,24 @@ export type Keys = { gemini: string; openai: string }
 export type Order = any
 export type Try = { spelling: string; heard: number; audio?: Uint8Array<ArrayBuffer>; refused?: boolean; lines?: string[] }
 
+// Lowercase letters and spaces only: "O'Sheen!" -> "osheen".
+const spoken = (s: string) => plainName(s).replace(/['’-]/g, '').replace(/[^a-z]+/g, ' ').trim()
+
+// Within a letter or two (one per four letters), so a near-miss in how the
+// transcriber spells a sung name still counts, but Ava doesn't pass for Alvah.
+function near(a: string, b: string) {
+  if (!a || !b) return false
+  const allowed = Math.max(1, Math.floor(b.length / 4))
+  if (Math.abs(a.length - b.length) > allowed) return false
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j)
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i]
+    for (let j = 1; j <= b.length; j++) row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+    prev = row
+  }
+  return prev[b.length] <= allowed
+}
+
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 // Writes the lyrics (if asked), then sings and checks up to three takes.
@@ -27,12 +45,19 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
     }
   }
   const name: string = order.recipient.name.trim()
-  const { spellings, heardAs } = await plan(name, order.recipient.pronunciation, keys.gemini)
+  const { spellings } = await plan(name, order.recipient.pronunciation, keys.gemini)
 
-  // Counts as heard: the real name, any spelling we tried, or how a listener might write it.
-  const heardPattern = () => {
-    const accepted = [...new Set([name, ...spellings, ...heardAs].map(plainName).filter(Boolean))]
-    return new RegExp(`\\b(${accepted.sort((a, b) => b.length - a.length).map(escape).join('|')})\\b`, 'i')
+  // Counts as heard: the transcriber wrote the real name, or something within a
+  // letter or two of it or of a spelling we sang ("Oshin" for Osheen, "Kiva" for
+  // Keeva). Not Gemini's list of how a listener might write it: that included
+  // wrong names like Alba and Ocean, so wrong songs passed.
+  const heardIn = (text: string) => {
+    const targets = [name, ...spellings].map(spoken)
+    const words = spoken(text).split(' ')
+    return targets.some((target) => {
+      const size = target.split(' ').length
+      return words.some((_, i) => near(words.slice(i, i + size).join(' '), target))
+    })
   }
 
   // Each try is sung and listened to. Lyria refuses some names outright: famous
@@ -56,7 +81,6 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
         askedGemini = true
         try {
           const s = await suggestSpellings(name, keys.gemini)
-          heardAs.push(...(s.heard_as || []))
           for (const alt of s.spellings.map(singable)) if (!spellings.some((x) => x.toLowerCase() === alt.toLowerCase())) spellings.push(alt)
         } catch (e) {
           console.error('suggestSpellings failed', name, e)
@@ -64,9 +88,8 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
       }
       continue
     }
-    const pattern = heardPattern()
     const texts = await Promise.all(Array.from({ length: LISTENS }, () => listen(audio, keys.openai)))
-    const heard = texts.filter((t) => pattern.test(plainName(t))).length
+    const heard = texts.filter(heardIn).length
     tries.push({ spelling, heard, audio, lines: texts.map((t) => (t.match(/[^.!?\n]*birthday[^.!?\n]*/i) || [''])[0].trim()) })
     if (heard >= 2) break
   }
@@ -80,7 +103,6 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
 // Spellings to try, best first.
 async function plan(name: string, chosen: string | undefined, geminiKey: string) {
   const spellings: string[] = []
-  const heardAs: string[] = []
   if (chosen?.trim()) spellings.push(singable(chosen))
   if (isTricky(name)) {
     const tested = testedSpelling(name)
@@ -88,7 +110,6 @@ async function plan(name: string, chosen: string | undefined, geminiKey: string)
     try {
       const s = await suggestSpellings(name, geminiKey)
       spellings.push(...s.spellings.map(singable))
-      heardAs.push(...(s.heard_as || []))
     } catch (error) {
       console.error('suggestSpellings failed', name, error)
     }
@@ -100,8 +121,9 @@ async function plan(name: string, chosen: string | undefined, geminiKey: string)
   // every sounds-like spelling (it blocks some that sound like a famous name,
   // such as Neave / Neve). A person then checks that take before the buyer.
   const tried = unique.slice(0, MAX_TRIES + 3)
-  if (!tried.some((s) => s.toLowerCase() === name.toLowerCase())) tried.push(name)
-  return { spellings: tried, heardAs }
+  const written = name.normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+  if (!tried.some((s) => s.toLowerCase() === written.toLowerCase())) tried.push(written)
+  return { spellings: tried }
 }
 
 // The lyrics keep the real name; the singer gets the sounds-like spelling.

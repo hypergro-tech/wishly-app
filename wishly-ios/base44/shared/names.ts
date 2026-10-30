@@ -7,8 +7,9 @@
 // fixes it. A pronunciation guide in brackets next to the name does not.
 
 // Letter patterns an English reader says wrong: Siobhan, Niamh, Aoife, Rhys,
-// Sinéad, Hermione, Llewellyn, Eoghan, Oisin. Emily, Kayleigh and Joaquin don't match.
-const TRICKY = /bh|mh|dh|ao|ae(?!l)|^rh|^ll|[éáíóú]|^sio|^nia|ione$|^eo|^ois/i
+// Sinéad, Hermione, Llewellyn, Eoghan, Oisin, and any accent or dots (Zoë).
+// Emily, Kayleigh and Joaquin don't match.
+const TRICKY = /bh|mh|dh|ao|ae(?!l)|^rh|^ll|[\u00C0-\u017F]|^sio|^nia|ione$|^eo|^ois/i
 
 // Spellings proven in the song tests, keyed by the name in plain lowercase.
 export const TESTED_SPELLINGS: Record<string, string> = {
@@ -20,6 +21,11 @@ export const TESTED_SPELLINGS: Record<string, string> = {
   sinead: 'Shinnade',
   aoife: 'Eefa',
   hermione: 'Hermyuhnee',
+  // From the 25-name backend test (30 Oct 2026)
+  ailbhe: 'Alva',
+  grainne: 'Grawnya',
+  eoghan: 'Owen',
+  zoe: 'Zoee',
 }
 
 // "Sinéad" -> "sinead"
