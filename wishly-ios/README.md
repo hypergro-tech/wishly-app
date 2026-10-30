@@ -141,6 +141,17 @@ spelling, so Irish and Welsh names come out wrong (Siobhan as "see over"). The f
   someone listens before the buyer does.
 - A pronunciation guide in brackets next to the name does not work; the sung word has to be
   the sounds-like spelling.
+- Lyria refuses some prompts outright (PROHIBITED_CONTENT): wording like "a personal gift
+  for Birthday" (so the style line is plain), and famous singers' first names (Taylor,
+  Selena, Ariana, Adele, Billie…). A refusal doesn't use up a try; makeSong asks Gemini for
+  same-sounding spellings (Tayler, Selina), which get through.
+- Lyrics are written by Gemini inside makeSong (Base44 blocks its own AI from the app, and
+  each Base44 AI call or upload uses an integration credit; the free plan has 100 a month).
+
+**Testing** (`scripts/song-tests/`): `node scripts/song-tests/run-suite.mjs` runs 25 names
+through the deployed backend as a test buyer (`WISHLY_TEST_*` in `.env.local`) and re-checks
+each song. `deno run -A --no-check scripts/song-tests/local-suite.ts` runs the same names
+through the same code on your Mac, without Base44, using the keys in `~/Downloads/.env`.
 
 To switch it on: deploy the functions (`base44 functions deploy`), set the `GEMINI_API_KEY`
 and `OPENAI_API_KEY` secrets (`base44 secrets set`), and set `EXPO_PUBLIC_REAL_SONGS=true`.

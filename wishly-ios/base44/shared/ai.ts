@@ -34,8 +34,20 @@ Return JSON with:
   return JSON.parse(res.candidates[0].content.parts[0].text)
 }
 
+// Lyrics from Gemini, as JSON in the app's song shape. The name has to be
+// heard, so it must come up often (Base44's own AI used it once or twice per
+// song, and uses a Base44 credit each time).
+export async function writeLyrics(prompt: string, schema: object, name: string, key: string) {
+  const ask = `${prompt}
+
+Rules: use the name "${name}" at least four times, including in every chorus. Write original lines; don't quote existing songs. Reply only with JSON matching this schema:
+${JSON.stringify(schema)}`
+  const res = await gemini('gemini-3.5-flash', key, ask, { responseMimeType: 'application/json', temperature: 0.9 })
+  return JSON.parse(res.candidates[0].content.parts[0].text)
+}
+
 // The song as an MP3, from Lyria 3 Pro.
-export async function sing(prompt: string, key: string): Promise<Uint8Array> {
+export async function sing(prompt: string, key: string): Promise<Uint8Array<ArrayBuffer>> {
   let why = ''
   // Lyria sometimes answers with no audio; once more usually works.
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -50,7 +62,7 @@ export async function sing(prompt: string, key: string): Promise<Uint8Array> {
 }
 
 // What a listener hears, as text. Not told the name, so it can't be led.
-export async function listen(audio: Uint8Array, key: string): Promise<string> {
+export async function listen(audio: Uint8Array<ArrayBuffer>, key: string): Promise<string> {
   const form = new FormData()
   form.append('model', 'gpt-4o-transcribe')
   form.append('language', 'en')
