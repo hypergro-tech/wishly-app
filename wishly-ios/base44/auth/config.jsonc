@@ -3,7 +3,7 @@
   "enableGoogleLogin": true,
   "enableMicrosoftLogin": false,
   "enableFacebookLogin": false,
-  "enableAppleLogin": false,
+  "enableAppleLogin": true,
   "ssoProviderName": null,
   "enableSSOLogin": false,
   "googleOAuthMode": "default",

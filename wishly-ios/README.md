@@ -109,7 +109,7 @@ Each buyer sees only their own orders, enforced by the entity's row-level rules
   with `base44 site deploy --no-build --publish`). It starts the sign-in, and when Base44 comes
   back it hands the token to `wishly://auth` (or to Expo Go while testing). If the web gift app is
   ever published to that address instead, it has to keep doing this. Google was tested this way on
-  the simulator on 1 Nov 2026; Apple is still switched off in Base44's auth settings.
+  the simulator on 1 Nov 2026. Apple is switched on too and reaches Apple's page, which names "Base44 Web Sign In", not Wishly.
 - The App Store requires Sign in with Apple when Google is offered, and expects Apple's own
   button style; swap in `expo-apple-authentication`'s button for a native build if review asks.
 - Set `EXPO_PUBLIC_TERMS_URL` and `EXPO_PUBLIC_PRIVACY_URL`; the sign-in sheet links to them.
