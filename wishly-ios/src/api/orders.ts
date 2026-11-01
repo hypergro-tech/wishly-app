@@ -47,7 +47,7 @@ const newToken = () =>
 
 export async function placeOrder(brief: Brief): Promise<Order> {
   const q = quote(brief.package)
-  return Orders().create({
+  const order: Order = await Orders().create({
     ...brief,
     status: 'in_production',
     price_total: q.total,
@@ -57,6 +57,9 @@ export async function placeOrder(brief: Brief): Promise<Order> {
     song_version: 0,
     gift: null,
   })
+  // With the real backend, singing starts as soon as the order is saved. The
+  // demo store waits for the "Finish the song now" button instead.
+  return realSongs ? compose(order) : order
 }
 
 async function compose(order: Order): Promise<Order> {
@@ -92,12 +95,14 @@ export const finishProduction = (order: Order) => compose(order)
 
 export async function requestCorrection(order: Order, { kind, note, changes = {} }: { kind: string; note: string; changes?: { recipient?: object; memories?: object } }) {
   const corrections = [...(order.corrections || []), { kind, note, changes, at: new Date().toISOString(), resolved: false }]
-  return Orders().update(order.id, {
+  const updated = await Orders().update(order.id, {
     recipient: { ...order.recipient, ...changes.recipient },
     memories: { ...order.memories, ...changes.memories },
     corrections,
     status: 'correction_requested',
-  }) as Promise<Order>
+  }) as Order
+  // With the real backend the corrected version is made straight away.
+  return realSongs ? applyCorrection(updated) : updated
 }
 
 export async function applyCorrection(order: Order) {

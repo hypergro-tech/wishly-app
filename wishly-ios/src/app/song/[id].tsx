@@ -50,7 +50,7 @@ export default function SongScreen() {
     return (
       <Writing
         order={order}
-        demo={showDemoTools && (
+        demo={showDemoTools && !realSongs && (
           <Button
             label={correcting ? 'Deliver the corrected version (demo)' : 'Finish the song now (demo)'}
             variant="ghost"
