@@ -13,6 +13,7 @@ import Cover from '@/components/Cover'
 import { ChevronDownIcon, LyricsIcon } from '@/components/icons'
 import { BigPlay, LyricView, Scrubber, useFollowLyrics } from '@/components/playback'
 import { Body, Button, Eyebrow, IconButton } from '@/components/ui'
+import { OCCASIONS } from '@/lib/catalog'
 import { useDraft } from '@/lib/draft'
 import { playerOrigin } from '@/lib/flight'
 import { spring } from '@/lib/motion'
@@ -164,7 +165,7 @@ export default function NowPlaying() {
                   label="Start a song like this"
                   variant="light"
                   size="md"
-                  onPress={() => close(() => { set('occasion', track.occasion!); router.navigate('/create') })}
+                  onPress={() => close(() => { set('occasion', OCCASIONS.includes(track.occasion!) ? track.occasion! : ''); router.navigate('/create') })}
                   style={{ marginTop: 20 }}
                 />
               ) : track.orderId ? (

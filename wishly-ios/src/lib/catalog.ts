@@ -277,5 +277,5 @@ const ALL_EXAMPLES: Example[] = [
 ]
 
 export const EXAMPLES = ALL_EXAMPLES.filter((e) => live(e.market) && OCCASIONS.includes(e.occasion))
-// The welcome screen's photo and song, whatever occasions are on.
-export const HERO_EXAMPLE = ALL_EXAMPLES.find((e) => e.id === 'ex1')!
+// The welcome screen's photo and song: a birthday, since that's what Wishly leads with.
+export const HERO_EXAMPLE = ALL_EXAMPLES.find((e) => e.id === 'ex2')!

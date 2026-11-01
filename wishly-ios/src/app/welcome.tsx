@@ -54,7 +54,7 @@ export default function Welcome() {
           />
         </Animated.View>
         <Animated.View entering={rise(450)} style={{ position: 'absolute', left: 14, right: 60, bottom: 14, padding: 12, paddingHorizontal: 14, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.92)' }}>
-          <Text style={[type.accent, { fontSize: 15, lineHeight: 20, color: colors.ink }]}>“Sunday pancakes, and the first one always burns. Ten years in, it’s still my favorite turn.”</Text>
+          <Text style={[type.accent, { fontSize: 15, lineHeight: 20, color: colors.ink }]}>“{HERO.lines[2]}. {HERO.lines[3]}.”</Text>
         </Animated.View>
       </Animated.View>
 

@@ -1,7 +1,7 @@
 import { router, useFocusEffect } from 'expo-router'
 import { useBottomTabBarHeight } from 'expo-router/js-tabs'
 import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react'
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { ScrollView, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { listOrders, type Order } from '@/api/orders'
@@ -248,9 +248,6 @@ export default function Home() {
             </Squish>
           ))}
         </View>
-        <Pressable accessibilityRole="button" onPress={() => { tap(); router.navigate('/create') }} hitSlop={10} style={{ marginTop: 14, marginHorizontal: 20, alignSelf: 'flex-start' }}>
-          <Text style={[type.bold, { fontSize: 14, color: colors.muted }]}>All occasions</Text>
-        </Pressable>
 
         <Text accessibilityRole="header" style={[type.bold, { marginTop: 32, marginHorizontal: 20, fontSize: 21, color: colors.text }]}>More examples</Text>
         <View style={{ marginTop: 8, marginHorizontal: 20 }}>
