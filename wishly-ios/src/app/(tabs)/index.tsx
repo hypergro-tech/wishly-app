@@ -12,7 +12,7 @@ import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { ArrowIcon, PlayIcon } from '@/components/icons'
 import { PlayPause, Squish } from '@/components/motion'
 import { Accent, Body, Eyebrow, IconButton, Title, tap } from '@/components/ui'
-import { CORE_PACKAGE, DELIVERY, EXAMPLES, OCCASION_TONES, formatPrice, type Example } from '@/lib/catalog'
+import { CORE_PACKAGE, DELIVERY, EXAMPLES, OCCASIONS, OCCASION_TONES, formatPrice, type Example } from '@/lib/catalog'
 import { useDraft } from '@/lib/draft'
 import { openPlayer } from '@/lib/flight'
 import { WELCOMED, seen } from '@/lib/once'
@@ -20,7 +20,7 @@ import { exampleTrack, usePlayer } from '@/lib/player'
 import { orderCover, songTitle } from '@/lib/songs'
 import { colors, tint, type, shade } from '@/theme'
 
-const OCCASION_TILES = ['Birthday', 'Anniversary', "Mother's Day", 'Just because']
+const OCCASION_TILES = OCCASIONS
 const TILE_COLOUR: Record<string, string> = { 'Just because': colors.coral }
 
 const greeting = () => {

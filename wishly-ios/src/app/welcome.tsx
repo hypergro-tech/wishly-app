@@ -8,14 +8,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Logo } from '@/components/brand'
 import { Body, Button, Title, tap } from '@/components/ui'
-import { EXAMPLES } from '@/lib/catalog'
+import { HERO_EXAMPLE } from '@/lib/catalog'
 import { openPlayer } from '@/lib/flight'
 import { useRise } from '@/lib/motion'
 import { WELCOMED, markSeen } from '@/lib/once'
 import { exampleTrack, usePlayer } from '@/lib/player'
 import { colors, type } from '@/theme'
 
-const HERO = EXAMPLES.find((e) => e.id === 'ex1')!
+const HERO = HERO_EXAMPLE
 
 // A very slow push in on the photo, like Memories in Photos.
 const DRIFT = { from: { transform: [{ scale: 1 }] }, to: { transform: [{ scale: 1.09 }] } }

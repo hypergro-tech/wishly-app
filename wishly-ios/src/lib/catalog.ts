@@ -22,21 +22,25 @@ export const formatPrice = (n: number) =>
 
 export const RELATIONSHIPS = ['Partner', 'Parent', 'Friend', 'Sibling', 'Child', 'Couple', 'Grandparent', 'Colleague', 'Someone else']
 
-export const OCCASIONS = [
+const ALL_OCCASIONS = [
   'Birthday', 'Anniversary', 'Wedding', "Valentine's Day", "Mother's Day", "Father's Day",
   'Christmas', 'Milestone', 'Remembrance', 'Just because',
 ]
+// Everyday celebrations only for now (Neha, 1 Nov 2026). Holidays like Mother's
+// Day or Christmas go back in close to their date: add them here then.
+const OCCASIONS_ON = ['Birthday', 'Milestone', 'Just because']
+export const OCCASIONS = ALL_OCCASIONS.filter((o) => OCCASIONS_ON.includes(o))
 
 export const PRONOUNS = ['she/her', 'he/him', 'they/them']
 
-// Soft colours carry the emotional temperature: lilac reflective,
-// butter joyful, mint quiet.
+// Soft colours carry the emotional temperature: lilac heartfelt,
+// butter bright, mint lively.
 export const MOODS: { id: string; label: string; blurb: string; tint: Tint }[] = [
-  { id: 'tender', label: 'Tender', blurb: 'Soft, warm, close', tint: 'lilac' },
-  { id: 'joyful', label: 'Joyful', blurb: 'Bright and celebratory', tint: 'butter' },
+  { id: 'upbeat', label: 'Upbeat', blurb: 'Bright and celebratory', tint: 'butter' },
+  { id: 'emotional', label: 'Emotional', blurb: 'Heartfelt, the kind that brings a tear', tint: 'lilac' },
   { id: 'playful', label: 'Playful', blurb: 'Kitchen dancing and family jokes', tint: 'butter' },
-  { id: 'nostalgic', label: 'Nostalgic', blurb: 'Looking back together', tint: 'lilac' },
-  { id: 'reflective', label: 'Gentle', blurb: 'Patient, for remembering', tint: 'mint' },
+  { id: 'romantic', label: 'Romantic', blurb: 'For the one you love', tint: 'lilac' },
+  { id: 'energetic', label: 'Energetic', blurb: 'Loud, fast, made to dance to', tint: 'mint' },
 ]
 
 // One brand, different emotional temperatures.
@@ -55,7 +59,7 @@ export const OCCASION_TONES: Record<string, { line: string; tint: Tint; gentle?:
   'Just because': { line: 'No big reason. Just your person.', tint: 'lilac' },
 }
 
-export const GENRES = ['Acoustic', 'Pop', 'Piano ballad', 'Folk', 'Country', 'R&B', 'Bollywood', 'Lullaby'].filter(offered)
+export const GENRES = ['Pop', 'Rock', 'Electronic', 'Hip Hop', 'R&B', 'Acoustic', 'Country', 'Classical', 'Bollywood'].filter(offered)
 
 export const VOICES = ['Female vocal', 'Male vocal', 'Duet', 'No preference']
 
@@ -148,7 +152,7 @@ const ALL_EXAMPLES: Example[] = [
     for: 'For Mei, from her roommates',
     occasion: 'Birthday',
     mood: 'joyful',
-    tags: ['Birthday', 'Joyful', 'Pop'],
+    tags: ['Birthday', 'Upbeat', 'Pop'],
     photo: require('../../assets/brand/friend-birthday.jpg'),
     photoAlt: 'Friends laughing around a birthday cake at a crowded table',
     tint: 'butter',
@@ -166,7 +170,7 @@ const ALL_EXAMPLES: Example[] = [
     for: 'For Mom, from her daughter',
     occasion: "Mother's Day",
     mood: 'tender',
-    tags: ['Mother’s Day', 'Tender', 'Piano ballad'],
+    tags: ['Mother’s Day', 'Emotional', 'Acoustic'],
     photo: null,
     photoAlt: '',
     tint: 'mint',
@@ -184,7 +188,7 @@ const ALL_EXAMPLES: Example[] = [
     for: 'For Amma, from her daughter',
     occasion: "Mother's Day",
     mood: 'tender',
-    tags: ['Mother’s Day', 'Tender', 'Piano ballad'],
+    tags: ['Mother’s Day', 'Emotional', 'Acoustic'],
     photo: require('../../assets/brand/hero-recognition.jpg'),
     photoAlt: 'An older woman listening on headphones while her daughter watches her smile',
     tint: 'mint',
@@ -203,7 +207,7 @@ const ALL_EXAMPLES: Example[] = [
     for: 'For Dad, from his three kids',
     occasion: "Father's Day",
     mood: 'playful',
-    tags: ['Father’s Day', 'Playful', 'Folk'],
+    tags: ['Father’s Day', 'Playful', 'Acoustic'],
     photo: null,
     photoAlt: '',
     tint: 'mint',
@@ -221,7 +225,7 @@ const ALL_EXAMPLES: Example[] = [
     for: 'For Jess, from Sam',
     occasion: 'Just because',
     mood: 'tender',
-    tags: ['Just because', 'Tender', 'Piano ballad'],
+    tags: ['Just because', 'Emotional', 'Acoustic'],
     photo: null,
     photoAlt: '',
     tint: 'lilac',
@@ -239,7 +243,7 @@ const ALL_EXAMPLES: Example[] = [
     for: 'For Grandma, from all of us',
     occasion: 'Milestone',
     mood: 'nostalgic',
-    tags: ['Milestone', 'Nostalgic', 'Country'],
+    tags: ['Milestone', 'Emotional', 'Country'],
     photo: null,
     photoAlt: '',
     tint: 'butter',
@@ -257,7 +261,7 @@ const ALL_EXAMPLES: Example[] = [
     for: 'For Nani, from all of us',
     occasion: 'Milestone',
     mood: 'nostalgic',
-    tags: ['Milestone', 'Nostalgic', 'Bollywood'],
+    tags: ['Milestone', 'Emotional', 'Bollywood'],
     photo: null,
     photoAlt: '',
     tint: 'butter',
@@ -272,4 +276,6 @@ const ALL_EXAMPLES: Example[] = [
   },
 ]
 
-export const EXAMPLES = ALL_EXAMPLES.filter((e) => live(e.market))
+export const EXAMPLES = ALL_EXAMPLES.filter((e) => live(e.market) && OCCASIONS.includes(e.occasion))
+// The welcome screen's photo and song, whatever occasions are on.
+export const HERO_EXAMPLE = ALL_EXAMPLES.find((e) => e.id === 'ex1')!

@@ -5,7 +5,7 @@ import LyricPlayer from '../components/LyricPlayer'
 import { Logo, Ribbon, Spark } from '../components/brand'
 import { Sheet } from '../components/app'
 import { Eyebrow } from '../components/ui'
-import { CORE_PACKAGE, DELIVERY, EXAMPLES, OCCASION_TONES, formatDate, formatPrice } from '../lib/catalog'
+import { CORE_PACKAGE, DELIVERY, EXAMPLES, OCCASIONS, OCCASION_TONES, formatDate, formatPrice } from '../lib/catalog'
 
 const STEPS = [
   ['Tell us who it’s for', 'Their name, and how you say it.'],
@@ -14,7 +14,7 @@ const STEPS = [
   ['Listen, check, then give', 'You check every name and fact before it’s given.'],
 ]
 
-const OCCASION_TILES = ['Birthday', 'Anniversary', "Mother's Day", 'Wedding', 'Just because', 'Remembrance']
+const OCCASION_TILES = OCCASIONS
 
 const ACTIVE_COPY = {
   in_production: (o) => ({ tint: 'bg-butter', title: `We’re writing ${o.recipient.name}’s song.`, sub: `Ready to listen and check by ${formatDate(o.ready_by)}.` }),

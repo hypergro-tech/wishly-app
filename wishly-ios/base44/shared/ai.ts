@@ -1,10 +1,12 @@
-// Calls to Gemini (spellings, singing with Lyria) and OpenAI (listening for the
-// name). Backend functions only: the keys come from Base44 secrets.
+// Calls to Gemini: Gemini 4 Argon writes the lyrics, suggests spellings and
+// listens for the name; Lyria sings. Backend functions only: the key comes from
+// Base44 secrets.
 
 // A key pasted into Base44 can pick up quotes or spaces around it.
 export const cleanKey = (key?: string) => key?.trim().replace(/^["']|["']$/g, '').trim() || undefined
 
 const GEMINI = 'https://generativelanguage.googleapis.com/v1beta/models'
+const ARGON = 'gemini-4-argon'
 
 async function post(url: string, body: BodyInit, headers: Record<string, string>) {
   for (let attempt = 1; ; attempt++) {
@@ -16,10 +18,13 @@ async function post(url: string, body: BodyInit, headers: Record<string, string>
   }
 }
 
-const gemini = (model: string, key: string, text: string, config: object) =>
+const gemini = (model: string, key: string, text: string, config: object, extra: object[] = []) =>
   post(`${GEMINI}/${model}:generateContent?key=${key}`,
-    JSON.stringify({ contents: [{ role: 'user', parts: [{ text }] }], generationConfig: config }),
+    JSON.stringify({ contents: [{ role: 'user', parts: [...extra, { text }] }], generationConfig: config }),
     { 'Content-Type': 'application/json' })
+
+const textOf = (res: { candidates?: { content?: { parts?: { text?: string }[] } }[] }) =>
+  (res.candidates?.[0]?.content?.parts || []).map((p) => p.text || '').join('')
 
 export type Suggestion = { said: string; spellings: string[]; heard_as: string[] }
 
@@ -30,8 +35,8 @@ Return JSON with:
 - "said": how the name is normally pronounced, as stressed syllables like "shi-VAWN"
 - "spellings": 4 different ONE-WORD respellings (letters only, no hyphens, no spaces, no accents) that an American reader would naturally pronounce exactly that way, best first
 - "heard_as": up to 8 ways a listener might write the name if they heard it pronounced correctly (include the real spelling)`
-  const res = await gemini('gemini-3.1-pro-preview', key, ask, { responseMimeType: 'application/json', temperature: 0.4 })
-  return JSON.parse(res.candidates[0].content.parts[0].text)
+  const res = await gemini(ARGON, key, ask, { responseMimeType: 'application/json', temperature: 0.4 })
+  return JSON.parse(textOf(res))
 }
 
 // Lyrics from Gemini, as JSON in the app's song shape. The name has to be
@@ -42,8 +47,8 @@ export async function writeLyrics(prompt: string, schema: object, name: string, 
 
 Rules: about one minute when sung: one verse of 4 or 5 lines, then a 4-line chorus sung twice (two sections, both labelled "Chorus"). No second verse, no bridge. Use the name "${name}" at least four times, including in every chorus. Write original lines; don't quote existing songs. Reply only with JSON matching this schema:
 ${JSON.stringify(schema)}`
-  const res = await gemini('gemini-3.5-flash', key, ask, { responseMimeType: 'application/json', temperature: 0.9 })
-  return JSON.parse(res.candidates[0].content.parts[0].text)
+  const res = await gemini(ARGON, key, ask, { responseMimeType: 'application/json', temperature: 0.9 })
+  return JSON.parse(textOf(res))
 }
 
 // The song as an MP3, from Lyria 3 Pro.
@@ -62,11 +67,11 @@ export async function sing(prompt: string, key: string): Promise<Uint8Array<Arra
 }
 
 // What a listener hears, as text. Not told the name, so it can't be led.
+// Gemini 3.5 Transcribe returns nothing for singing, so Argon listens: on 19
+// saved songs it matched the known answer 18 times (1 Nov 2026).
 export async function listen(audio: Uint8Array<ArrayBuffer>, key: string): Promise<string> {
-  const form = new FormData()
-  form.append('model', 'gpt-4o-transcribe')
-  form.append('language', 'en')
-  form.append('file', new Blob([audio], { type: 'audio/mpeg' }), 'song.mp3')
-  const res = await post('https://api.openai.com/v1/audio/transcriptions', form, { Authorization: `Bearer ${key}` })
-  return res.text
+  let data = ''
+  for (let i = 0; i < audio.length; i += 0x8000) data += String.fromCharCode(...audio.subarray(i, i + 0x8000))
+  const ask = 'Transcribe every sung word in this song. Write each name the way it sounds to you, spelled the way an American would write what they hear. Do not guess a name from context or fix it to a common spelling. Output only the lyrics you hear.'
+  return textOf(await gemini(ARGON, key, ask, {}, [{ inlineData: { mimeType: 'audio/mpeg', data: btoa(data) } }]))
 }

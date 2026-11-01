@@ -18,7 +18,7 @@ await Deno.mkdir(`${OUT}/songs`, { recursive: true })
 
 const env = Object.fromEntries((await Deno.readTextFile(`${HOME}/Downloads/.env`)).split('\n')
   .filter((l) => l.includes('=') && !l.startsWith('#')).map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim().replace(/^"|"$/g, '')]))
-const keys = { gemini: env.GEMINI_API_KEY, openai: env.OPEN_AI_TOKEN }
+const keys = { gemini: env.GEMINI_API_KEY }
 const plain = (s: string) => s.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
 
 // deno-lint-ignore no-explicit-any
@@ -48,7 +48,7 @@ async function runCase(c: any) {
     await Deno.writeFile(file, best.audio!)
     result.file = `songs/${c.id}.mp3`
     const pattern = new RegExp(`\\b(${c.heard}|${plain(best.spelling).replace(/[^a-z ]/g, '')})\\b`, 'i')
-    const texts = await Promise.all([1, 2, 3].map(() => listen(best.audio!, keys.openai)))
+    const texts = await Promise.all([1, 2, 3].map(() => listen(best.audio!, keys.gemini)))
     result.our_heard = texts.filter((t) => pattern.test(plain(t))).length
     result.our_lines = texts.map((t) => [...t.matchAll(/[^.!?\n]*birthday[^.!?\n]*/gi)].map((m) => m[0].trim()).slice(0, 3))
   } catch (error) {

@@ -28,6 +28,10 @@ const OPENERS: Record<string, string> = {
   playful: "Okay, listen, I've got something to confess",
   nostalgic: 'Remember when the days were long and slow',
   reflective: 'I keep you in the quiet parts of every day',
+  upbeat: "Turn it up, turn it up, it's a day for you",
+  emotional: 'Some things are too big to say out loud',
+  romantic: 'Every love song finally makes sense to me',
+  energetic: "Lights up, hands up, this one's going loud",
 }
 
 const OCCASION_LINES: Record<string, string> = {

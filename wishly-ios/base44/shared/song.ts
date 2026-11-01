@@ -8,7 +8,7 @@ import { isTricky, plainName, singable, testedSpelling } from './names.ts'
 export const MAX_TRIES = 3
 const LISTENS = 3
 
-export type Keys = { gemini: string; openai: string }
+export type Keys = { gemini: string }
 // deno-lint-ignore no-explicit-any
 export type Order = any
 export type Try = { spelling: string; heard: number; audio?: Uint8Array<ArrayBuffer>; refused?: boolean; lines?: string[] }
@@ -16,8 +16,11 @@ export type Try = { spelling: string; heard: number; audio?: Uint8Array<ArrayBuf
 // Lowercase letters and spaces only: "O'Sheen!" -> "osheen".
 const spoken = (s: string) => plainName(s).replace(/['’-]/g, '').replace(/[^a-z]+/g, ' ').trim()
 
-// Spellings of the same sound made equal, so "Kiva" heard matches Keeva sung.
-const sound = (s: string) => s.replace(/ee|ea|ie|y/g, 'i').replace(/oo/g, 'u').replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/(.)\1+/g, '$1')
+// Spellings of the same sound made equal, so "Kiva" heard matches Keeva sung,
+// "Shavonne" matches Shivawn and "Efa" matches Eefa. Gemini writes what it hears
+// as an everyday name spelling, so these come up often.
+const sound = (s: string) => s.replace(/^e(?=[^aeiouy])/, 'i').replace(/ee|ea|ie|y/g, 'i').replace(/oo/g, 'u').replace(/aw|au/g, 'o')
+  .replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/(.)\1+/g, '$1').replace(/([^aeiou])e$/, '$1')
 
 // Within a letter or two (one per four letters; none under four), so a
 // near-miss in how the transcriber spells a sung name still counts, but Ava
@@ -37,6 +40,17 @@ function near(a: string, b: string) {
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
+// Counts as heard: the transcriber wrote the real name, or something within a
+// letter or two of it or of a spelling we sang ("Oshin" for Osheen, "Kiva" for
+// Keeva). Not Gemini's list of how a listener might write it: that included
+// wrong names like Alba and Ocean, so wrong songs passed. Spaces don't count,
+// so "Mary-Kate" heard matches Mary Kate sung, and "Anne Marie" matches Annmarie.
+export function nameHeard(text: string, name: string, spellings: string[]) {
+  const targets = [name, ...spellings].map((s) => sound(spoken(s).replace(/ /g, '')))
+  const words = spoken(text).split(' ')
+  return targets.some((target) => words.some((_, i) => [1, 2, 3].some((size) => near(sound(words.slice(i, i + size).join('')), target))))
+}
+
 // Writes the lyrics (if asked), then sings and checks up to three takes.
 // `order.song` is updated in place with the new lyrics.
 export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: string; schema: object } | null) {
@@ -51,16 +65,7 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
   const name: string = order.recipient.name.trim()
   const { spellings } = await plan(name, order.recipient.pronunciation, keys.gemini)
 
-  // Counts as heard: the transcriber wrote the real name, or something within a
-  // letter or two of it or of a spelling we sang ("Oshin" for Osheen, "Kiva" for
-  // Keeva). Not Gemini's list of how a listener might write it: that included
-  // wrong names like Alba and Ocean, so wrong songs passed. Spaces don't count,
-  // so "Mary-Kate" heard matches Mary Kate sung, and "Anne Marie" matches Annmarie.
-  const heardIn = (text: string) => {
-    const targets = [name, ...spellings].map((s) => sound(spoken(s).replace(/ /g, '')))
-    const words = spoken(text).split(' ')
-    return targets.some((target) => words.some((_, i) => [1, 2, 3].some((size) => near(sound(words.slice(i, i + size).join('')), target))))
-  }
+  const heardIn = (text: string) => nameHeard(text, name, spellings)
 
   // Each try is sung and listened to. Lyria refuses some names outright: famous
   // singers' first names (Taylor, Selena, Ariana, Adele) and a few sounds-like
@@ -90,7 +95,7 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
       }
       continue
     }
-    const texts = await Promise.all(Array.from({ length: LISTENS }, () => listen(audio, keys.openai)))
+    const texts = await Promise.all(Array.from({ length: LISTENS }, () => listen(audio, keys.gemini)))
     const heard = texts.filter(heardIn).length
     tries.push({ spelling, heard, audio, lines: texts.map((t) => (t.match(/[^.!?\n]*birthday[^.!?\n]*/i) || [''])[0].trim()) })
     if (heard >= 2) break

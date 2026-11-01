@@ -33,13 +33,12 @@ export default async function (req: Request) {
     if (!order.song?.sections?.length) return Response.json({ error: 'Write the lyrics first' }, { status: 400 })
 
     const gemini = cleanKey(secrets.get('GEMINI_API_KEY'))
-    const openai = cleanKey(secrets.get('OPENAI_API_KEY'))
-    if (!gemini || !openai) return Response.json({ error: 'GEMINI_API_KEY and OPENAI_API_KEY must be set' }, { status: 500 })
+    if (!gemini) return Response.json({ error: 'GEMINI_API_KEY must be set' }, { status: 500 })
 
     const admin = base44.asServiceRole
     const lyrics = typeof lyrics_prompt === 'string' ? { prompt: lyrics_prompt.slice(0, 8000), schema: lyrics_schema } : null
     try {
-      return Response.json({ done: true, ...(await produce(admin, order, { gemini, openai }, lyrics)) })
+      return Response.json({ done: true, ...(await produce(admin, order, { gemini }, lyrics)) })
     } catch (error) {
       console.error('makeSong failed', order.id, error)
       const message = String((error as Error)?.message ?? error)
