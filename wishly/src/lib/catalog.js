@@ -27,7 +27,7 @@ const ALL_OCCASIONS = [
 ]
 // Everyday celebrations only for now (Neha, 1 Nov 2026). Holidays like Mother's
 // Day or Christmas go back in close to their date: add them here then.
-const OCCASIONS_ON = ['Birthday', 'Milestone', 'Just because']
+const OCCASIONS_ON = ['Birthday', 'Anniversary', 'Milestone']
 export const OCCASIONS = ALL_OCCASIONS.filter((o) => OCCASIONS_ON.includes(o))
 
 export const PRONOUNS = ['she/her', 'he/him', 'they/them']
