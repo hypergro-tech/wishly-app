@@ -15,6 +15,8 @@ const STEPS = [
 ]
 
 const OCCASION_TILES = OCCASIONS
+// Pink for Milestone, as on the iPhone app's Home.
+const TILE_COLOUR = { Milestone: 'bg-coral' }
 
 const ACTIVE_COPY = {
   in_production: (o) => ({ tint: 'bg-butter', title: `We’re writing ${o.recipient.name}’s song.`, sub: `Ready to listen and check by ${formatDate(o.ready_by)}.` }),
@@ -108,7 +110,7 @@ export default function Home() {
         <h2 className="mt-2 text-[28px] leading-tight">Every reason, its own temperature.</h2>
         <div className="mt-5 grid grid-cols-2 gap-2.5">
           {OCCASION_TILES.map((o) => (
-            <Link key={o} to={`/create?occasion=${encodeURIComponent(o)}`} className={`flex min-h-[132px] flex-col justify-between rounded-[20px] p-4 ${OCCASION_TONES[o].tint}`}>
+            <Link key={o} to={`/create?occasion=${encodeURIComponent(o)}`} className={`flex min-h-[132px] flex-col justify-between rounded-[20px] p-4 ${TILE_COLOUR[o] ?? OCCASION_TONES[o].tint}`}>
               <p className="font-bold">{o}</p>
               <p className="accent text-[15px] leading-snug text-ink/80">{OCCASION_TONES[o].line}</p>
             </Link>

@@ -21,7 +21,7 @@ import { orderCover, songTitle } from '@/lib/songs'
 import { colors, tint, type, shade } from '@/theme'
 
 const OCCASION_TILES = OCCASIONS
-const TILE_COLOUR: Record<string, string> = { 'Just because': colors.coral }
+const TILE_COLOUR: Record<string, string> = { Milestone: colors.coral }
 
 const greeting = () => {
   const h = new Date().getHours()
