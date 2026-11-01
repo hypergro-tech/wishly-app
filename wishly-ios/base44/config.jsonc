@@ -5,14 +5,12 @@
 {
   "name": "Wishly",
 
-  "visibility": "public"
+  "visibility": "public",
 
-  // Site/hosting configuration
+  // The page at the app's Base44 address that carries Apple and Google sign-in
+  // back into the iPhone app (site/index.html). Publish with `base44 site deploy`.
   // Docs: https://docs.base44.com/developers/backend/overview/project-structure
-  // "site": {
-  //   "buildCommand": "npm run build",
-  //   "serveCommand": "npm run dev",
-  //   "outputDirectory": "./dist",
-  //   "installCommand": "npm ci"
-  // }
+  "site": {
+    "outputDirectory": "./site"
+  }
 }

@@ -104,10 +104,12 @@ Each buyer sees only their own orders, enforced by the entity's row-level rules
   account, and Base44 emails a 6-digit code. If the account exists and the password is wrong, it
   says so and offers "Forgot your password?".
 - **Apple and Google** use Base44's web sign-in in the iOS sign-in browser. Turn both providers on
-  in your Base44 app's auth settings and set `EXPO_PUBLIC_BASE44_APP_URL`. Base44 sends the login
-  token back to `wishly://auth`; if it only accepts https return addresses, host a page on the web
-  app that forwards to `wishly://auth` with the same query string and set
-  `EXPO_PUBLIC_AUTH_REDIRECT_URL` to it. Test this on a phone before launch.
+  in your Base44 app's auth settings and set `EXPO_PUBLIC_BASE44_APP_URL`. Base44 only returns a
+  sign-in to the app's own web address, so the app opens `site/index.html` there first (published
+  with `base44 site deploy --no-build --publish`). It starts the sign-in, and when Base44 comes
+  back it hands the token to `wishly://auth` (or to Expo Go while testing). If the web gift app is
+  ever published to that address instead, it has to keep doing this. Google was tested this way on
+  the simulator on 1 Nov 2026; Apple is still switched off in Base44's auth settings.
 - The App Store requires Sign in with Apple when Google is offered, and expects Apple's own
   button style; swap in `expo-apple-authentication`'s button for a native build if review asks.
 - Set `EXPO_PUBLIC_TERMS_URL` and `EXPO_PUBLIC_PRIVACY_URL`; the sign-in sheet links to them.

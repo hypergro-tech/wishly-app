@@ -158,7 +158,7 @@ export default function Home() {
                       <ArrowIcon />
                     </Squish>
                   </View>
-                  <Body muted size={13} style={{ marginTop: 12 }}>About five minutes. No account needed to start.</Body>
+                  <Body muted size={13} style={{ marginTop: 12 }}>{user ? 'About five minutes.' : 'About five minutes. No account needed to start.'}</Body>
                 </>
               )}
             </View>

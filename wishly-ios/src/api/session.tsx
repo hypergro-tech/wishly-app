@@ -104,9 +104,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       return true
     }
     if (!APP_URL) throw new AuthError('Apple and Google sign-in need EXPO_PUBLIC_BASE44_APP_URL. Use email for now.')
-    const redirect = process.env.EXPO_PUBLIC_AUTH_REDIRECT_URL || returnLink()
+    // Base44 only returns a sign-in to the app's own web address, so on a phone
+    // its page there (wishly-ios/site) starts the sign-in and hands it back to
+    // wishly://auth. The web preview can be returned to directly.
     const path = provider === 'google' ? '' : `/${provider}`
-    const url = `${APP_URL}/api/apps/auth${path}/login?app_id=${BASE44_APP_ID}&from_url=${encodeURIComponent(redirect)}`
+    const url = Platform.OS === 'web'
+      ? `${APP_URL}/api/apps/auth${path}/login?app_id=${BASE44_APP_ID}&from_url=${encodeURIComponent(process.env.EXPO_PUBLIC_AUTH_REDIRECT_URL || returnLink())}`
+      : `${APP_URL}/?start=${provider}&app_id=${BASE44_APP_ID}&to=${encodeURIComponent(returnLink())}`
     const result = await WebBrowser.openAuthSessionAsync(url, returnLink())
     if (result.type !== 'success') return false // Closed or cancelled: no message needed.
     const token = Linking.parse(result.url).queryParams?.access_token

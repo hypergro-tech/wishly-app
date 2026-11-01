@@ -1,0 +1,74 @@
+<!doctype html>
+<!--
+  Wishly's page on its Base44 address (https://wishly-61fd03a5.base44.app).
+  Published with `base44 site deploy`.
+
+  It carries Apple and Google sign-in back into the iPhone app. Base44 only
+  returns a sign-in to this address, so the app opens it first:
+    /?start=google&app_id=…&to=wishly://auth   remembers `to`, then starts Base44's sign-in
+    /?access_token=…                            Base44's return: hands the token to the app
+  It only ever hands a token to the Wishly app (wishly://) or, while testing in
+  Expo Go, to a dev server on this computer or the local network (exp://).
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FFF5EB">
+  <title>Wishly</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #FFF5EB; color: #143438;
+      font: 17px/1.5 Arial, "Helvetica Neue", Helvetica, sans-serif; text-align: center; padding: 0 24px; box-sizing: border-box; }
+    .logo { font-weight: 700; font-size: 34px; letter-spacing: -1.5px; }
+    .logo span { color: #FF6B7A; }
+    p { color: #5B6466; margin: 10px 0 0; }
+    a.button { display: inline-block; margin-top: 24px; padding: 14px 28px; border-radius: 999px; background: #FF6B7A; color: #143438; font-weight: 700; text-decoration: none; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="logo">✱ wishly<span>.</span></div>
+    <p id="message">Personal songs from the memories that matter.</p>
+    <a id="back" class="button" hidden>Back to Wishly</a>
+  </main>
+  <script>
+    (function () {
+      var query = new URLSearchParams(location.search)
+      var KEY = 'wishly_return'
+      var allowed = function (to) {
+        return /^wishly:\/\//.test(to) ||
+          /^exp:\/\/(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?\//.test(to)
+      }
+      var say = function (text) { document.getElementById('message').textContent = text }
+
+      var provider = query.get('start')
+      if (provider === 'google' || provider === 'apple') {
+        var to = query.get('to')
+        try { if (to && allowed(to)) localStorage.setItem(KEY, to); else localStorage.removeItem(KEY) } catch (e) {}
+        say('Opening sign-in…')
+        location.replace('/api/apps/auth' + (provider === 'apple' ? '/apple' : '') + '/login?app_id=' +
+          encodeURIComponent(query.get('app_id') || '') + '&from_url=' + encodeURIComponent(location.origin + '/'))
+        return
+      }
+
+      var token = query.get('access_token')
+      if (token) {
+        var back = 'wishly://auth'
+        try {
+          var saved = localStorage.getItem(KEY)
+          if (saved && allowed(saved)) back = saved
+          localStorage.removeItem(KEY)
+        } catch (e) {}
+        var link = back + (back.indexOf('?') === -1 ? '?' : '&') + 'access_token=' + encodeURIComponent(token)
+        history.replaceState(null, '', '/')
+        say('You’re signed in. Taking you back to Wishly…')
+        var button = document.getElementById('back')
+        button.href = link
+        button.hidden = false
+        location.replace(link)
+      }
+    })()
+  </script>
+</body>
+</html>
