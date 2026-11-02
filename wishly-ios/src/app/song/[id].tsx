@@ -17,6 +17,7 @@ import { usePop } from '@/lib/motion'
 import { markSeen, seen } from '@/lib/once'
 import { usePlayer, useTrack } from '@/lib/player'
 import { orderCover, orderTrack, pronoun, songTitle } from '@/lib/songs'
+import { saveSong } from '@/lib/saveSong'
 import { quoted } from '@/lib/text'
 import { colors, tint, type, shade } from '@/theme'
 
@@ -182,6 +183,7 @@ function Check({ order }: { order: Order }) {
         </View>
         <View style={{ alignItems: 'center', marginTop: 6 }}>
           <BigPlay size={66} playing={now.playing} onPress={() => (now.isCurrent ? player.toggle() : player.play(track))} />
+          <SaveSong order={order} />
         </View>
 
         <Card style={{ marginTop: 20 }}>
@@ -225,6 +227,29 @@ function Check({ order }: { order: Order }) {
         </Text>
       </Footer>
     </View>
+  )
+}
+
+// Keep the MP3: the share sheet on a phone, a download in a browser.
+function SaveSong({ order }: { order: Order }) {
+  const [saving, setSaving] = useState(false)
+  const url = order.song?.audio_url
+  if (!url) return null
+  const save = async () => {
+    tap()
+    setSaving(true)
+    try {
+      await saveSong(url, songTitle(order))
+    } catch {
+      Alert.alert('Couldn’t save the song', 'Check your connection and try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+  return (
+    <Pressable accessibilityRole="button" accessibilityState={{ busy: saving }} disabled={saving} hitSlop={10} onPress={save} style={{ marginTop: 14, paddingVertical: 6 }}>
+      <Text style={[type.bold, { fontSize: 15, color: colors.text, textDecorationLine: 'underline' }]}>{saving ? 'Saving…' : 'Save song'}</Text>
+    </Pressable>
   )
 }
 
@@ -289,6 +314,7 @@ function Give({ order }: { order: Order }) {
 
       <Button label={`Send to ${name}`} onPress={share} style={{ marginTop: 20 }} />
       <Button label={`Preview what ${she}’ll see`} variant="ghost" size="md" onPress={() => router.push(`/gift/${order.gift_token}`)} style={{ marginTop: 10 }} />
+      <View style={{ alignItems: 'center' }}><SaveSong order={order} /></View>
     </ScrollView>
   )
 }
