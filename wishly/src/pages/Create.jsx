@@ -224,6 +224,7 @@ export default function Create() {
                   <p className="mt-3 rounded-xl bg-butter px-4 py-3 text-[15px]">This would be ready after {formatDate(b.occasion_date)}. Express may get it there in time.</p>
                 )}
               </div>
+              {EXTRAS.length > 0 && (
               <div>
                 <span className="label">Extras (optional)</span>
                 <div className="space-y-3">
@@ -244,6 +245,7 @@ export default function Create() {
                   })}
                 </div>
               </div>
+              )}
               <div className="grid gap-5">
                 <Field label="Your name" hint="Shown on the gift as who it’s from.">
                   <input className="input" value={b.buyer.name} onChange={set('buyer', 'name')} autoComplete="name" />

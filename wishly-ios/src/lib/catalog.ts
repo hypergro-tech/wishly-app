@@ -94,11 +94,14 @@ export const DELIVERY = [
   { id: 'express', label: 'Express', days: 1, price: 25 },
 ]
 
-export const EXTRAS = [
+const ALL_EXTRAS = [
   { id: 'photo_film', label: 'Photo film', price: 19, blurb: 'Your photos set to the song, ready to play at a party' },
   { id: 'lyric_art', label: 'Lyric artwork', price: 12, blurb: 'A printable keepsake of the lyrics' },
   { id: 'share_video', label: 'Short share video', price: 9, blurb: 'A 30-second vertical clip for stories' },
 ]
+// None of the extras are made yet, so none are offered. Add an id here to offer it.
+const EXTRAS_ON: string[] = []
+export const EXTRAS = ALL_EXTRAS.filter((e) => EXTRAS_ON.includes(e.id))
 
 export function quote({ delivery = 'standard', extras = [] as string[] }: { delivery?: string; extras?: string[] }) {
   const d = DELIVERY.find((x) => x.id === delivery) || DELIVERY[0]
