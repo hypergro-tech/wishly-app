@@ -14,14 +14,13 @@ export const orderCover = (o: Order): CoverSpec => ({
   caption: `for ${o.recipient.name}`,
 })
 
-const weekday = (iso: string) => new Date(iso).toLocaleDateString('en-US', { weekday: 'short' })
 
 export function statusChip(o: Order): { label: string; bg: string; fg: string } {
   switch (o.status) {
     case 'ready_for_review':
       return { label: 'Ready to listen and check', bg: colors.coral, fg: colors.ink }
     case 'in_production':
-      return { label: `Writing · ready ${weekday(o.ready_by)}`, bg: shade(0.1), fg: colors.text }
+      return { label: 'Writing…', bg: shade(0.1), fg: colors.text }
     case 'correction_requested':
       return { label: 'Making your correction', bg: colors.butter, fg: colors.ink }
     case 'approved':

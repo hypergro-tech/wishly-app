@@ -73,7 +73,7 @@ export const MEMORY_PROMPTS = [
 
 export const CORE_PACKAGE = {
   id: 'core',
-  name: 'Personal Song',
+  name: 'Your song',
   price: 59,
   includes: [
     'A complete song, about 1 minute',
@@ -84,9 +84,9 @@ export const CORE_PACKAGE = {
   ],
 }
 
+// Songs are ready in a minute or two, so there's one delivery and no Express.
 export const DELIVERY = [
-  { id: 'standard', label: 'Standard', days: 3, price: 0 },
-  { id: 'express', label: 'Express', days: 1, price: 25 },
+  { id: 'standard', label: 'Standard', days: 0, price: 0 },
 ]
 
 const ALL_EXTRAS = [

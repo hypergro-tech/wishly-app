@@ -9,7 +9,7 @@ import { Spark } from '@/components/brand'
 import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { Squish } from '@/components/motion'
 import { Body, Button, Field, Label, Pill, Pills, Segmented, SpeakButton, Title, nudge, styles as ui, tap } from '@/components/ui'
-import { CORE_PACKAGE, DELIVERY, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
+import { CORE_PACKAGE, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
 import { realSongs } from '@/api/base44Client'
 import { suggestSpelling } from '@/api/orders'
 import { filledMemories, missing, useDraft } from '@/lib/draft'
@@ -215,7 +215,7 @@ function CreateForm() {
               <Body muted size={13} style={{ marginTop: 12, textAlign: 'center' }}>
                 {todo.length > 0
                   ? `Still to add: ${todo.join(', ')}`
-                  : `${formatPrice(CORE_PACKAGE.price)} · ready in ${DELIVERY[0].days} days · you check every name first`}
+                  : `${formatPrice(CORE_PACKAGE.price)} · ready in minutes · you check every name first`}
               </Body>
             </Animated.View>
           </Animated.View>

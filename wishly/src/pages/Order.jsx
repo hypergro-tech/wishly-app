@@ -89,7 +89,7 @@ export default function Order() {
         <div className="mt-5 rounded-[22px] border border-ink/10 bg-white p-5 text-[15px]">
           <p className="eyebrow">Your order</p>
           <dl className="mt-3 space-y-2 text-ink/75">
-            <div className="flex justify-between"><dt>Personal Song</dt><dd>{order.package.delivery === 'express' ? 'Express' : 'Standard'}</dd></div>
+            <div className="flex justify-between"><dt>Your song</dt><dd>{formatPrice(order.price_total)}</dd></div>
             {order.package.extras.map((x) => <div key={x} className="flex justify-between"><dt>{EXTRAS.find((e) => e.id === x)?.label ?? x}</dt><dd>Added</dd></div>)}
             <div className="flex justify-between border-t border-ink/10 pt-2 font-bold text-ink"><dt>Total</dt><dd>{formatPrice(order.price_total)}</dd></div>
           </dl>

@@ -12,7 +12,7 @@ import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { ArrowIcon, PlayIcon } from '@/components/icons'
 import { PlayPause, Squish } from '@/components/motion'
 import { Accent, Body, Eyebrow, IconButton, Title, tap } from '@/components/ui'
-import { CORE_PACKAGE, DELIVERY, EXAMPLES, OCCASIONS, OCCASION_TONES, formatPrice, type Example } from '@/lib/catalog'
+import { CORE_PACKAGE, EXAMPLES, OCCASIONS, OCCASION_TONES, formatPrice, type Example } from '@/lib/catalog'
 import { useDraft } from '@/lib/draft'
 import { openPlayer } from '@/lib/flight'
 import { WELCOMED, seen } from '@/lib/once'
@@ -28,11 +28,10 @@ const greeting = () => {
   return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
 }
 
-const weekday = (iso: string) => new Date(iso).toLocaleDateString('en-US', { weekday: 'short' })
 
 const STEPS = [
   { tint: colors.lilac, title: 'Tell us one memory', sub: 'The nickname, the joke, the Sunday ritual.' },
-  { tint: colors.butter, title: 'We write and sing it', sub: `A one-minute song, ready in ${DELIVERY[0].days} days.` },
+  { tint: colors.butter, title: 'We write and sing it', sub: 'A one-minute song, ready in minutes.' },
   { tint: colors.mint, title: 'You listen, check, then give', sub: 'Fix any name or fact before it’s sent.' },
 ]
 
@@ -218,7 +217,7 @@ export default function Home() {
                 <View style={{ width: o.status === 'correction_requested' ? '75%' : '40%', height: 4, borderRadius: 2, backgroundColor: tint(orderCover(o).tint) }} />
               </View>
             </View>
-            <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>Ready {weekday(o.ready_by)}</Text>
+            <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>In a minute</Text>
           </Squish>
         ))}
 

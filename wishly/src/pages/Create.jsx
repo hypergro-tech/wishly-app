@@ -206,24 +206,6 @@ export default function Create() {
                   {CORE_PACKAGE.includes.map((i) => <li key={i} className="flex gap-2.5 text-[15px] text-ink/80"><Spark size={14} className="mt-1 shrink-0 text-coral" />{i}</li>)}
                 </ul>
               </div>
-              <div>
-                <span className="label">When it’s ready</span>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {DELIVERY.map((d) => {
-                    const ready = new Date(); ready.setDate(ready.getDate() + d.days)
-                    const on = b.package.delivery === d.id
-                    return (
-                      <button key={d.id} type="button" aria-pressed={on} onClick={() => set('package', 'delivery')(d.id)} className={on ? 'option-on bg-white' : 'option-off'}>
-                        <p className="font-bold">{d.label} <span className="font-normal text-ink/65">{d.price ? `+${formatPrice(d.price)}` : 'included'}</span></p>
-                        <p className="mt-0.5 text-[15px] text-ink/70">Ready by {formatDate(ready.toISOString())}</p>
-                      </button>
-                    )
-                  })}
-                </div>
-                {b.occasion_date && new Date(q.readyBy) > new Date(b.occasion_date + 'T23:59') && (
-                  <p className="mt-3 rounded-xl bg-butter px-4 py-3 text-[15px]">This would be ready after {formatDate(b.occasion_date)}. Express may get it there in time.</p>
-                )}
-              </div>
               {EXTRAS.length > 0 && (
               <div>
                 <span className="label">Extras (optional)</span>

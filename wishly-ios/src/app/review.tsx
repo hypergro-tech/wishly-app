@@ -6,9 +6,8 @@ import { placeOrder } from '@/api/orders'
 import { useSession, type User } from '@/api/session'
 import { Spark } from '@/components/brand'
 import Cover from '@/components/Cover'
-import { Squish } from '@/components/motion'
 import { Accent, Body, Button, Card, CheckCircle, Footer, SpeakPill, success, tap } from '@/components/ui'
-import { CORE_PACKAGE, DELIVERY, EXTRAS, MOODS, OCCASION_TONES, formatDate, formatPrice, quote } from '@/lib/catalog'
+import { CORE_PACKAGE, EXTRAS, MOODS, OCCASION_TONES, formatPrice, quote } from '@/lib/catalog'
 import { filledMemories, useDraft } from '@/lib/draft'
 import { wait } from '@/lib/motion'
 import { shouldAskForNotifications } from '@/lib/notifications'
@@ -59,20 +58,11 @@ export default function Review() {
       await wait(550)
       reset()
       router.replace(`/song/${order.id}`)
-      if (await shouldAskForNotifications()) {
-        const day = new Date(order.ready_by).toLocaleDateString('en-US', { weekday: 'long' })
-        router.push({ pathname: '/notify', params: { name: order.recipient.name, day } })
-      }
+      if (await shouldAskForNotifications()) router.push({ pathname: '/notify', params: { name: order.recipient.name } })
     } catch {
       Alert.alert('We couldn’t create your song', 'Check your connection and try again. Nothing has been charged.')
       setPlacing(false)
     }
-  }
-
-  const ready = (days: number) => {
-    const d = new Date()
-    d.setDate(d.getDate() + days)
-    return formatDate(d.toISOString())
   }
 
   return (
@@ -126,26 +116,7 @@ export default function Review() {
             <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>{CORE_PACKAGE.name}</Text>
             <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>{formatPrice(CORE_PACKAGE.price)}</Text>
           </View>
-          <Body muted size={14}>A complete one-minute song, a private page {she} opens without an account, and one correction round.</Body>
-
-          <View accessibilityRole="radiogroup" accessibilityLabel="When it’s ready" style={{ flexDirection: 'row', gap: 8 }}>
-            {DELIVERY.map((d) => {
-              const on = draft.package.delivery === d.id
-              return (
-                <Squish
-                  key={d.id}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: on }}
-                  pop={on}
-                  onPress={() => { tap(); set('package', { delivery: d.id }) }}
-                  style={{ flex: 1, padding: 12, borderRadius: 16, borderWidth: 2, borderColor: on ? colors.text : 'transparent', backgroundColor: colors.fill, transitionProperty: 'borderColor', transitionDuration: 180 }}
-                >
-                  <Text style={[type.bold, { fontSize: 15, color: colors.text }]}>{d.label}</Text>
-                  <Text style={[type.regular, { fontSize: 13, color: colors.muted, marginTop: 3 }]}>{d.price ? `+${formatPrice(d.price)}` : 'Included'} · {ready(d.days)}</Text>
-                </Squish>
-              )
-            })}
-          </View>
+          <Body muted size={14}>A one-minute song, a private page {she} can open without an account, and one free correction.</Body>
 
           <View>
             {EXTRAS.map((e) => {
@@ -177,7 +148,7 @@ export default function Review() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
           <View style={{ flex: 1 }}>
             <Text style={[type.bold, { fontSize: 26, color: colors.text }]}>{formatPrice(q.total)}</Text>
-            <Text style={[type.regular, { fontSize: 13, color: colors.muted, marginTop: 2 }]}>Ready by {formatDate(q.readyBy)}</Text>
+            <Text style={[type.regular, { fontSize: 13, color: colors.muted, marginTop: 2 }]}>Ready in a few minutes</Text>
           </View>
           <Button
             label="Create song"

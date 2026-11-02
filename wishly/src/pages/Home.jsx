@@ -5,7 +5,7 @@ import LyricPlayer from '../components/LyricPlayer'
 import { Logo, Ribbon, Spark } from '../components/brand'
 import { Sheet } from '../components/app'
 import { Eyebrow } from '../components/ui'
-import { CORE_PACKAGE, DELIVERY, EXAMPLES, OCCASIONS, OCCASION_TONES, formatDate, formatPrice } from '../lib/catalog'
+import { CORE_PACKAGE, EXAMPLES, OCCASIONS, OCCASION_TONES, formatDate, formatPrice } from '../lib/catalog'
 
 const STEPS = [
   ['Tell us who it’s for', 'Their name, and how you say it.'],
@@ -70,7 +70,7 @@ export default function Home() {
           <Link to="/create" className="btn-primary !py-4 !text-base">Start their song</Link>
           <button onClick={() => document.getElementById('examples')?.scrollIntoView({ behavior: 'smooth' })} className="btn-berry !py-4 !text-base">Hear an example</button>
         </div>
-        <p className="mt-4 text-center text-sm text-ink/65">{formatPrice(CORE_PACKAGE.price)} · ready in {DELIVERY[0].days} days · you check every name first</p>
+        <p className="mt-4 text-center text-sm text-ink/65">{formatPrice(CORE_PACKAGE.price)} · ready in minutes · you check every name first</p>
       </section>
 
       {/* Brand idea */}
@@ -148,7 +148,7 @@ export default function Home() {
             ))}
           </ul>
           <p className="mt-5 border-t border-ivory/15 pt-4 text-sm text-ivory/75">
-            Ready in {DELIVERY[0].days} days. Express in 24 hours for +{formatPrice(DELIVERY[1].price)}. Extras from +$9.
+            Ready to listen in a minute or two.
           </p>
           <Link to="/create" className="btn-primary mt-5 w-full !py-4 !text-base">Start their song</Link>
         </div>

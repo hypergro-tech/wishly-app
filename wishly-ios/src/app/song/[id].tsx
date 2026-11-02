@@ -12,7 +12,7 @@ import { EmailIcon, LinkIcon, MessageIcon, MoreIcon } from '@/components/icons'
 import { Burst, Glow, Squish } from '@/components/motion'
 import { BigPlay, LyricView, Scrubber, useFollowLyrics } from '@/components/playback'
 import { Accent, Body, Button, Card, CheckCircle, Chip, Eyebrow, Footer, say, success, tap } from '@/components/ui'
-import { MOODS, OCCASION_TONES, formatDate } from '@/lib/catalog'
+import { MOODS, OCCASION_TONES } from '@/lib/catalog'
 import { usePop } from '@/lib/motion'
 import { markSeen, seen } from '@/lib/once'
 import { usePlayer, useTrack } from '@/lib/player'
@@ -136,7 +136,7 @@ function Writing({ order, demo }: { order: Order; demo: ReactNode }) {
           </Body>
         ) : (
           <Body muted style={{ marginTop: 8 }}>
-            It will be ready for you to listen and check by <Text style={[type.bold, { color: colors.text }]}>{formatDate(order.ready_by)}</Text>. Nothing is given until you’ve heard it.
+            It’s usually ready to listen and check in a minute or two. Nothing is given until you’ve heard it.
           </Body>
         )}
       </Card>
