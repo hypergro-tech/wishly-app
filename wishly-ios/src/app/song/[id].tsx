@@ -8,7 +8,7 @@ import { realSongs, showDemoTools } from '@/api/base44Client'
 import { applyCorrection, finishProduction, getOrder, giftUrl, type Order } from '@/api/orders'
 import { Rhythm, Ribbon, Spark } from '@/components/brand'
 import Cover from '@/components/Cover'
-import { EmailIcon, LinkIcon, MessageIcon, MoreIcon } from '@/components/icons'
+import { DownloadIcon, EmailIcon, InstagramIcon, LinkIcon, MessageIcon, MoreIcon, WhatsAppIcon } from '@/components/icons'
 import { Burst, Glow, Squish } from '@/components/motion'
 import { BigPlay, LyricView, Scrubber, useFollowLyrics } from '@/components/playback'
 import { Accent, Body, Button, Card, CheckCircle, Chip, Eyebrow, Footer, say, success, tap } from '@/components/ui'
@@ -231,7 +231,7 @@ function Check({ order }: { order: Order }) {
 }
 
 // Keep the MP3: the share sheet on a phone, a download in a browser.
-function SaveSong({ order }: { order: Order }) {
+function SaveSong({ order, button }: { order: Order; button?: boolean }) {
   const [saving, setSaving] = useState(false)
   const url = order.song?.audio_url
   if (!url) return null
@@ -246,9 +246,11 @@ function SaveSong({ order }: { order: Order }) {
       setSaving(false)
     }
   }
+  if (button) return <Button label="Download the song" variant="ghost" size="md" icon={<DownloadIcon size={20} />} busy={saving} onPress={save} style={{ marginTop: 10 }} />
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ busy: saving }} disabled={saving} hitSlop={10} onPress={save} style={{ marginTop: 14, paddingVertical: 6 }}>
-      <Text style={[type.bold, { fontSize: 15, color: colors.text, textDecorationLine: 'underline' }]}>{saving ? 'Saving…' : 'Save song'}</Text>
+    <Pressable accessibilityRole="button" accessibilityState={{ busy: saving }} disabled={saving} hitSlop={10} onPress={save} style={{ marginTop: 14, paddingVertical: 6, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <DownloadIcon size={18} />
+      <Text style={[type.bold, { fontSize: 15, color: colors.text, textDecorationLine: 'underline' }]}>{saving ? 'Saving…' : 'Download song'}</Text>
     </Pressable>
   )
 }
@@ -268,8 +270,22 @@ function Give({ order }: { order: Order }) {
     if (result.action === Share.sharedAction) setSent(true)
   }
   const open = async (url: string) => { await Linking.openURL(url); setSent(true) }
+  // Instagram can't take a message from another app, so the link goes on the
+  // clipboard for a DM or a story link sticker.
+  const instagram = async () => {
+    if (!link) return needLink()
+    await Clipboard.setStringAsync(link)
+    success()
+    Alert.alert('Link copied', `Paste it in a message to ${name}, or add it to your story with a link sticker.`, [
+      { text: 'Not now', style: 'cancel' },
+      { text: 'Open Instagram', onPress: () => open('instagram://app').catch(() => open('https://www.instagram.com/direct/inbox/')) },
+    ])
+  }
+  const message = `${text}\n${link}`
   const targets = [
-    { label: 'Message', icon: <MessageIcon />, go: () => (link ? open(`sms:&body=${encodeURIComponent(`${text} ${link}`)}`) : needLink()) },
+    { label: 'WhatsApp', icon: <WhatsAppIcon />, bg: '#25D366', go: () => (link ? open(`https://wa.me/?text=${encodeURIComponent(message)}`) : needLink()) },
+    { label: 'Instagram', icon: <InstagramIcon />, bg: '#D62976', go: instagram },
+    { label: 'Messages', icon: <MessageIcon />, go: () => (link ? open(`sms:&body=${encodeURIComponent(`${text} ${link}`)}`) : needLink()) },
     { label: 'Email', icon: <EmailIcon />, go: () => (link ? open(`mailto:?subject=${encodeURIComponent(`A song for ${name}`)}&body=${encodeURIComponent(`${text}\n\n${link}`)}`) : needLink()) },
     { label: 'Copy link', icon: <LinkIcon />, go: async () => { if (!link) return needLink(); await Clipboard.setStringAsync(link); success(); setSent(true) } },
     { label: 'More', icon: <MoreIcon />, go: share },
@@ -285,10 +301,10 @@ function Give({ order }: { order: Order }) {
       <Card style={{ marginTop: 22 }}>
         <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>Send {name} {her === 'them' ? 'their' : her === 'him' ? 'his' : 'her'} song</Text>
         <Body muted style={{ marginTop: 6 }}>A private link. {she[0].toUpperCase() + she.slice(1)} can listen without an account or the app.</Body>
-        <View style={{ flexDirection: 'row', marginTop: 16 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 16, rowGap: 16 }}>
           {targets.map((t) => (
-            <Squish key={t.label} accessibilityRole="button" accessibilityLabel={t.label} to={0.92} onPress={() => { tap(); t.go() }} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
-              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: shade(0.08), alignItems: 'center', justifyContent: 'center' }}>{t.icon}</View>
+            <Squish key={t.label} accessibilityRole="button" accessibilityLabel={t.label} to={0.92} onPress={() => { tap(); t.go() }} style={{ width: '33.33%', alignItems: 'center', gap: 6 }}>
+              <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: t.bg ?? shade(0.08), alignItems: 'center', justifyContent: 'center' }}>{t.icon}</View>
               <Text style={[type.bold, { fontSize: 12, color: colors.text }]}>{t.label}</Text>
             </Squish>
           ))}
@@ -313,8 +329,8 @@ function Give({ order }: { order: Order }) {
       ) : null}
 
       <Button label={`Send to ${name}`} onPress={share} style={{ marginTop: 20 }} />
+      <SaveSong order={order} button />
       <Button label={`Preview what ${she}’ll see`} variant="ghost" size="md" onPress={() => router.push(`/gift/${order.gift_token}`)} style={{ marginTop: 10 }} />
-      <View style={{ alignItems: 'center' }}><SaveSong order={order} /></View>
     </ScrollView>
   )
 }

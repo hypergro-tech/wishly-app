@@ -9,6 +9,11 @@
     /?access_token=…                            Base44's return: hands the token to the app
   It only ever hands a token to the Wishly app (wishly://) or, while testing in
   Expo Go, to a dev server on this computer or the local network (exp://).
+
+  It is also the gift page. Every path on this address serves this file, so
+    /gift/<token>                               plays the song a buyer sent, with their message
+  The song comes from the getGift backend function, which returns only what
+  this page shows and only for approved songs.
 -->
 <html lang="en">
 <head>
@@ -24,16 +29,65 @@
     p { color: #5B6466; margin: 10px 0 0; }
     a.button { display: inline-block; margin-top: 24px; padding: 14px 28px; border-radius: 999px; background: #FF6B7A; color: #143438; font-weight: 700; text-decoration: none; }
     [hidden] { display: none !important; }
+
+    body.gift { display: block; text-align: left; padding: 0; }
+    .gift main { max-width: 440px; margin: 0 auto; padding: 28px 20px 48px; }
+    .gift .logo { font-size: 24px; letter-spacing: -1px; }
+    .cover { margin: 28px auto 0; width: 100%; max-width: 320px; aspect-ratio: 1; border-radius: 28px; background: #FFE07A; padding: 24px; box-sizing: border-box;
+      display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 18px 40px rgba(90, 42, 26, 0.14); }
+    .cover .spark { color: #FF6B7A; font-size: 34px; line-height: 1; }
+    .cover h1 { margin: 0; font-size: 40px; line-height: 1.02; letter-spacing: -1.5px; }
+    .cover small { display: block; margin-top: 10px; font-size: 14px; font-weight: 700; }
+    .for { margin-top: 26px; text-align: center; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+    .gift p.sub { text-align: center; margin-top: 4px; }
+    .player { margin-top: 22px; display: flex; align-items: center; gap: 14px; }
+    .play { flex: none; width: 64px; height: 64px; border: 0; border-radius: 50%; background: #FF6B7A; color: #143438; font-size: 22px; cursor: pointer; }
+    .bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(20, 52, 56, 0.12); overflow: hidden; }
+    .bar div { height: 100%; width: 0; background: #143438; }
+    .time { font-size: 13px; color: #5B6466; min-width: 38px; text-align: right; }
+    .card { margin-top: 22px; padding: 20px; border-radius: 22px; background: #FFFFFF; }
+    .card .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #5B6466; }
+    .note { margin-top: 10px; font: italic 20px/1.4 Georgia, "Times New Roman", serif; }
+    .from { margin-top: 8px; font-weight: 700; font-size: 15px; }
+    .lyrics h3 { margin: 16px 0 4px; font-size: 13px; color: #5B6466; text-transform: uppercase; letter-spacing: 1px; }
+    .lyrics p { margin: 0; color: #143438; }
+    .made { margin-top: 32px; text-align: center; font-size: 14px; }
+    .made a { color: #143438; font-weight: 700; }
   </style>
 </head>
 <body>
-  <main>
+  <main id="home">
     <div class="logo">✱ wishly<span>.</span></div>
     <p id="message">Personal songs from the memories that matter.</p>
     <a id="back" class="button" hidden>Back to Wishly</a>
   </main>
+
+  <main id="gift" hidden>
+    <div class="logo">✱ wishly<span>.</span></div>
+    <div class="cover"><div class="spark">✱</div><div><h1 id="title"></h1><small id="cover-for"></small></div></div>
+    <div class="for" id="for"></div>
+    <p class="sub" id="sub">Press play when you have a quiet minute.</p>
+    <div class="player">
+      <button class="play" id="play" aria-label="Play">▶</button>
+      <div class="bar"><div id="progress"></div></div>
+      <span class="time" id="time"></span>
+    </div>
+    <audio id="audio" preload="metadata"></audio>
+    <div class="card" id="note-card" hidden>
+      <div class="eyebrow">A message for you</div>
+      <div class="note" id="note"></div>
+      <div class="from" id="from"></div>
+    </div>
+    <div class="card lyrics" id="lyrics" hidden><div class="eyebrow">The words</div></div>
+    <div class="made">Made with <a href="https://trywishly.co">Wishly</a>, personal songs from the memories that matter.</div>
+  </main>
   <script>
     (function () {
+      // The Base44 app this page belongs to (not a secret: it's in every request).
+      var APP_ID = '6ae33a4fc9fab5ae61fd03a5'
+      var giftToken = (location.pathname.match(/^\/gift\/([a-z0-9]+)\/?$/) || [])[1]
+      if (giftToken) return showGift(giftToken)
+
       var query = new URLSearchParams(location.search)
       var KEY = 'wishly_return'
       var allowed = function (to) {
@@ -67,6 +121,50 @@
         button.href = link
         button.hidden = false
         location.replace(link)
+      }
+
+      function showGift(token) {
+        document.body.className = 'gift'
+        document.getElementById('home').hidden = true
+        document.getElementById('gift').hidden = false
+        var $ = function (id) { return document.getElementById(id) }
+        fetch('/api/apps/' + APP_ID + '/functions/getGift', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: token, opened: true }),
+        })
+          .then(function (res) { if (!res.ok) throw new Error(); return res.json() })
+          .then(function (g) {
+            document.title = g.title + ' · a song for ' + g.name
+            $('title').textContent = g.title
+            $('cover-for').textContent = 'for ' + g.name + ' · wishly.'
+            $('for').textContent = 'A song for ' + g.name
+            if (g.message) {
+              $('note').textContent = '“' + g.message + '”'
+              $('from').textContent = g.from_name || ''
+              $('note-card').hidden = false
+            }
+            ;(g.sections || []).forEach(function (s) {
+              var h = document.createElement('h3'); h.textContent = s.label; $('lyrics').appendChild(h)
+              ;(s.lines || []).forEach(function (line) { var p = document.createElement('p'); p.textContent = line; $('lyrics').appendChild(p) })
+            })
+            $('lyrics').hidden = !(g.sections || []).length
+            var audio = $('audio')
+            audio.src = g.audio_url
+            var clock = function (t) { t = Math.max(0, Math.round(t || 0)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2) }
+            $('play').onclick = function () { audio.paused ? audio.play() : audio.pause() }
+            audio.onplay = function () { $('play').textContent = '❚❚'; $('play').setAttribute('aria-label', 'Pause') }
+            audio.onpause = function () { $('play').textContent = '▶'; $('play').setAttribute('aria-label', 'Play') }
+            audio.ontimeupdate = function () {
+              $('progress').style.width = (audio.duration ? (audio.currentTime / audio.duration) * 100 : 0) + '%'
+              $('time').textContent = clock(audio.duration - audio.currentTime)
+            }
+            audio.onloadedmetadata = function () { $('time').textContent = clock(audio.duration) }
+          })
+          .catch(function () {
+            $('for').textContent = 'This song isn’t here'
+            $('sub').textContent = 'Check the link, or ask the person who sent it.'
+            document.querySelector('.cover').hidden = true
+            document.querySelector('.player').hidden = true
+          })
       }
     })()
   </script>

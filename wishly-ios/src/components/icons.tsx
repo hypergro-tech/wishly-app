@@ -98,3 +98,29 @@ export const AppleIcon = ({ size = 20, color = '#000000' }: P) => (
 export const BellIcon = ({ size = 30, color = colors.ink }: P) => (
   <Svg width={size} height={size} viewBox="0 0 24 24"><Path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16ZM10 20a2 2 0 0 0 4 0" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" fill="none" /></Svg>
 )
+
+export const ProfileIcon = ({ size = 26, color = colors.text, filled }: P & { filled?: boolean }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Circle cx={12} cy={8} r={4} fill={filled ? color : 'none'} stroke={color} strokeWidth={filled ? 0 : 2} />
+    <Path d="M4 21a8 8 0 0 1 16 0" fill={filled ? color : 'none'} stroke={color} strokeWidth={2} strokeLinecap="round" />
+  </Svg>
+)
+
+export const DownloadIcon = ({ size = 24, color = colors.text }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24"><Path d="M12 3v12M7 10l5 5 5-5M5 20h14" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" /></Svg>
+)
+
+export const WhatsAppIcon = ({ size = 24, color = '#FFFFFF' }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Path d="M12 3.2a8.7 8.7 0 0 0-7.5 13.1L3.3 20.7l4.5-1.2A8.7 8.7 0 1 0 12 3.2Z" stroke={color} strokeWidth={1.8} strokeLinejoin="round" fill="none" />
+    <Path d="M9.1 7.9c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .6.5l.7 1.7c.1.2.1.4 0 .5l-.5.6c-.1.2-.2.3 0 .6.4.7 1.6 2 3.1 2.6.3.1.4.1.6-.1l.7-.8c.2-.2.3-.2.6-.1l1.6.8c.3.1.4.2.4.4 0 .4-.1 1.1-.6 1.5-.5.5-1.5.8-2.4.6-1.1-.3-2.6-1-3.9-2.3-1.3-1.3-2.2-2.8-2.4-3.8-.2-1 .1-1.8.7-2.3Z" fill={color} />
+  </Svg>
+)
+
+export const InstagramIcon = ({ size = 24, color = '#FFFFFF' }: P) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Rect x={3.5} y={3.5} width={17} height={17} rx={5} stroke={color} strokeWidth={2} fill="none" />
+    <Circle cx={12} cy={12} r={4} stroke={color} strokeWidth={2} fill="none" />
+    <Circle cx={17.2} cy={6.8} r={1.2} fill={color} />
+  </Svg>
+)

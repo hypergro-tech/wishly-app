@@ -9,7 +9,7 @@ import { usePlayer } from '@/lib/player'
 import { colors, type, shade } from '@/theme'
 import Cover from './Cover'
 import { Glass } from './glass'
-import { HomeIcon, PlusIcon, SongsIcon } from './icons'
+import { HomeIcon, PlusIcon, ProfileIcon, SongsIcon } from './icons'
 import { PlayPause, Squish } from './motion'
 import { IconButton, tap } from './ui'
 
@@ -31,6 +31,8 @@ export default function TabBar({ state, navigateToTab, insets }: BottomTabBarPro
   )
 }
 
+const LABELS: Record<string, string> = { index: 'Home', songs: 'My songs', profile: 'Profile' }
+
 function Tab({ name, active, onPress }: { name: string; active: boolean; onPress: () => void }) {
   const pop = usePop(active, 0.78) // the icon bounces when chosen
   const color = active ? colors.text : colors.muted
@@ -42,11 +44,12 @@ function Tab({ name, active, onPress }: { name: string; active: boolean; onPress
       </Squish>
     )
   }
-  const label = name === 'index' ? 'Home' : 'My songs'
+  const label = LABELS[name]
+  const Icon = name === 'index' ? HomeIcon : name === 'songs' ? SongsIcon : ProfileIcon
   return (
     <Pressable accessibilityRole="tab" accessibilityState={{ selected: active }} accessibilityLabel={label} onPress={onPress} style={styles.item}>
       <Animated.View style={pop}>
-        {name === 'index' ? <HomeIcon color={color} filled={active} /> : <SongsIcon color={color} filled={active} />}
+        <Icon color={color} filled={active} />
       </Animated.View>
       <Text style={[type.bold, styles.label, { color }]}>{label}</Text>
     </Pressable>
@@ -92,7 +95,7 @@ function MiniPlayer() {
 const styles = StyleSheet.create({
   float: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   bar: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },
-  item: { width: 96, alignItems: 'center', gap: 4, paddingVertical: 2 },
+  item: { width: 84, alignItems: 'center', gap: 4, paddingVertical: 2 },
   label: { fontSize: 11 },
   create: { width: 48, height: 32, borderRadius: 11, backgroundColor: colors.coral, alignItems: 'center', justifyContent: 'center', marginBottom: -1 },
   lift: {

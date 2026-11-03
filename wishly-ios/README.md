@@ -37,16 +37,17 @@ succeeds, and only then does the app ask once about notifications.
 | Screen | What it does |
 | --- | --- |
 | Welcome | First launch only: one photo, one promise, Start a song · Hear an example · I already have an account |
-| Home | First visit: Who's it for? and how it works. Later: your songs in progress. Always: example songs, occasion tiles |
-| Create | One scrolling screen: who it's for, occasion, their story (+ add details), the sound |
+| Home | First visit: Who's it for? and how it works. Later: your songs in progress. Always: example songs, occasion tiles with pictures |
+| Create | One scrolling screen: who it's for, occasion (picture cards), their story (+ add details), the sound |
 | My songs | Every song with its cover and status; filter by in progress or ready to give |
+| Profile | Who's signed in, notifications, help and every policy page from the website (opened in Safari inside the app), log out |
 | Mini player | Above the tab bar whenever something is playing; tap to open the full player |
 | Now playing | Full-screen player: big cover, scrubber, play, lyrics following along |
 | Review | Cover from their name, details to check (with pronunciation), delivery, extras, total |
-| Song | Being written · ready to listen and check (checklist, lyrics) · ready to give (share targets, link) |
+| Song | Being written · ready to listen and check (checklist, lyrics, download) · ready to give (WhatsApp, Instagram, Messages, Email, copy link, more; download) |
 | Sign in · Email · Code | Bottom sheet: Apple, Google, email; one email form for new and returning; 6-digit code |
 | Notification ask | Once, after the first song is placed |
-| Fix something · Add your message · Account | Native bottom sheets |
+| Fix something · Add your message | Native bottom sheets |
 | Gift preview | The recipient's gift cover and player |
 
 Also: pronunciation playback (`expo-speech`), music-box previews per mood (`expo-audio`,
@@ -162,13 +163,15 @@ automation on new orders should run that and `makeSong` instead.
 
 ### Still to build on Base44
 
-- **Gift page for recipients.** The web gift page should fetch through a backend function that
-  returns only the song and message for a valid `gift_token`, so the Order entity never needs
-  public read access.
+- **Gift page for recipients.** Built 3 Nov 2026: `site/index.html` shows `/gift/<token>` on the
+  Base44 address, fetching through the `getGift` function, which returns only the song and
+  message for an approved order and counts opens. The Order entity stays private. Base44 adds
+  its "Made with Base44" badge to the page.
 - **The song itself.** `makeSong` now records the vocals (see above). Still to do: write the
   lyrics server-side too, and run both from an automation when an order is placed, so the
   phone doesn't have to. Keep the demo buttons while testing with `EXPO_PUBLIC_DEMO_TOOLS=true`.
-- **Gift links.** Set `EXPO_PUBLIC_GIFT_BASE_URL` to wherever the web app is hosted.
+- **Gift links.** `EXPO_PUBLIC_GIFT_BASE_URL` is the Base44 address. Instagram can't take a
+  message from another app, so its button copies the link and opens Instagram.
 - **Payment.** Checkout takes no payment yet. Before choosing Stripe or in-app purchase, check
   Apple's App Store rules for selling digital goods in an app.
 

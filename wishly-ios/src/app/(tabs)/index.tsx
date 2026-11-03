@@ -1,3 +1,4 @@
+import { Image } from 'expo-image'
 import { router, useFocusEffect } from 'expo-router'
 import { useBottomTabBarHeight } from 'expo-router/js-tabs'
 import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react'
@@ -15,13 +16,13 @@ import { Accent, Body, Eyebrow, IconButton, Title, tap } from '@/components/ui'
 import { CORE_PACKAGE, EXAMPLES, OCCASIONS, OCCASION_TONES, formatPrice, type Example } from '@/lib/catalog'
 import { useDraft } from '@/lib/draft'
 import { openPlayer } from '@/lib/flight'
+import { occasionColour, occasionPicture } from '@/lib/occasions'
 import { WELCOMED, seen } from '@/lib/once'
 import { exampleTrack, usePlayer } from '@/lib/player'
 import { orderCover, songTitle } from '@/lib/songs'
 import { colors, tint, type, shade } from '@/theme'
 
 const OCCASION_TILES = OCCASIONS
-const TILE_COLOUR: Record<string, string> = { Milestone: colors.coral }
 
 const greeting = () => {
   const h = new Date().getHours()
@@ -86,9 +87,9 @@ export default function Home() {
           {user ? (
             <Squish
               accessibilityRole="button"
-              accessibilityLabel="Your account"
+              accessibilityLabel="Your profile"
               to={0.9}
-              onPress={() => { tap(); router.push('/account') }}
+              onPress={() => { tap(); router.navigate('/profile') }}
               style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.lilac, alignItems: 'center', justifyContent: 'center' }}
             >
               <Text style={[type.bold, { fontSize: 15, color: colors.ink }]}>{(first ?? user.email)[0].toUpperCase()}</Text>
@@ -240,10 +241,11 @@ export default function Home() {
               accessibilityRole="button"
               to={0.95}
               onPress={() => { tap(); startFor(o) }}
-              style={{ width: '48%', flexGrow: 1, height: 118, padding: 14, borderRadius: 18, justifyContent: 'space-between', backgroundColor: TILE_COLOUR[o] ?? tint(OCCASION_TONES[o].tint) }}
+              style={{ width: '48%', flexGrow: 1, minHeight: 168, padding: 14, borderRadius: 18, backgroundColor: occasionColour(o) }}
             >
-              <Text style={[type.bold, { fontSize: 20, color: colors.ink }]}>{o.replace("'", '’')}</Text>
-              <Accent size={14} style={{ color: colors.ink, lineHeight: 18 }}>{OCCASION_TONES[o].line}</Accent>
+              {occasionPicture(o) ? <Image source={occasionPicture(o)} style={{ width: 72, height: 72, marginLeft: -4, marginTop: -4 }} contentFit="contain" accessibilityIgnoresInvertColors /> : null}
+              <Text style={[type.bold, { marginTop: 6, fontSize: 20, color: colors.ink }]}>{o.replace("'", '’')}</Text>
+              <Accent size={14} style={{ marginTop: 4, color: colors.ink, lineHeight: 18 }}>{OCCASION_TONES[o].line}</Accent>
             </Squish>
           ))}
         </View>

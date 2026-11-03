@@ -74,7 +74,6 @@ function RootStack() {
         <Stack.Screen name="player" options={{ presentation: 'transparentModal', animation: 'none', headerShown: false, contentStyle: { backgroundColor: 'transparent' } }} />
         <Stack.Screen name="fix/[id]" options={{ ...sheet, sheetAllowedDetents: [0.92] }} />
         <Stack.Screen name="message/[id]" options={{ ...sheet, sheetAllowedDetents: [0.68, 0.92] }} />
-        <Stack.Screen name="account" options={{ ...sheet, sheetAllowedDetents: 'fitToContents' }} />
         <Stack.Screen name="welcome" options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="sign-in" options={{ ...sheet, sheetAllowedDetents: [0.62, 0.95] }} />
         <Stack.Screen name="notify" options={{ ...sheet, sheetAllowedDetents: 'fitToContents' }} />

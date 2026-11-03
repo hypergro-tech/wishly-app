@@ -1,3 +1,4 @@
+import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import { useBottomTabBarHeight } from 'expo-router/js-tabs'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
@@ -15,6 +16,7 @@ import { suggestSpelling } from '@/api/orders'
 import { filledMemories, missing, useDraft } from '@/lib/draft'
 import { isTricky, singable, testedSpelling } from '@/lib/names'
 import { focusSafe, useRise } from '@/lib/motion'
+import { occasionColour, occasionPicture } from '@/lib/occasions'
 import { colors, tint, type, shade } from '@/theme'
 
 // Cards and choices glide to their new places when details are added.
@@ -96,8 +98,8 @@ function CreateForm() {
           </Section>
 
           <Section title="The occasion">
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {OCCASIONS.map((o) => <Pill key={o} label={occasionLabel(o)} selected={draft.occasion === o} onPress={() => set('occasion', o)} />)}
+            <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {OCCASIONS.map((o) => <OccasionCard key={o} occasion={o} selected={draft.occasion === o} onPress={() => set('occasion', o)} />)}
             </View>
             {tone && (
               <Animated.View key={draft.occasion} entering={FadeIn.duration(260)} style={{ paddingLeft: 12, borderLeftWidth: 3, borderLeftColor: colors.coral }}>
@@ -311,5 +313,23 @@ function Detail({ title, children }: { title: string; children: ReactNode }) {
       <Text style={[type.bold, { fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase', color: colors.muted }]}>{title}</Text>
       {children}
     </Animated.View>
+  )
+}
+
+// Picture cards for the occasion, three to a row.
+function OccasionCard({ occasion, selected, onPress }: { occasion: string; selected: boolean; onPress: () => void }) {
+  const picture = occasionPicture(occasion)
+  return (
+    <Squish
+      accessibilityRole="radio"
+      accessibilityState={{ selected }}
+      accessibilityLabel={occasionLabel(occasion)}
+      to={0.95}
+      onPress={() => { tap(); onPress() }}
+      style={{ width: '31%', flexGrow: 1, alignItems: 'center', paddingTop: 8, paddingBottom: 10, borderRadius: 18, backgroundColor: occasionColour(occasion), borderWidth: 3, borderColor: selected ? colors.ink : 'transparent' }}
+    >
+      {picture ? <Image source={picture} style={{ width: 60, height: 60 }} contentFit="contain" accessibilityIgnoresInvertColors /> : <View style={{ height: 16 }} />}
+      <Text numberOfLines={1} adjustsFontSizeToFit style={[type.bold, { marginTop: 4, fontSize: 15, color: colors.ink }]}>{occasionLabel(occasion)}</Text>
+    </Squish>
   )
 }

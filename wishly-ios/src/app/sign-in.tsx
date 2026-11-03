@@ -17,13 +17,14 @@ import { Body, Button, Field, IconButton, success, tap } from '@/components/ui'
 import { OCCASION_TONES } from '@/lib/catalog'
 import { useDraft } from '@/lib/draft'
 import { focusSafe, popIn, slideIn, stillFade, useShake } from '@/lib/motion'
+import { siteUrl } from '@/lib/site'
 import { colors, radius, type, shade } from '@/theme'
 
 type Mode = 'choose' | 'email' | 'code'
 const STEPS: Mode[] = ['choose', 'email', 'code']
 
-const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL
-const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL
+const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL ?? siteUrl('/terms')
+const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL ?? siteUrl('/privacy')
 const ERROR = 'Something went wrong. Try again in a moment.'
 
 export default function SignIn() {

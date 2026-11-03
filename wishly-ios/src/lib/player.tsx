@@ -2,7 +2,7 @@
 // playing as you move between screens, shows in the mini player, and opens in
 // the full-screen player. Songs without a recording yet play the music-box
 // preview for their mood, one chord per lyric line.
-import { useAudioPlayer, type AudioSource } from 'expo-audio'
+import { useAudioPlayer, useAudioPlayerStatus, type AudioSource } from 'expo-audio'
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 
 import type { CoverSpec } from '@/components/Cover'
@@ -51,6 +51,10 @@ const sourceFor = (t: Track): AudioSource => (t.audioUrl ? { uri: t.audioUrl } :
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const audio = useAudioPlayer(MUSIC_BOX.tender)
+  // The recording's real length arrives in the player's status once it loads.
+  const status = useAudioPlayerStatus(audio)
+  const loaded = useRef(status)
+  useEffect(() => { loaded.current = status }, [status])
   const [track, setTrack] = useState<Track | null>(null)
   const [playing, setPlaying] = useState(false)
   const [elapsed, setElapsed] = useState(0)
@@ -59,10 +63,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const tick = useRef<ReturnType<typeof setInterval> | null>(null)
   const current = useRef<Track | null>(null)
 
-  const totalFor = (t: Track | null) => {
-    if (!t) return 0
-    if (t.audioUrl && audio.duration) return audio.duration
-    return lineCount(t) * SECONDS_PER_LINE
+  const estimate = (t: Track) => lineCount(t) * SECONDS_PER_LINE
+  const totalFor = (t: Track | null, length: number) => (!t ? 0 : t.audioUrl && length > 0 ? length : estimate(t))
+  // A recording ends when it finishes playing, not at the estimate, which
+  // only stands in for its length until it loads.
+  const ended = (t: Track, now: number) => {
+    if (!t.audioUrl) return now >= estimate(t)
+    const length = loaded.current.duration || audio.duration
+    return loaded.current.didJustFinish || (length > 0 ? now >= length : now >= estimate(t) * 3)
   }
 
   const stopTicking = () => {
@@ -84,7 +92,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         audio.seekTo(0)
         audio.play()
       }
-      if (now >= totalFor(t)) {
+      if (ended(t, now)) {
         stopTicking()
         audio.pause()
         base.current = 0
@@ -127,7 +135,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => stopTicking, [])
 
-  const total = totalFor(track)
+  const total = totalFor(track, status.duration)
   const line = track && (playing || elapsed > 0) ? Math.min(lineCount(track) - 1, Math.floor(elapsed / (total / lineCount(track)))) : -1
 
   return (
