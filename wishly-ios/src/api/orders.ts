@@ -6,6 +6,8 @@ import { type Song } from '@/lib/songwriter'
 import { LYRICS_SCHEMA, parseLyrics } from '@/services/lyricGenerator'
 import { generateSongPayload, songInputs, startingSong } from '@/services/songPipeline'
 import type { SongPayload } from '@/types/songEngine'
+import { watchSong } from '@/lib/watch'
+import type { Rating } from './feedbackApi'
 import { b44, isBase44, realSongs } from './base44Client'
 
 export type Status = 'in_production' | 'ready_for_review' | 'correction_requested' | 'approved'
@@ -13,6 +15,7 @@ export type Status = 'in_production' | 'ready_for_review' | 'correction_requeste
 export type Order = {
   id: string
   created_date: string
+  updated_date?: string
   status: Status
   recipient: { name: string; pronunciation: string; pronouns: string; relationship: string }
   occasion: string
@@ -30,6 +33,8 @@ export type Order = {
   gift: { message: string; from_name: string; opened_count: number } | null
   // Set by the makeSong function: which spellings were sung and whether the name was heard.
   name_check?: { passed: boolean; needs_person: boolean; tries: { spelling: string; heard: number; refused?: boolean }[]; error?: string }
+  // The buyer's thumbs up or down (src/api/feedbackApi.ts).
+  feedback?: { rating: Rating; reason?: string; version?: number; at: string } | null
 }
 
 export type Brief = Pick<Order, 'recipient' | 'occasion' | 'occasion_date' | 'memories' | 'music' | 'package' | 'buyer'>
@@ -76,7 +81,9 @@ async function compose(order: Order, payload = generateSongPayload(songInputs(or
     // Base44 only lets backend functions call its AI, so makeSong writes the
     // lyrics (starting from the template), then sings and checks them.
     const updated: Order = await Orders().update(order.id, { song: fallback, song_version: version, status: 'in_production' })
-    // Takes a minute or more; the song screen checks the order meanwhile.
+    // Takes a minute or more; the song screen checks the order meanwhile, and
+    // the ready pop-up shows wherever they are once it's done.
+    watchSong(order.id)
     b44().functions.invoke('makeSong', { order_id: order.id, lyrics_prompt: lyricPrompt, lyrics_schema: LYRICS_SCHEMA }).catch(() => {})
     return updated
   }

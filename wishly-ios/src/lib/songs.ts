@@ -46,6 +46,8 @@ export function orderTrack(o: Order): Track | null {
     tags: [o.occasion, MOODS.find((m) => m.id === o.music.mood)?.label ?? '', o.music.genre].filter(Boolean),
     audioUrl: o.song.audio_url,
     orderId: o.id,
+    feedback: o.feedback,
+    version: o.song_version,
   }
 }
 

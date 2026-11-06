@@ -11,6 +11,7 @@ import Cover from './Cover'
 import { Glass } from './glass'
 import { HomeIcon, PlusIcon, ProfileIcon, SongsIcon } from './icons'
 import { PlayPause, Squish } from './motion'
+import { SongFeedback } from './SongFeedback'
 import { IconButton, tap } from './ui'
 
 // Floats over the screens, so songs scroll and blur beneath it. Screens leave
@@ -83,6 +84,8 @@ function MiniPlayer() {
             <Text numberOfLines={1} style={[type.regular, { fontSize: 13, color: colors.muted, marginTop: 2 }]}>{track.subtitle}</Text>
           </Animated.View>
         </Pressable>
+        {/* Your own songs can be rated from here; examples can't. */}
+        {track.orderId ? <SongFeedback compact songId={track.orderId} initial={track.feedback} version={track.version} /> : null}
         <IconButton label={playing ? 'Pause' : 'Play'} onPress={toggle}>
           <PlayPause playing={playing} size={22} />
         </IconButton>

@@ -11,6 +11,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SessionProvider, useSession } from '@/api/session'
 import { DraftProvider } from '@/lib/draft'
 import { PlayerProvider } from '@/lib/player'
+import { SongReadyProvider } from '@/lib/songReady'
 import { colors, type } from '@/theme'
 
 SplashScreen.preventAutoHideAsync()
@@ -32,7 +33,9 @@ export default function RootLayout() {
       <SessionProvider>
         <DraftProvider>
           <PlayerProvider>
-            <RootStack />
+            <SongReadyProvider>
+              <RootStack />
+            </SongReadyProvider>
           </PlayerProvider>
         </DraftProvider>
       </SessionProvider>

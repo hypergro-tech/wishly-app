@@ -11,6 +11,7 @@ import Cover from '@/components/Cover'
 import { DownloadIcon, EmailIcon, InstagramIcon, LinkIcon, MessageIcon, MoreIcon, WhatsAppIcon } from '@/components/icons'
 import { Burst, Glow, Squish } from '@/components/motion'
 import { BigPlay, LyricView, Scrubber, useFollowLyrics } from '@/components/playback'
+import { SongFeedback } from '@/components/SongFeedback'
 import { Accent, Body, Button, Card, CheckCircle, Chip, Eyebrow, Footer, say, success, tap } from '@/components/ui'
 import { MOODS, OCCASION_TONES } from '@/lib/catalog'
 import { usePop } from '@/lib/motion'
@@ -185,6 +186,9 @@ function Check({ order }: { order: Order }) {
           <BigPlay size={66} playing={now.playing} onPress={() => (now.isCurrent ? player.toggle() : player.play(track))} />
           <SaveSong order={order} />
         </View>
+        <View style={{ marginTop: 14 }}>
+          <SongFeedback songId={order.id} initial={order.feedback} version={order.song_version} />
+        </View>
 
         <Card style={{ marginTop: 20 }}>
           <Eyebrow color={colors.coral}>Ready to listen and check</Eyebrow>
@@ -328,7 +332,10 @@ function Give({ order }: { order: Order }) {
         </Card>
       ) : null}
 
-      <Button label={`Send to ${name}`} onPress={share} style={{ marginTop: 20 }} />
+      <View style={{ marginTop: 18 }}>
+        <SongFeedback songId={order.id} initial={order.feedback} version={order.song_version} />
+      </View>
+      <Button label={`Send to ${name}`} onPress={share} style={{ marginTop: 18 }} />
       <SaveSong order={order} button />
       <Button label={`Preview what ${she}’ll see`} variant="ghost" size="md" onPress={() => router.push(`/gift/${order.gift_token}`)} style={{ marginTop: 10 }} />
     </ScrollView>

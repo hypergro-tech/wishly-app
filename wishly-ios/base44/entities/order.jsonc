@@ -121,6 +121,16 @@
         "from_name": { "type": "string" },
         "opened_count": { "type": "integer", "minimum": 0 }
       }
+    },
+    // The buyer's thumbs up or down on the song (src/api/feedbackApi.ts); null when cleared.
+    "feedback": {
+      "type": ["object", "null"],
+      "properties": {
+        "rating": { "type": "string", "enum": ["LIKE", "DISLIKE"] },
+        "reason": { "type": "string", "maxLength": 300 },
+        "version": { "type": "integer" },
+        "at": { "type": "string" }
+      }
     }
   },
   "required": ["recipient", "occasion"],

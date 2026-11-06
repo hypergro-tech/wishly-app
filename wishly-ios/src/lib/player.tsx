@@ -5,6 +5,7 @@
 import { useAudioPlayer, useAudioPlayerStatus, type AudioSource } from 'expo-audio'
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 
+import type { Rating } from '@/api/feedbackApi'
 import type { CoverSpec } from '@/components/Cover'
 import { EXAMPLES, type Example } from './catalog'
 import type { Song } from './songwriter'
@@ -31,6 +32,8 @@ export type Track = {
   audioUrl?: string | null
   occasion?: string // for "Start a song like this"
   orderId?: string
+  feedback?: { rating: Rating; reason?: string } | null // the buyer's thumbs on an order's song
+  version?: number
 }
 
 type Player = {
