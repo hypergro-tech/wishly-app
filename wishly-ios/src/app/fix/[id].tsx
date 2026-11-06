@@ -94,10 +94,10 @@ export default function FixSomething() {
             <View>
               <Label>Which detail?</Label>
               <Pills
-                options={filled.map((m) => m.chip)}
-                value={MEMORY_PROMPTS.find((m) => m.key === field)?.chip ?? ''}
-                onChange={(chip) => {
-                  const key = MEMORY_PROMPTS.find((m) => m.chip === chip)!.key
+                options={filled.map((m) => m.title)}
+                value={MEMORY_PROMPTS.find((m) => m.key === field)?.title ?? ''}
+                onChange={(title) => {
+                  const key = MEMORY_PROMPTS.find((m) => m.title === title)!.key
                   setField(key)
                   setValue(order.memories[key] ?? '')
                 }}

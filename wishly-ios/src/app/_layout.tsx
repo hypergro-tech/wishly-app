@@ -73,6 +73,7 @@ function RootStack() {
         {/* The player draws its own rise, fall and swipe to close. */}
         <Stack.Screen name="player" options={{ presentation: 'transparentModal', animation: 'none', headerShown: false, contentStyle: { backgroundColor: 'transparent' } }} />
         <Stack.Screen name="fix/[id]" options={{ ...sheet, sheetAllowedDetents: [0.92] }} />
+        <Stack.Screen name="story/[key]" options={{ ...sheet, sheetAllowedDetents: [0.92] }} />
         <Stack.Screen name="message/[id]" options={{ ...sheet, sheetAllowedDetents: [0.68, 0.92] }} />
         <Stack.Screen name="welcome" options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="sign-in" options={{ ...sheet, sheetAllowedDetents: [0.62, 0.95] }} />

@@ -65,15 +65,78 @@ export const VOICES = ['Female vocal', 'Male vocal', 'Duet', 'No preference']
 
 export const LANGUAGES = ['English', 'Hindi', 'Hinglish', 'Spanish', 'French', 'Portuguese'].filter(offered)
 
-// The prompts that turn "write something nice" into specific, recognisable detail.
 // The prompts that turn "write something nice" into specific, recognisable
-// detail. `title` labels a filled detail, `chip` adds an empty one.
-export const MEMORY_PROMPTS: { key: string; label: string; title: string; chip: string; placeholder: string; short?: boolean }[] = [
-  { key: 'ritual', label: 'One small thing they do that always makes you smile', title: 'Something they do that makes you smile', chip: 'Something they do', placeholder: 'e.g. Sunday pancakes. He always burns the first one and eats it anyway.' },
-  { key: 'inside_joke', label: 'The thing they always say', title: 'The thing they always say', chip: 'What they always say', placeholder: 'e.g. "Five more minutes." She has never once meant five.' },
-  { key: 'nickname', label: 'The name only you call them', title: 'The name only you call them', chip: 'A nickname', placeholder: 'e.g. Bubs, Captain, Peanut', short: true },
-  { key: 'memory', label: 'A moment you keep coming back to', title: 'A moment you remember', chip: 'A moment you remember', placeholder: 'e.g. Getting lost in Lisbon and finding the best custard tart of our lives' },
-  { key: 'want_to_say', label: 'Something you have always wanted to tell them', title: 'What you’d tell them', chip: 'What you’d tell them', placeholder: 'e.g. You made every new city feel like home' },
+// detail. Each opens as a card on Create: `title` and `examples` show on the
+// empty card, `tag` labels what they wrote, and the sheet asks `question` with
+// `ideas` to tap in as a start.
+export type StoryPrompt = {
+  key: string
+  label: string
+  title: string
+  tag: string
+  examples: string[]
+  question: string
+  ideas: string[]
+  placeholder: string
+  short?: boolean
+  maxLength: number
+}
+
+export const MEMORY_PROMPTS: StoryPrompt[] = [
+  {
+    key: 'ritual', label: 'One small thing they do that always makes you smile', title: 'Something they do', tag: 'Habit',
+    examples: ['Always burns the toast', 'Obsessed with pickleball'],
+    question: 'What’s something funny or unique they do every single day?',
+    ideas: ['Every morning, they ', 'They can’t walk past a ', 'Whenever music comes on, they '],
+    placeholder: 'e.g. Sunday pancakes. He always burns the first one and eats it anyway.', maxLength: 600,
+  },
+  {
+    key: 'inside_joke', label: 'The thing they always say', title: 'What they always say', tag: 'Catchphrase',
+    examples: ['It is what it is', 'Did you feed the cat?'],
+    question: 'What do they always say? The line everyone could finish for them.',
+    ideas: ['When something goes wrong: “', 'Every phone call ends with “', 'Before any trip: “'],
+    placeholder: 'e.g. “Five more minutes.” She has never once meant five.', maxLength: 600,
+  },
+  {
+    key: 'nickname', label: 'The name only you call them', title: 'A nickname', tag: 'Nickname',
+    examples: ['Captain Chaos', 'Little Pumpkin'],
+    question: 'What do you call them that nobody else does?',
+    ideas: ['Bubs', 'Champ', 'Sunshine'],
+    placeholder: 'e.g. Bubs, Captain, Peanut', short: true, maxLength: 80,
+  },
+  {
+    key: 'memory', label: 'A moment you keep coming back to', title: 'A moment you remember', tag: 'Moment',
+    examples: ['Road trip to Big Sur in 2021', 'When we got stuck in the elevator'],
+    question: 'Which moment with them do you keep coming back to?',
+    ideas: ['The day we first met, ', 'That trip when ', 'The night we '],
+    placeholder: 'e.g. Getting lost in Lisbon and finding the best custard tart of our lives', maxLength: 600,
+  },
+  {
+    key: 'want_to_say', label: 'Something you have always wanted to tell them', title: 'What you’d tell them', tag: 'Message',
+    examples: ['Thank you for always having my back'],
+    question: 'If they only heard one line, what should it say?',
+    ideas: ['Thank you for ', 'I’ve never told you that ', 'I’m so proud of you for '],
+    placeholder: 'e.g. You made every new city feel like home', maxLength: 600,
+  },
+]
+
+// Not a detail about them, so it doesn't count toward the song; same card and sheet.
+export const AVOID_PROMPT: StoryPrompt = {
+  key: 'avoid', label: 'Anything to leave out', title: 'Leave something out', tag: 'Leave out',
+  examples: ['Their age', 'Anything about work'],
+  question: 'Anything the song should stay away from?',
+  ideas: ['Their age', 'Exes', 'Work'],
+  placeholder: 'Topics, words or names that shouldn’t appear', maxLength: 300,
+}
+
+export const STORY_PROMPTS = [...MEMORY_PROMPTS, AVOID_PROMPT]
+
+// Rotate under the story cards on Create.
+export const STORY_TIPS = [
+  'Specific places, pet names and inside jokes make the song sound like them.',
+  'Use their exact words. “Did you feed the cat?” beats “they’re caring.”',
+  'Small and specific wins: “burns the first pancake” over “loves cooking.”',
+  'One true detail is enough to begin. You can add more any time.',
 ]
 
 export const CORE_PACKAGE = {

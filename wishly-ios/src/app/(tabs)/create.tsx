@@ -2,22 +2,23 @@ import { Image } from 'expo-image'
 import { router } from 'expo-router'
 import { useBottomTabBarHeight } from 'expo-router/js-tabs'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
-import Animated, { FadeIn, FadeOut, LayoutAnimationConfig, LinearTransition } from 'react-native-reanimated'
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native'
+import Animated, { FadeIn, LayoutAnimationConfig, LinearTransition } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Spark } from '@/components/brand'
+import { StoryCards, StoryTip } from '@/components/StoryCards'
 import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { Squish } from '@/components/motion'
-import { Body, Button, Field, Label, Pill, Pills, Segmented, SpeakButton, Title, nudge, styles as ui, tap } from '@/components/ui'
+import { Body, Button, Field, Label, Pills, Segmented, SpeakButton, Title, nudge, styles as ui, tap } from '@/components/ui'
 import { CORE_PACKAGE, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
 import { realSongs } from '@/api/base44Client'
 import { suggestSpelling } from '@/api/orders'
 import { filledMemories, missing, useDraft } from '@/lib/draft'
 import { isTricky, singable, testedSpelling } from '@/lib/names'
-import { focusSafe, useRise } from '@/lib/motion'
+import { useRise } from '@/lib/motion'
 import { occasionColour, occasionPicture } from '@/lib/occasions'
-import { colors, tint, type, shade } from '@/theme'
+import { colors, tint, type } from '@/theme'
 
 // Cards and choices glide to their new places when details are added.
 const settle = LinearTransition.springify(420).dampingRatio(0.92)
@@ -42,13 +43,8 @@ function CreateForm() {
   const header = useScrollHeader(10)
   const rise = useRise()
   const { draft, set, reset } = useDraft()
-  // Details someone has opened but not filled yet.
-  const [opened, setOpened] = useState<string[]>([])
   const r = draft.recipient
   const tone = OCCASION_TONES[draft.occasion]
-  const shown = MEMORY_PROMPTS.filter((m) => draft.memories[m.key]?.trim() || opened.includes(m.key))
-  const hidden = MEMORY_PROMPTS.filter((m) => !shown.includes(m))
-  const showAvoid = Boolean(draft.memories.avoid?.trim() || opened.includes('avoid'))
   const todo = missing(draft)
   const count = filledMemories(draft).length
 
@@ -110,51 +106,10 @@ function CreateForm() {
 
           <Section title="Their story" sub={tone?.gentle
             ? 'Share what you’d like them remembered for. One memory is enough, and this is saved, so you can come back when you feel ready.'
-            : 'One small memory is enough to begin. The more specific, the more it sounds like them.'}
+            : 'Tell us the details that make them, THEM!'}
           >
-            {shown.map((m) => (
-              <Detail key={m.key} title={m.title}>
-                <TextInput
-                  value={draft.memories[m.key]}
-                  onChangeText={(v) => set('memories', { [m.key]: v })}
-                  placeholder={m.placeholder}
-                  placeholderTextColor={shade(0.4)}
-                  keyboardAppearance="dark"
-                  selectionColor={colors.coral}
-                  multiline={!m.short}
-                  autoFocus={opened.includes(m.key) && !draft.memories[m.key]}
-                  accessibilityLabel={m.label}
-                  style={[type.regular, { fontSize: 16, lineHeight: 22, color: colors.text, padding: 0, marginTop: 6 }]}
-                />
-              </Detail>
-            ))}
-            {showAvoid && (
-              <Detail title="Leave out">
-                <TextInput
-                  value={draft.memories.avoid}
-                  onChangeText={(avoid) => set('memories', { avoid })}
-                  placeholder="Topics, words or names that shouldn’t appear"
-                  placeholderTextColor={shade(0.4)}
-                  keyboardAppearance="dark"
-                  selectionColor={colors.coral}
-                  autoFocus={opened.includes('avoid') && !draft.memories.avoid}
-                  accessibilityLabel="Anything to leave out"
-                  style={[type.regular, { fontSize: 16, lineHeight: 22, color: colors.text, padding: 0, marginTop: 6 }]}
-                />
-              </Detail>
-            )}
-            <Animated.View layout={settle} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {hidden.map((m) => (
-                <Animated.View key={m.key} layout={settle} exiting={FadeOut.duration(140)}>
-                  <Pill dashed label={`+ ${m.chip}`} onPress={() => setOpened((o) => [...o, m.key])} />
-                </Animated.View>
-              ))}
-              {!showAvoid && (
-                <Animated.View layout={settle} exiting={FadeOut.duration(140)}>
-                  <Pill dashed label="+ Leave something out" onPress={() => setOpened((o) => [...o, 'avoid'])} />
-                </Animated.View>
-              )}
-            </Animated.View>
+            <StoryCards memories={draft.memories} />
+            <StoryTip />
             <Animated.View layout={settle} style={{ flexDirection: 'row' }}>
               {count === 0 ? (
                 <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>Add one detail to begin</Text>
@@ -162,7 +117,7 @@ function CreateForm() {
                 <>
                   {/* The number rolls up as details are added, like iOS counters. */}
                   <Animated.Text key={count} entering={rise(0, 10)} style={[type.bold, { fontSize: 13, color: colors.text }]}>{count}</Animated.Text>
-                  <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}> detail{count > 1 ? 's' : ''} added</Text>
+                  <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}> of {MEMORY_PROMPTS.length} details added</Text>
                 </>
               )}
             </Animated.View>
@@ -301,16 +256,6 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
         <Text accessibilityRole="header" style={[type.bold, { fontSize: 19, color: colors.text }]}>{title}</Text>
         {sub ? <Body muted size={14} style={{ marginTop: 6 }}>{sub}</Body> : null}
       </View>
-      {children}
-    </Animated.View>
-  )
-}
-
-// Opens into place when added.
-function Detail({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <Animated.View layout={settle} entering={focusSafe(FadeIn.duration(260))} style={{ paddingVertical: 12, paddingHorizontal: 14, borderRadius: 16, backgroundColor: colors.fill }}>
-      <Text style={[type.bold, { fontSize: 11, letterSpacing: 0.8, textTransform: 'uppercase', color: colors.muted }]}>{title}</Text>
       {children}
     </Animated.View>
   )
