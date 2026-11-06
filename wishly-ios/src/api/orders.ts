@@ -2,7 +2,10 @@
 // The web app reads and writes the same records.
 
 import { quote, type Tint } from '@/lib/catalog'
-import { buildSongPrompt, SONG_SCHEMA, writeSong, type Song } from '@/lib/songwriter'
+import { type Song } from '@/lib/songwriter'
+import { LYRICS_SCHEMA, parseLyrics } from '@/services/lyricGenerator'
+import { generateSongPayload, songInputs, startingSong } from '@/services/songPipeline'
+import type { SongPayload } from '@/types/songEngine'
 import { b44, isBase44, realSongs } from './base44Client'
 
 export type Status = 'in_production' | 'ready_for_review' | 'correction_requested' | 'approved'
@@ -45,7 +48,9 @@ const Orders = () => b44().entities.Order
 const newToken = () =>
   Array.from({ length: 16 }, () => '0123456789abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 36)]).join('')
 
-export async function placeOrder(brief: Brief): Promise<Order> {
+// `payload` is the song engine's output for this brief (Review makes it when
+// Create song is tapped); corrections make a fresh one from the changed order.
+export async function placeOrder(brief: Brief, payload?: SongPayload): Promise<Order> {
   const q = quote(brief.package)
   const order: Order = await Orders().create({
     ...brief,
@@ -59,13 +64,12 @@ export async function placeOrder(brief: Brief): Promise<Order> {
   })
   // With the real backend, singing starts as soon as the order is saved. The
   // demo store waits for the "Finish the song now" button instead.
-  return realSongs ? compose(order) : order
+  return realSongs ? compose(order, payload) : order
 }
 
-async function compose(order: Order): Promise<Order> {
-  const prompt = buildSongPrompt(order)
-  // A model reply may omit the extras the template adds; fill them from the brief.
-  const fallback = writeSong(order)
+async function compose(order: Order, payload = generateSongPayload(songInputs(order))): Promise<Order> {
+  const { title, lyricPrompt } = payload
+  const fallback = startingSong(order, payload)
   const version = (order.song_version || 0) + 1
 
   if (realSongs) {
@@ -73,14 +77,15 @@ async function compose(order: Order): Promise<Order> {
     // lyrics (starting from the template), then sings and checks them.
     const updated: Order = await Orders().update(order.id, { song: fallback, song_version: version, status: 'in_production' })
     // Takes a minute or more; the song screen checks the order meanwhile.
-    b44().functions.invoke('makeSong', { order_id: order.id, lyrics_prompt: prompt, lyrics_schema: SONG_SCHEMA }).catch(() => {})
+    b44().functions.invoke('makeSong', { order_id: order.id, lyrics_prompt: lyricPrompt, lyrics_schema: LYRICS_SCHEMA }).catch(() => {})
     return updated
   }
 
   const result = isBase44
-    ? await b44().integrations.Core.InvokeLLM({ prompt, response_json_schema: SONG_SCHEMA }).catch(() => null)
-    : await b44().integrations.Core.InvokeLLM({ prompt, response_json_schema: SONG_SCHEMA, context: { order } })
-  const song: Song = typeof result === 'object' && result?.sections ? { ...fallback, ...result } : fallback
+    ? await b44().integrations.Core.InvokeLLM({ prompt: lyricPrompt, response_json_schema: LYRICS_SCHEMA }).catch(() => null)
+    : await b44().integrations.Core.InvokeLLM({ prompt: lyricPrompt, response_json_schema: LYRICS_SCHEMA, context: { order } })
+  const sections = typeof result?.lyrics === 'string' ? parseLyrics(result.lyrics) : result?.sections
+  const song: Song = sections?.length ? { ...fallback, title: result.title || title, sections } : fallback
   return Orders().update(order.id, { song, song_version: version, status: 'ready_for_review' })
 }
 

@@ -18,9 +18,10 @@ const spoken = (s: string) => plainName(s).replace(/['’-]/g, '').replace(/[^a-
 
 // Spellings of the same sound made equal, so "Kiva" heard matches Keeva sung,
 // "Shavonne" matches Shivawn and "Efa" matches Eefa. Gemini writes what it hears
-// as an everyday name spelling, so these come up often.
+// as an everyday name spelling, so these come up often. A final "ei" is "ay",
+// so "May" heard matches Mei sung (6 Nov 2026).
 const sound = (s: string) => s.replace(/^e(?=[^aeiouy])/, 'i').replace(/ee|ea|ie|y/g, 'i').replace(/oo/g, 'u').replace(/aw|au/g, 'o')
-  .replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/(.)\1+/g, '$1').replace(/([^aeiou])e$/, '$1')
+  .replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/(.)\1+/g, '$1').replace(/([^aeiou])e$/, '$1').replace(/ei$/, 'ai')
 
 // Within a letter or two (one per four letters; none under four), so a
 // near-miss in how the transcriber spells a sung name still counts, but Ava
@@ -51,12 +52,23 @@ export function nameHeard(text: string, name: string, spellings: string[]) {
   return targets.some((target) => words.some((_, i) => [1, 2, 3].some((size) => near(sound(words.slice(i, i + size).join('')), target))))
 }
 
+// deno-lint-ignore no-explicit-any
+const nameCount = (song: any, name: string) =>
+  (song?.sections || []).flatMap((s: { lines: string[] }) => s.lines).join('\n').split(new RegExp(`\\b${escape(name)}\\b`, 'i')).length - 1
+
 // Writes the lyrics (if asked), then sings and checks up to three takes.
 // `order.song` is updated in place with the new lyrics.
 export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: string; schema: object } | null) {
   if (lyrics) {
+    const n = order.recipient.name.trim()
     try {
-      const written = await writeLyrics(lyrics.prompt, lyrics.schema, order.recipient.name.trim(), keys.gemini)
+      // The name has to be heard, so lyrics with it fewer than four times are
+      // written once more (Gemini sometimes stops at three).
+      let written = await writeLyrics(lyrics.prompt, lyrics.schema, n, keys.gemini)
+      if (nameCount(written, n) < 4) {
+        const again = await writeLyrics(lyrics.prompt, lyrics.schema, n, keys.gemini).catch(() => null)
+        if (nameCount(again, n) > nameCount(written, n)) written = again
+      }
       if (written?.sections?.length) order.song = { ...order.song, ...written }
     } catch (error) {
       console.error('Writing lyrics failed, singing the template', order.id, error)
@@ -140,11 +152,17 @@ export function songPrompt(order: Order, spelling: string) {
     .map((s: { label: string; lines: string[] }) => `[${s.label}]\n${s.lines.map((l) => l.replace(name, spelling)).join('\n')}`)
     .join('\n\n')
   const { mood, genre, voice, language } = order.music || {}
-  const sound = [mood, genre].filter(Boolean).join(' ').toLowerCase() || 'warm acoustic pop'
-  const singer = voice && voice !== 'No preference' ? `, clear ${voice.toLowerCase().replace('vocal', 'lead vocal')}` : ''
   const occasion = (order.occasion || 'celebration').toLowerCase()
   // A plain style line, then the lyrics. Wording like "a song for Birthday, a
   // personal gift" made Lyria refuse whole songs, even for Emily (30 Oct 2026).
-  const style = `${sound} ${occasion} song${singer}, ${language || 'English'}, about 1 minute.`
+  // Orders since 6 Nov 2026 carry sound tags (src/services/soundMapper.ts).
+  const tags: string | undefined = order.song.style_tags
+  let style: string
+  if (tags) style = `${tags}, ${occasion} song, sung in ${language || 'English'}, about 1 minute.`
+  else {
+    const sound = [mood, genre].filter(Boolean).join(' ').toLowerCase() || 'warm acoustic pop'
+    const singer = voice && voice !== 'No preference' ? `, clear ${voice.toLowerCase().replace('vocal', 'lead vocal')}` : ''
+    style = `${sound} ${occasion} song${singer}, ${language || 'English'}, about 1 minute.`
+  }
   return `${style[0].toUpperCase()}${style.slice(1)}\n\nLyrics:\n${lyrics}`
 }

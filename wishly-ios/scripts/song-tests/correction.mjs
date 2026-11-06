@@ -2,7 +2,8 @@
 //   node scripts/song-tests/correction.mjs <order id> <new sounds-like spelling>
 // Checks the new version is sung with the new spelling and the name is heard.
 
-import { buildSongPrompt, SONG_SCHEMA } from '../../src/lib/songwriter.ts'
+import { generateSongPayload, songInputs, startingSong } from '../../src/services/songPipeline.ts'
+import { LYRICS_SCHEMA } from '../../src/services/lyricGenerator.ts'
 import { signIn } from './client.mjs'
 
 const [orderId, spelling] = process.argv.slice(2)
@@ -15,7 +16,7 @@ const order = await base44.entities.Order.update(orderId, {
   status: 'in_production',
 })
 const started = Date.now()
-const res = await base44.functions.invoke('makeSong', { order_id: orderId, lyrics_prompt: buildSongPrompt(order), lyrics_schema: SONG_SCHEMA })
+const res = await base44.functions.invoke('makeSong', { order_id: orderId, lyrics_prompt: generateSongPayload(songInputs(order)).lyricPrompt, lyrics_schema: LYRICS_SCHEMA })
 const after = await base44.entities.Order.get(orderId)
 console.log(JSON.stringify({
   seconds: Math.round((Date.now() - started) / 1000), reply: res.data,

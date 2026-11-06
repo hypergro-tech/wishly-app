@@ -1,6 +1,8 @@
 export type Song = {
   title: string
   style?: string
+  // Sound tags the singer was given (src/services/soundMapper.ts).
+  style_tags?: string
   duration_sec?: number
   audio_url?: string | null
   // The spelling the singer was given, e.g. "Shivawn" for Siobhan.
@@ -8,9 +10,8 @@ export type Song = {
   sections: { label: string; lines: string[] }[]
 }
 
-// Template songwriter used until a real model (Base44 InvokeLLM) and a
-// vocal/music generator are connected. It builds a structured song from the
-// brief so the review, correction and gift flows can be exercised end to end.
+// Template lyrics from the brief: what's sung if the lyrics model fails, and
+// the whole song in demo mode.
 
 const clean = (s: string = '') => s.trim().replace(/^["“]|["”]$/g, '').replace(/[.!]+$/, '')
 const PROPER = /^(I|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|February|March|April|May|June|July|August|September|October|November|December)\b/
@@ -60,13 +61,17 @@ export function writeSong(order: any): Song {
   }
   const catchphrase = catchphraseOf(memories.inside_joke)
 
-  // About a minute sung: one verse, then the chorus twice.
+  // About a minute sung, in the same shape the lyrics model writes.
   const verse = [
     OPENERS[mood] || OPENERS.tender,
     m.ritual ? `Like ${lower(m.ritual)}` : 'Like the way you hum when you think no one hears',
     m.joke ? `And you still say "${catchphrase}"` : 'And you laugh before the punchline every time',
     m.memory ? `And I think about ${lower(m.memory)}` : 'And the nights we stayed up way too late',
+  ]
+
+  const preChorus = [
     `${call}, that’s the stuff I wouldn’t trade`,
+    'And I never say it like I should',
   ]
 
   const chorus = [
@@ -74,6 +79,16 @@ export function writeSong(order: any): Song {
     m.say ? lower(m.say) : 'you make the ordinary feel like more',
     OCCASION_LINES[occasion] || OCCASION_LINES['Just because'],
     `Oh ${name}, this one’s yours`,
+  ]
+
+  const bridge = [
+    'If I could live these years again',
+    'I’d pick the ones with you in them',
+  ]
+
+  const outro = [
+    `This one’s yours, ${name}`,
+    'Only ever yours',
   ]
 
   const title = memories.nickname
@@ -88,34 +103,11 @@ export function writeSong(order: any): Song {
     duration_sec: 60,
     audio_url: null,
     sections: [
-      { label: 'Verse', lines: verse },
+      { label: 'Verse 1', lines: verse },
+      { label: 'Pre-Chorus', lines: preChorus },
       { label: 'Chorus', lines: chorus },
-      { label: 'Chorus', lines: chorus },
+      { label: 'Bridge', lines: bridge },
+      { label: 'Outro', lines: outro },
     ],
   }
-}
-
-export function buildSongPrompt(order: any) {
-  return [
-    'Write lyrics for a personal gift song, about one minute long when sung. Specific details must carry the emotion;',
-    'use the details verbatim where natural and never invent facts about the people.',
-    JSON.stringify({
-      recipient: order.recipient,
-      occasion: order.occasion,
-      memories: order.memories,
-      music: order.music,
-      from: order.buyer?.name,
-    }),
-  ].join('\n')
-}
-
-export const SONG_SCHEMA = {
-  type: 'object',
-  properties: {
-    title: { type: 'string' },
-    sections: {
-      type: 'array',
-      items: { type: 'object', properties: { label: { type: 'string' }, lines: { type: 'array', items: { type: 'string' } } } },
-    },
-  },
 }

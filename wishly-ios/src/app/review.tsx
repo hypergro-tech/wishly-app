@@ -12,6 +12,7 @@ import { filledMemories, useDraft } from '@/lib/draft'
 import { wait } from '@/lib/motion'
 import { shouldAskForNotifications } from '@/lib/notifications'
 import { pronoun } from '@/lib/songs'
+import { generateSongPayload, songInputs } from '@/services/songPipeline'
 import { quoted } from '@/lib/text'
 import { colors, type, shade } from '@/theme'
 
@@ -47,9 +48,13 @@ export default function Review() {
   async function place(buyer: User) {
     setPlacing(true)
     try {
+      const brief = { ...draft, buyer: { name: buyer.full_name && buyer.full_name !== 'You' ? buyer.full_name : '', email: buyer.email } }
+      // The chosen mood, style, voice and story become the singer's sound tags
+      // and the lyrics brief.
+      const payload = generateSongPayload(songInputs(brief))
       // The button turns into a spinner, then a tick, before the song opens.
       const [order] = await Promise.all([
-        placeOrder({ ...draft, buyer: { name: buyer.full_name && buyer.full_name !== 'You' ? buyer.full_name : '', email: buyer.email } }),
+        placeOrder(brief, payload),
         wait(700),
       ])
       setPlacing(false)

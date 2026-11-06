@@ -14,7 +14,8 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { createClient } from '@base44/sdk'
 
-import { buildSongPrompt, SONG_SCHEMA, writeSong } from '../../src/lib/songwriter.ts'
+import { generateSongPayload, songInputs, startingSong } from '../../src/services/songPipeline.ts'
+import { LYRICS_SCHEMA } from '../../src/services/lyricGenerator.ts'
 import { CASES } from './cases.mjs'
 import { signIn } from './client.mjs'
 
@@ -60,9 +61,9 @@ async function runCase(base44, c) {
   }
   const result = { ...c, order_id: null, seconds: null, function: null, error: null }
   try {
-    const created = await base44.entities.Order.create({ ...order, song: writeSong(order) })
+    const created = await base44.entities.Order.create({ ...order, song: startingSong(order, generateSongPayload(songInputs(order))) })
     result.order_id = created.id
-    const res = await base44.functions.invoke('makeSong', { order_id: created.id, lyrics_prompt: buildSongPrompt(created), lyrics_schema: SONG_SCHEMA })
+    const res = await base44.functions.invoke('makeSong', { order_id: created.id, lyrics_prompt: generateSongPayload(songInputs(created)).lyricPrompt, lyrics_schema: LYRICS_SCHEMA })
     result.function = res.data
   } catch (error) {
     result.error = String(error?.data?.error || error?.message || error)

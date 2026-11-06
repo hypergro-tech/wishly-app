@@ -151,6 +151,16 @@ spelling, so Irish and Welsh names come out wrong (Siobhan as "see over"). The f
 - Lyrics are written by Gemini inside makeSong (Base44 blocks its own AI from the app, and
   each Base44 AI call or upload uses an integration credit; the free plan has 100 a month).
 
+**Song engine** (`src/services/`, types in `src/types/songEngine.ts`, since 6 Nov 2026). When
+Create song is tapped on Review, `generateSongPayload` turns the mood, style, voice and story
+into `{ title, lyrics, styleTags, lyricPrompt }`:
+- `soundMapper.ts` maps each style and mood to instruments, production, tempo and vocal
+  texture, and compiles them into sound tags under 120 characters that Lyria sings to.
+- `lyricGenerator.ts` writes the lyrics brief: `[Verse 1]`, `[Pre-Chorus]`, `[Chorus]`,
+  `[Bridge]`, `[Outro]`, about a minute, with the story woven in. makeSong has Gemini write
+  from it and asks once more if the name comes up fewer than four times.
+- The template lyrics (`src/lib/songwriter.ts`) use the same shape and stay if writing fails.
+
 **Testing** (`scripts/song-tests/`): `node scripts/song-tests/run-suite.mjs` runs 25 names
 through the deployed backend as a test buyer (`WISHLY_TEST_*` in `.env.local`) and re-checks
 each song. `deno run -A --no-check scripts/song-tests/local-suite.ts` runs the same names

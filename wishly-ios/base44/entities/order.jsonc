@@ -64,6 +64,8 @@
       "properties": {
         "title": { "type": "string" },
         "style": { "type": "string" },
+        // Sound tags the singer was given, e.g. "acoustic pop, warm female vocal, 86 bpm".
+        "style_tags": { "type": "string" },
         "duration_sec": { "type": "number" },
         "audio_url": { "type": "string" },
         // The spelling the singer was given, e.g. "Shivawn" for Siobhan.

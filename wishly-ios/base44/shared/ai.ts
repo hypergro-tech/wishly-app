@@ -39,16 +39,36 @@ Return JSON with:
   return JSON.parse(textOf(res))
 }
 
-// Lyrics from Gemini, as JSON in the app's song shape. The name has to be
-// heard, so it must come up often (Base44's own AI used it once or twice per
-// song, and uses a Base44 credit each time).
+// Lyrics from Gemini, as JSON: a title and bracket-tagged lyrics
+// ([Verse 1], [Pre-Chorus], [Chorus], [Bridge], [Outro]), turned into the app's
+// sections. The prompt sets the shape (src/services/lyricGenerator.ts). The
+// name has to be heard, so it must come up often (Base44's own AI used it once
+// or twice per song, and uses a Base44 credit each time).
 export async function writeLyrics(prompt: string, schema: object, name: string, key: string) {
   const ask = `${prompt}
 
-Rules: about one minute when sung: one verse of 4 or 5 lines, then a 4-line chorus sung twice (two sections, both labelled "Chorus"). No second verse, no bridge. Use the name "${name}" at least four times, including in every chorus. Write original lines; don't quote existing songs. Reply only with JSON matching this schema:
+Use the name "${name}" at least four times. Reply only with JSON matching this schema:
 ${JSON.stringify(schema)}`
   const res = await gemini(ARGON, key, ask, { responseMimeType: 'application/json', temperature: 0.9 })
-  return JSON.parse(textOf(res))
+  const written = JSON.parse(textOf(res))
+  if (typeof written?.lyrics !== 'string') return written
+  return { title: written.title, sections: parseLyrics(written.lyrics) }
+}
+
+// "[Verse 1]\nline\n\n[Chorus]\n…" -> sections. The same as parseLyrics in
+// src/services/lyricGenerator.ts; backend functions can't import the app's code.
+export function parseLyrics(text: string) {
+  const sections: { label: string; lines: string[] }[] = []
+  for (const raw of text.split('\n')) {
+    const line = raw.trim()
+    const tag = line.match(/^\[([^\]]+)\]$/)
+    if (tag) sections.push({ label: tag[1].trim(), lines: [] })
+    else if (line) {
+      if (!sections.length) sections.push({ label: 'Verse', lines: [] })
+      sections[sections.length - 1].lines.push(line)
+    }
+  }
+  return sections.filter((s) => s.lines.length)
 }
 
 // The song as an MP3, from Lyria 3 Pro.

@@ -4,7 +4,8 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
-import { buildSongPrompt, SONG_SCHEMA, writeSong } from '../../src/lib/songwriter.ts'
+import { generateSongPayload, songInputs, startingSong } from '../../src/services/songPipeline.ts'
+import { LYRICS_SCHEMA } from '../../src/services/lyricGenerator.ts'
 import { signIn } from './client.mjs'
 
 const OUT = process.argv[2] || join(homedir(), 'Downloads/Claude working files/wishly-song-tests/styles')
@@ -28,8 +29,8 @@ const results = await Promise.all(CASES.map(async (c) => {
     buyer: { name: 'Sam', email: 'test@example.com' },
     price_total: 0, corrections: [], song_version: 1, gift: null,
   }
-  const order = await base44.entities.Order.create({ ...draft, song: writeSong(draft) })
-  const res = await base44.functions.invoke('makeSong', { order_id: order.id, lyrics_prompt: buildSongPrompt(order), lyrics_schema: SONG_SCHEMA }).catch((e) => ({ data: { error: e.message } }))
+  const order = await base44.entities.Order.create({ ...draft, song: startingSong(draft, generateSongPayload(songInputs(draft))) })
+  const res = await base44.functions.invoke('makeSong', { order_id: order.id, lyrics_prompt: generateSongPayload(songInputs(order)).lyricPrompt, lyrics_schema: LYRICS_SCHEMA }).catch((e) => ({ data: { error: e.message } }))
   const after = await base44.entities.Order.get(order.id)
   const file = `${c.name.toLowerCase()}-${c.mood}-${c.genre.toLowerCase().replace(/\W+/g, '')}.mp3`
   if (after.song?.audio_url) writeFileSync(join(OUT, file), Buffer.from(await (await fetch(after.song.audio_url)).arrayBuffer()))

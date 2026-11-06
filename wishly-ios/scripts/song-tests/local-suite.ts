@@ -5,7 +5,8 @@
 //
 //   deno run -A scripts/song-tests/local-suite.ts [out dir] [case ids...]
 
-import { buildSongPrompt, SONG_SCHEMA, writeSong } from '../../src/lib/songwriter.ts'
+import { generateSongPayload, songInputs, startingSong } from '../../src/services/songPipeline.ts'
+import { LYRICS_SCHEMA } from '../../src/services/lyricGenerator.ts'
 import { listen } from '../../base44/shared/ai.ts'
 import { makeTakes } from '../../base44/shared/song.ts'
 import { CASES } from './cases.mjs'
@@ -36,8 +37,8 @@ async function runCase(c: any) {
   const result: any = { ...c, error: null }
   try {
     // deno-lint-ignore no-explicit-any
-    const o: any = { ...order, song: writeSong(order) }
-    const { tries, best, passed } = await makeTakes(o, keys, { prompt: buildSongPrompt(o), schema: SONG_SCHEMA })
+    const o: any = { ...order, song: startingSong(order, generateSongPayload(songInputs(order))) }
+    const { tries, best, passed } = await makeTakes(o, keys, { prompt: generateSongPayload(songInputs(o)).lyricPrompt, schema: LYRICS_SCHEMA })
     const nameInLyrics = o.song.sections.flatMap((s: { lines: string[] }) => s.lines).join(' ').normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
       .split(new RegExp(`\\b${c.name.normalize('NFKD').replace(/[̀-ͯ]/g, '')}\\b`, 'i')).length - 1
     result.name_check = { passed, needs_person: !passed, tries: tries.map(({ spelling, heard, refused }) => ({ spelling, heard, refused: Boolean(refused) })) }
