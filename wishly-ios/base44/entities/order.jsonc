@@ -6,10 +6,15 @@
   "title": "Order",
   "description": "A personal song gift: the brief, the song, corrections and the gift link",
   "properties": {
+    // status, song, song_version, name_check and gift_token are written only by
+    // the backend functions (startSong, makeSong, approveSong), which run with
+    // full access. A buyer can't set them, even on their own order: otherwise
+    // they could approve an unchecked song or put any audio behind a gift link.
     "status": {
       "type": "string",
       "enum": ["in_production", "ready_for_review", "correction_requested", "approved"],
-      "default": "in_production"
+      "default": "in_production",
+      "rls": { "write": false }
     },
     "recipient": {
       "type": "object",
@@ -61,13 +66,15 @@
     "ready_by": { "type": "string" },
     "song": {
       "type": "object",
+      "rls": { "write": false },
       "properties": {
         "title": { "type": "string" },
         "style": { "type": "string" },
         // Sound tags the singer was given, e.g. "acoustic pop, warm female vocal, 86 bpm".
         "style_tags": { "type": "string" },
         "duration_sec": { "type": "number" },
-        "audio_url": { "type": "string" },
+        // null while a new version is being made.
+        "audio_url": { "type": ["string", "null"] },
         // The spelling the singer was given, e.g. "Shivawn" for Siobhan.
         "sung_as": { "type": "string" },
         "sections": {
@@ -82,7 +89,7 @@
         }
       }
     },
-    "song_version": { "type": "integer", "minimum": 0, "default": 0 },
+    "song_version": { "type": "integer", "minimum": 0, "default": 0, "rls": { "write": false } },
     "corrections": {
       "type": "array",
       "items": {
@@ -100,6 +107,7 @@
     // listens heard the name. needs_person: no try passed, so someone listens first.
     "name_check": {
       "type": "object",
+      "rls": { "write": false },
       "properties": {
         "passed": { "type": "boolean" },
         "needs_person": { "type": "boolean" },
@@ -113,7 +121,7 @@
         }
       }
     },
-    "gift_token": { "type": "string" },
+    "gift_token": { "type": "string", "rls": { "write": false } },
     "gift": {
       "type": "object",
       "properties": {

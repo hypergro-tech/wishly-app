@@ -13,7 +13,7 @@ import Animated, {
 
 import { useGlide, spring } from '@/lib/motion'
 import { formatTime } from '@/lib/player'
-import type { Song } from '@/lib/songwriter'
+import type { Song } from '@shared/songwriter'
 import { colors, type, shade } from '@/theme'
 import { Spark } from './brand'
 import { PlayPause, Squish } from './motion'

@@ -5,7 +5,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import { writeSong } from '@/lib/songwriter'
+import { writeSong } from '@shared/songwriter'
 
 type Row = { id: string; created_date: string; updated_date: string; created_by: string; [key: string]: unknown }
 

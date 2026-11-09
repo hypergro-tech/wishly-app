@@ -1,12 +1,13 @@
 // Sings an order's lyrics and checks the name came out right.
-// POST { order_id, lyrics_prompt?, lyrics_schema? } -> { done, passed, sung_as }.
+// POST { order_id } -> { done, passed, sung_as }. Call startSong first.
 // It does all the work before replying (up to Base44's 5-minute limit):
 // background work after the reply is cut off after about 30 seconds, which is
 // shorter than one song takes. The app doesn't wait for the reply; it checks
 // the order instead.
 //
-//   0. If the app sent a lyrics prompt, write the lyrics with Gemini first,
-//      using the name at least four times. The template lyrics stay if it fails.
+//   0. Write the lyrics with Gemini first, from a prompt built here from the
+//      saved order (never one the app sends), using the name at least four
+//      times. The template lyrics startSong saved stay if it fails.
 //   1. Sing it with the buyer's sounds-like spelling (else a tested or
 //      suggested one for tricky names, else the name as written).
 //   2. Listen three times. The name must be heard at least twice.
@@ -18,25 +19,28 @@ import { createClientFromRequest } from 'npm:@base44/sdk'
 import { secrets } from 'base44:runtime'
 
 import { cleanKey } from '../../shared/ai.ts'
+import { buildLyricPrompt, LYRICS_SCHEMA } from '../../shared/lyricGenerator.ts'
 import { makeTakes, type Keys, type Order } from '../../shared/song.ts'
+import { songInputs } from '../../shared/songPipeline.ts'
 
 export default async function (req: Request) {
   try {
     const base44 = createClientFromRequest(req)
     if (!(await base44.auth.me().catch(() => null))) return Response.json({ error: 'Sign in first' }, { status: 401 })
 
-    const { order_id, lyrics_prompt, lyrics_schema } = await req.json()
+    const { order_id } = await req.json()
     if (typeof order_id !== 'string' || !order_id) return Response.json({ error: 'Send the order to sing' }, { status: 400 })
     // Read as the buyer, so the order's own access rules check it's theirs.
     const order = await base44.entities.Order.get(order_id).catch(() => null)
     if (!order) return Response.json({ error: 'No such order' }, { status: 404 })
-    if (!order.song?.sections?.length) return Response.json({ error: 'Write the lyrics first' }, { status: 400 })
+    if (order.status !== 'in_production' || !order.song?.sections?.length) return Response.json({ error: 'Start the song first' }, { status: 409 })
 
     const gemini = cleanKey(secrets.get('GEMINI_API_KEY'))
     if (!gemini) return Response.json({ error: 'GEMINI_API_KEY must be set' }, { status: 500 })
 
     const admin = base44.asServiceRole
-    const lyrics = typeof lyrics_prompt === 'string' ? { prompt: lyrics_prompt.slice(0, 8000), schema: lyrics_schema } : null
+    const { story, mood } = songInputs(order)
+    const lyrics = { prompt: buildLyricPrompt(story, mood, story.occasion), schema: LYRICS_SCHEMA }
     try {
       return Response.json({ done: true, ...(await produce(admin, order, { gemini }, lyrics)) })
     } catch (error) {

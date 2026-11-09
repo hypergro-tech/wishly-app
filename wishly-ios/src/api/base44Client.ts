@@ -20,14 +20,14 @@ import { createLocalClient } from './localClient'
 
 export const BASE44_APP_ID = process.env.EXPO_PUBLIC_BASE44_APP_ID
 export const isBase44 = Boolean(BASE44_APP_ID)
+// Optional: a local backend from `base44 dev` (http://localhost:4400) for testing.
+const SERVER_URL = process.env.EXPO_PUBLIC_BASE44_SERVER_URL || undefined
 
-// "Finish the song" and "deliver the correction" stand in for the production
-// pipeline: always on in demo mode, opt-in against Base44.
-export const showDemoTools = !isBase44 || process.env.EXPO_PUBLIC_DEMO_TOOLS === 'true'
-
-// Real sung songs from the backend (the makeSong and suggestSpelling functions).
-// Off until those functions and their secrets are set up on Base44.
-export const realSongs = isBase44 && process.env.EXPO_PUBLIC_REAL_SONGS === 'true'
+// Real sung songs from the backend functions (startSong, makeSong, approveSong,
+// suggestSpelling). Always on against Base44: the Order entity lets only those
+// functions set a song, its status and its gift link. The demo store has
+// "Finish the song" and "deliver the correction" buttons instead.
+export const realSongs = isBase44
 
 export const TOKEN_KEY = 'wishly.base44.token'
 
@@ -44,7 +44,7 @@ export type Client = any
 let client: Client = null
 
 const remoteClient = (token?: string | null) =>
-  createClient({ appId: BASE44_APP_ID as string, ...(token ? { token } : {}) })
+  createClient({ appId: BASE44_APP_ID as string, ...(SERVER_URL ? { serverUrl: SERVER_URL } : {}), ...(token ? { token } : {}) })
 
 export async function initBase44(): Promise<Client> {
   client = isBase44 ? remoteClient(await tokenStore.get()) : createLocalClient()

@@ -3,8 +3,8 @@
 //   node scripts/song-tests/run-suite.mjs [out dir] [case ids...]
 //
 // Signs in as the test buyer, checks the functions refuse bad calls, then for
-// each name places an order exactly like the app (template lyrics plus the
-// app's lyrics prompt), runs makeSong, downloads the song and has it heard
+// each name places an order exactly like the app (create it, then startSong
+// and makeSong), downloads the song and has it heard
 // three more times here, independently of makeSong's own check. Writes
 // results.json and the songs to the out dir. Needs OPEN_AI_TOKEN in
 // ~/Downloads/.env for the independent listening.
@@ -14,8 +14,6 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { createClient } from '@base44/sdk'
 
-import { generateSongPayload, songInputs, startingSong } from '../../src/services/songPipeline.ts'
-import { LYRICS_SCHEMA } from '../../src/services/lyricGenerator.ts'
 import { CASES } from './cases.mjs'
 import { signIn } from './client.mjs'
 
@@ -50,20 +48,20 @@ const nameLines = (text, pattern) =>
 async function runCase(base44, c) {
   const started = Date.now()
   const order = {
-    status: 'in_production',
     recipient: { name: c.name, pronunciation: c.sounds_like || '', pronouns: c.who === 'man' ? 'he/him' : 'she/her', relationship: 'Partner' },
     occasion: 'Birthday',
     memories: { memory: 'Sunday pancakes on the porch, and the first one always burns', nickname: '' },
     music: { mood: 'Joyful', genre: 'Acoustic', voice: c.who === 'man' ? 'Female vocal' : 'Male vocal', language: 'English' },
     package: { delivery: 'standard', extras: [] },
     buyer: { name: 'Sam', email: 'test@example.com' },
-    price_total: 0, corrections: [], song_version: 1, gift: null,
+    price_total: 0, corrections: [], gift: null,
   }
   const result = { ...c, order_id: null, seconds: null, function: null, error: null }
   try {
-    const created = await base44.entities.Order.create({ ...order, song: startingSong(order, generateSongPayload(songInputs(order))) })
+    const created = await base44.entities.Order.create(order)
     result.order_id = created.id
-    const res = await base44.functions.invoke('makeSong', { order_id: created.id, lyrics_prompt: generateSongPayload(songInputs(created)).lyricPrompt, lyrics_schema: LYRICS_SCHEMA })
+    await base44.functions.invoke('startSong', { order_id: created.id })
+    const res = await base44.functions.invoke('makeSong', { order_id: created.id })
     result.function = res.data
   } catch (error) {
     result.error = String(error?.data?.error || error?.message || error)

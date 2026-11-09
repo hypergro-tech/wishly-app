@@ -2,13 +2,13 @@
 // The web app reads and writes the same records.
 
 import { quote, type Tint } from '@/lib/catalog'
-import { type Song } from '@/lib/songwriter'
-import { LYRICS_SCHEMA, parseLyrics } from '@/services/lyricGenerator'
-import { generateSongPayload, songInputs, startingSong } from '@/services/songPipeline'
-import type { SongPayload } from '@/types/songEngine'
+import { type Song } from '@shared/songwriter'
+import { LYRICS_SCHEMA, parseLyrics } from '@shared/lyricGenerator'
+import { generateSongPayload, songInputs, startingSong } from '@shared/songPipeline'
+import type { SongPayload } from '@shared/songEngine'
 import { watchSong } from '@/lib/watch'
 import type { Rating } from './feedbackApi'
-import { b44, isBase44, realSongs } from './base44Client'
+import { b44, realSongs } from './base44Client'
 
 export type Status = 'in_production' | 'ready_for_review' | 'correction_requested' | 'approved'
 
@@ -50,6 +50,12 @@ export const STATUS: Record<Status, { label: string; tint: Tint | 'coral' }> = {
 
 const Orders = () => b44().entities.Order
 
+// Against Base44 an order's status, song and gift link are written only by
+// backend functions (startSong, makeSong, approveSong): the Order entity locks
+// those fields, so the app can't approve an unchecked song or change its audio.
+// The demo store on the phone writes them itself.
+const invoke = async (name: string, body: object) => (await b44().functions.invoke(name, body)).data
+
 const newToken = () =>
   Array.from({ length: 16 }, () => '0123456789abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 36)]).join('')
 
@@ -59,13 +65,12 @@ export async function placeOrder(brief: Brief, payload?: SongPayload): Promise<O
   const q = quote(brief.package)
   const order: Order = await Orders().create({
     ...brief,
-    status: 'in_production',
     price_total: q.total,
     ready_by: q.readyBy,
     corrections: [],
-    song: null,
-    song_version: 0,
     gift: null,
+    // Base44 fills these in from the entity's defaults.
+    ...(realSongs ? {} : { status: 'in_production', song: null, song_version: 0 }),
   })
   // With the real backend, singing starts as soon as the order is saved. The
   // demo store waits for the "Finish the song now" button instead.
@@ -73,24 +78,22 @@ export async function placeOrder(brief: Brief, payload?: SongPayload): Promise<O
 }
 
 async function compose(order: Order, payload = generateSongPayload(songInputs(order))): Promise<Order> {
-  const { title, lyricPrompt } = payload
-  const fallback = startingSong(order, payload)
-  const version = (order.song_version || 0) + 1
-
   if (realSongs) {
-    // Base44 only lets backend functions call its AI, so makeSong writes the
-    // lyrics (starting from the template), then sings and checks them.
-    const updated: Order = await Orders().update(order.id, { song: fallback, song_version: version, status: 'in_production' })
+    // startSong saves the template version from the order as saved; makeSong
+    // then writes the lyrics, sings and checks them. Nothing the app sends is
+    // sung, so `payload` isn't used here.
+    const started: Order = await invoke('startSong', { order_id: order.id })
     // Takes a minute or more; the song screen checks the order meanwhile, and
     // the ready pop-up shows wherever they are once it's done.
     watchSong(order.id)
-    b44().functions.invoke('makeSong', { order_id: order.id, lyrics_prompt: lyricPrompt, lyrics_schema: LYRICS_SCHEMA }).catch(() => {})
-    return updated
+    b44().functions.invoke('makeSong', { order_id: order.id }).catch(() => {})
+    return started
   }
 
-  const result = isBase44
-    ? await b44().integrations.Core.InvokeLLM({ prompt: lyricPrompt, response_json_schema: LYRICS_SCHEMA }).catch(() => null)
-    : await b44().integrations.Core.InvokeLLM({ prompt: lyricPrompt, response_json_schema: LYRICS_SCHEMA, context: { order } })
+  const { title, lyricPrompt } = payload
+  const fallback = startingSong(order, payload)
+  const version = (order.song_version || 0) + 1
+  const result = await b44().integrations.Core.InvokeLLM({ prompt: lyricPrompt, response_json_schema: LYRICS_SCHEMA, context: { order } })
   const sections = typeof result?.lyrics === 'string' ? parseLyrics(result.lyrics) : result?.sections
   const song: Song = sections?.length ? { ...fallback, title: result.title || title, sections } : fallback
   return Orders().update(order.id, { song, song_version: version, status: 'ready_for_review' })
@@ -111,10 +114,11 @@ export async function requestCorrection(order: Order, { kind, note, changes = {}
     recipient: { ...order.recipient, ...changes.recipient },
     memories: { ...order.memories, ...changes.memories },
     corrections,
-    status: 'correction_requested',
+    ...(realSongs ? {} : { status: 'correction_requested' }),
   }) as Order
-  // With the real backend the corrected version is made straight away.
-  return realSongs ? applyCorrection(updated) : updated
+  // With the real backend the corrected version is made straight away
+  // (startSong marks the correction made).
+  return realSongs ? compose(updated) : updated
 }
 
 export async function applyCorrection(order: Order) {
@@ -123,6 +127,7 @@ export async function applyCorrection(order: Order) {
 }
 
 export async function approveAndWrap(order: Order, { message, from_name }: { message: string; from_name: string }) {
+  if (realSongs) return invoke('approveSong', { order_id: order.id, message, from_name }) as Promise<Order>
   return Orders().update(order.id, {
     status: 'approved',
     gift_token: order.gift_token || newToken(),

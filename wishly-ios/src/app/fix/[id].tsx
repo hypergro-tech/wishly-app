@@ -38,12 +38,13 @@ export default function FixSomething() {
 
   if (!order) return null
 
-  const canSend = kind === 'name' || kind === 'fact' || note.trim()
+  // A name or detail fix needs the corrected text; the others need a note.
+  const canSend = kind === 'name' ? name.trim() : kind === 'fact' ? value.trim() : note.trim()
   const filled = MEMORY_PROMPTS.filter((m) => order.memories[m.key])
 
   async function send() {
     setSending(true)
-    const changes = kind === 'name' ? { recipient: { name, pronunciation } } : kind === 'fact' ? { memories: { [field]: value } } : {}
+    const changes = kind === 'name' ? { recipient: { name: name.trim(), pronunciation: pronunciation.trim() } } : kind === 'fact' ? { memories: { [field]: value.trim() } } : {}
     await requestCorrection(order!, { kind, note: note || KINDS.find((k) => k.id === kind)!.label, changes })
     success()
     router.back()

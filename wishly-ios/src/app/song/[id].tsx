@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Share, Text, View } from 'react-native'
 import Animated, { useReducedMotion } from 'react-native-reanimated'
 
-import { realSongs, showDemoTools } from '@/api/base44Client'
+import { realSongs } from '@/api/base44Client'
 import { applyCorrection, finishProduction, getOrder, giftUrl, type Order } from '@/api/orders'
 import { Rhythm, Ribbon, Spark } from '@/components/brand'
 import Cover from '@/components/Cover'
@@ -52,7 +52,7 @@ export default function SongScreen() {
     return (
       <Writing
         order={order}
-        demo={showDemoTools && !realSongs && (
+        demo={!realSongs && (
           <Button
             label={correcting ? 'Deliver the corrected version (demo)' : 'Finish the song now (demo)'}
             variant="ghost"

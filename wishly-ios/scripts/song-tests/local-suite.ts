@@ -5,8 +5,8 @@
 //
 //   deno run -A scripts/song-tests/local-suite.ts [out dir] [case ids...]
 
-import { generateSongPayload, songInputs, startingSong } from '../../src/services/songPipeline.ts'
-import { LYRICS_SCHEMA } from '../../src/services/lyricGenerator.ts'
+import { generateSongPayload, songInputs, startingSong } from '../../base44/shared/songPipeline.ts'
+import { LYRICS_SCHEMA } from '../../base44/shared/lyricGenerator.ts'
 import { listen } from '../../base44/shared/ai.ts'
 import { makeTakes } from '../../base44/shared/song.ts'
 import { CASES } from './cases.mjs'

@@ -9,6 +9,9 @@
       ],
       "@/assets/*": [
         "./assets/*"
+      ],
+      "@shared/*": [
+        "./base44/shared/*"
       ]
     }
   },

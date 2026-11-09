@@ -1,9 +1,10 @@
 // One song's payload for the music model: a title, bracket-tagged lyrics and
-// sound tags. The app sends it with the order; makeSong has Gemini rewrite the
-// lyrics from `lyricPrompt`, then Lyria sings them to `styleTags`.
+// sound tags. The backend builds it from the saved order (startSong saves the
+// template, makeSong has Gemini rewrite the lyrics from `lyricPrompt`, then
+// Lyria sings them to `styleTags`); the app uses it for the demo and previews.
 
-import { writeSong, type Song } from '../lib/songwriter.ts'
-import type { Mood, SongInputs, SongPayload, Style, Voice } from '../types/songEngine.ts'
+import { writeSong, type Song } from './songwriter.ts'
+import type { Mood, SongInputs, SongPayload, Style, Voice } from './songEngine.ts'
 import { buildLyricPrompt, lyricsText, parseLyrics } from './lyricGenerator.ts'
 import { compileStylePrompt } from './soundMapper.ts'
 

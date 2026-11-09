@@ -4,7 +4,7 @@
 // Plain musical words only: no artist names, and nothing about gifts (wording
 // like "a personal gift" made Lyria refuse whole songs, 30 Oct 2026).
 
-import type { Mood, Style, Voice } from '../types/songEngine.ts'
+import type { Mood, Style, Voice } from './songEngine.ts'
 
 export const MAX_STYLE_TAGS = 120
 

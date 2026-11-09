@@ -41,7 +41,7 @@ Return JSON with:
 
 // Lyrics from Gemini, as JSON: a title and bracket-tagged lyrics
 // ([Verse], [Chorus], [Outro - Melodic fade]), turned into the app's
-// sections. The prompt sets the shape (src/services/lyricGenerator.ts). The
+// sections. The prompt sets the shape (lyricGenerator.ts). The
 // name has to be heard, so it must come up often (Base44's own AI used it once
 // or twice per song, and uses a Base44 credit each time).
 export async function writeLyrics(prompt: string, schema: object, name: string, key: string) {
@@ -56,8 +56,8 @@ ${JSON.stringify(schema)}`
 }
 
 // "[Verse]\nline\n\n[Chorus]\n…" -> sections. The same as parseLyrics in
-// src/services/lyricGenerator.ts; backend functions can't import the app's
-// code. Tags with no words ([Short Intro], [Fade Out], [End]) are left out:
+// lyricGenerator.ts, kept apart so this file needs nothing from the song engine.
+// Tags with no words ([Short Intro], [Fade Out], [End]) are left out:
 // songPrompt always adds them.
 export function parseLyrics(text: string) {
   const sections: { label: string; lines: string[] }[] = []

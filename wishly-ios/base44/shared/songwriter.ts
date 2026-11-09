@@ -1,7 +1,7 @@
 export type Song = {
   title: string
   style?: string
-  // Sound tags the singer was given (src/services/soundMapper.ts).
+  // Sound tags the singer was given (soundMapper.ts).
   style_tags?: string
   duration_sec?: number
   audio_url?: string | null

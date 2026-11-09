@@ -151,25 +151,40 @@ spelling, so Irish and Welsh names come out wrong (Siobhan as "see over"). The f
 - Lyrics are written by Gemini inside makeSong (Base44 blocks its own AI from the app, and
   each Base44 AI call or upload uses an integration credit; the free plan has 100 a month).
 
-**Song engine** (`src/services/`, types in `src/types/songEngine.ts`, since 6 Nov 2026). When
-Create song is tapped on Review, `generateSongPayload` turns the mood, style, voice and story
-into `{ title, lyrics, styleTags, lyricPrompt }`:
+**Song engine** (`base44/shared/`, types in `songEngine.ts`, since 6 Nov 2026; the app imports
+it as `@shared/…`). `generateSongPayload` turns an order's mood, style, voice and story into
+`{ title, lyrics, styleTags, lyricPrompt }`. The backend builds it from the saved order, so
+nothing the phone sends is ever sung:
 - `soundMapper.ts` maps each style and mood to instruments, production, tempo and vocal
   texture, and compiles them into sound tags under 120 characters that Lyria sings to.
 - `lyricGenerator.ts` writes the lyrics brief: `[Verse 1]`, `[Pre-Chorus]`, `[Chorus]`,
   `[Bridge]`, `[Outro]`, about a minute, with the story woven in. makeSong has Gemini write
   from it and asks once more if the name comes up fewer than four times.
-- The template lyrics (`src/lib/songwriter.ts`) use the same shape and stay if writing fails.
+- The template lyrics (`songwriter.ts`) use the same shape and stay if writing fails.
+
+**Who writes what** (since 9 Nov 2026). The Order entity locks `status`, `song`,
+`song_version`, `name_check` and `gift_token` (`"rls": { "write": false }` on each), so only
+backend functions can set them. The buyer still writes the brief, corrections, the gift
+message and feedback.
+- **`startSong`** saves the next version (template lyrics, version number, corrections marked
+  made). It refuses an approved song, or a finished one with no correction waiting.
+- **`makeSong`** then writes the lyrics, sings and checks them (above). It only sings an order
+  that `startSong` has put in production.
+- **`approveSong`** approves a sung song and gives it a gift link (16 random letters and
+  digits from a secure source). Again on an approved song, it only changes the message.
 
 **Testing** (`scripts/song-tests/`): `node scripts/song-tests/run-suite.mjs` runs 25 names
 through the deployed backend as a test buyer (`WISHLY_TEST_*` in `.env.local`) and re-checks
 each song. `deno run -A --no-check scripts/song-tests/local-suite.ts` runs the same names
 through the same code on your Mac, without Base44, using the keys in `~/Downloads/.env`.
+`node scripts/song-tests/locks.mjs` checks, for free, that a buyer can't set the locked fields
+or approve an unsung song. To try any of this before deploying, run `base44 dev` (a local
+backend on port 4400 with its own users) and set `WISHLY_SERVER_URL` and `WISHLY_TOKEN` for the
+scripts, or `EXPO_PUBLIC_BASE44_SERVER_URL` for the app.
 
-To switch it on: deploy the functions (`base44 functions deploy`), set the `GEMINI_API_KEY`
-and `OPENAI_API_KEY` secrets (`base44 secrets set`), and set `EXPO_PUBLIC_REAL_SONGS=true`.
-Lyrics are still written on the phone when "Finish the song" is tapped; in production an
-automation on new orders should run that and `makeSong` instead.
+To set it up: push the entity and deploy the functions (`base44 entities push && base44
+functions deploy`) and set the `GEMINI_API_KEY` and `OPENAI_API_KEY` secrets (`base44 secrets
+set`). With a Base44 app ID set, the app always makes songs this way.
 
 ### Still to build on Base44
 
@@ -177,9 +192,9 @@ automation on new orders should run that and `makeSong` instead.
   Base44 address, fetching through the `getGift` function, which returns only the song and
   message for an approved order and counts opens. The Order entity stays private. Base44 adds
   its "Made with Base44" badge to the page.
-- **The song itself.** `makeSong` now records the vocals (see above). Still to do: write the
-  lyrics server-side too, and run both from an automation when an order is placed, so the
-  phone doesn't have to. Keep the demo buttons while testing with `EXPO_PUBLIC_DEMO_TOOLS=true`.
+- **The song itself.** `startSong` and `makeSong` write and record it on the backend (see
+  above). Still to do: run them from an automation when an order is placed, so the phone
+  doesn't have to start them.
 - **Gift links.** `EXPO_PUBLIC_GIFT_BASE_URL` is the Base44 address. Instagram can't take a
   message from another app, so its button copies the link and opens Instagram.
 - **Payment.** Checkout takes no payment yet. Before choosing Stripe or in-app purchase, check

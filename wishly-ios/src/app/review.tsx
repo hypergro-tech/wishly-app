@@ -12,7 +12,7 @@ import { filledMemories, useDraft } from '@/lib/draft'
 import { wait } from '@/lib/motion'
 import { shouldAskForNotifications } from '@/lib/notifications'
 import { pronoun } from '@/lib/songs'
-import { generateSongPayload, songInputs } from '@/services/songPipeline'
+import { generateSongPayload, songInputs } from '@shared/songPipeline'
 import { quoted } from '@/lib/text'
 import { colors, type, shade } from '@/theme'
 

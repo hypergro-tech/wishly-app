@@ -158,7 +158,7 @@ async function plan(name: string, chosen: string | undefined, geminiKey: string)
 // The lyrics keep the real name; the singer gets the sounds-like spelling.
 // The song opens on a short instrumental intro and closes with a melodic
 // fade and an explicit end, so it resolves cleanly at around 50–60 seconds
-// (the same tags as lyricsText in src/services/lyricGenerator.ts). Always
+// (the same tags as lyricsText in lyricGenerator.ts). Always
 // sung in English.
 export function songPrompt(order: Order, spelling: string) {
   const name = new RegExp(`\\b${escape(order.recipient.name.trim())}\\b`, 'gi')
@@ -170,7 +170,7 @@ export function songPrompt(order: Order, spelling: string) {
   const occasion = (order.occasion || 'celebration').toLowerCase()
   // A plain style line, then the lyrics. Wording like "a song for Birthday, a
   // personal gift" made Lyria refuse whole songs, even for Emily (30 Oct 2026).
-  // Orders since 6 Nov 2026 carry sound tags (src/services/soundMapper.ts).
+  // Orders since 6 Nov 2026 carry sound tags (soundMapper.ts).
   const tags: string | undefined = order.song.style_tags
   const ending = 'sung in English (en), 50 to 60 seconds, short intro, clean resolved ending.'
   let style: string

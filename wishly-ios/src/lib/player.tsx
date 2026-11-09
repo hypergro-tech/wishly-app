@@ -8,7 +8,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import type { Rating } from '@/api/feedbackApi'
 import type { CoverSpec } from '@/components/Cover'
 import { EXAMPLES, type Example } from './catalog'
-import type { Song } from './songwriter'
+import type { Song } from '@shared/songwriter'
 
 export const SECONDS_PER_LINE = 3.2
 

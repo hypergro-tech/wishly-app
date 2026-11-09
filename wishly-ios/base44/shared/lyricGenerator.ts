@@ -4,7 +4,7 @@
 // the backend (makeSong), and replies as JSON matching LYRICS_SCHEMA. Kept to
 // 70–90 words so the song resolves cleanly at around 50–60 seconds.
 
-import type { Mood, UserStoryDetails } from '../types/songEngine.ts'
+import type { Mood, UserStoryDetails } from './songEngine.ts'
 
 export const MAX_WORDS = 90
 export const MIN_WORDS = 70
