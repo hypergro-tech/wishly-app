@@ -21,10 +21,10 @@ export function generateSongPayload(inputs: SongInputs): SongPayload {
 // The song saved with the order before the model's lyrics are written: the
 // template lyrics, which stay if writing fails.
 export function startingSong(brief: BriefLike, { title, lyrics, styleTags }: SongPayload): Song {
-  const { genre, voice, language } = brief.music
+  const { genre, voice } = brief.music
   return {
     title,
-    style: [genre, voice !== 'No preference' && voice, language].filter(Boolean).join(' · '),
+    style: [genre, voice !== 'No preference' && voice, 'English'].filter(Boolean).join(' · '),
     style_tags: styleTags,
     duration_sec: 60,
     audio_url: null,
@@ -69,7 +69,8 @@ export function songInputs(brief: BriefLike): SongInputs {
       wantToSay: text(m.want_to_say),
       avoid: text(m.avoid),
       fromName: text(brief.buyer?.name),
-      language: text(music.language) || 'English',
+      // Songs are sung in English only (6 Nov 2026), whatever an older order says.
+      language: 'English',
     },
   }
 }

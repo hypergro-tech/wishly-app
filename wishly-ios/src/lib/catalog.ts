@@ -63,7 +63,10 @@ export const GENRES = ['Pop', 'Rock', 'Electronic', 'Hip Hop', 'R&B', 'Acoustic'
 
 export const VOICES = ['Female vocal', 'Male vocal', 'Duet', 'No preference']
 
-export const LANGUAGES = ['English', 'Hindi', 'Hinglish', 'Spanish', 'French', 'Portuguese'].filter(offered)
+// Songs are sung in English only for now (6 Nov 2026): the lyrics model and
+// the singer are both told so. Add a language here to offer it again.
+const LANGUAGES_ON = ['English']
+export const LANGUAGES = ['English', 'Hindi', 'Hinglish', 'Spanish', 'French', 'Portuguese'].filter((l) => offered(l) && LANGUAGES_ON.includes(l))
 
 // The prompts that turn "write something nice" into specific, recognisable
 // detail. Each opens as a card on Create: `title` and `examples` show on the

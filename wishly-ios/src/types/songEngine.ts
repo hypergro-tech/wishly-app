@@ -38,7 +38,7 @@ export type SongInputs = {
 
 export type SongPayload = {
   title: string
-  // Bracket-tagged lyrics: "[Verse 1]\n…\n\n[Chorus]\n…". These are the
+  // Bracket-tagged lyrics: "[Short Intro]\n\n[Verse]\n…\n\n[Chorus]\n…\n\n[Fade Out]\n[End]". These are the
   // template lyrics; the backend replaces them with ones written from `lyricPrompt`.
   lyrics: string
   // Comma-separated sound tags for the music model, under 120 characters.

@@ -61,17 +61,13 @@ export function writeSong(order: any): Song {
   }
   const catchphrase = catchphraseOf(memories.inside_joke)
 
-  // About a minute sung, in the same shape the lyrics model writes.
+  // The same short shape the lyrics model writes (about 70–90 words): a
+  // verse, the chorus once and a one-line outro.
   const verse = [
     OPENERS[mood] || OPENERS.tender,
     m.ritual ? `Like ${lower(m.ritual)}` : 'Like the way you hum when you think no one hears',
     m.joke ? `And you still say "${catchphrase}"` : 'And you laugh before the punchline every time',
-    m.memory ? `And I think about ${lower(m.memory)}` : 'And the nights we stayed up way too late',
-  ]
-
-  const preChorus = [
-    `${call}, that’s the stuff I wouldn’t trade`,
-    'And I never say it like I should',
+    m.memory ? `And I think about ${lower(m.memory)}` : `${call}, that’s the stuff I wouldn’t trade`,
   ]
 
   const chorus = [
@@ -81,15 +77,7 @@ export function writeSong(order: any): Song {
     `Oh ${name}, this one’s yours`,
   ]
 
-  const bridge = [
-    'If I could live these years again',
-    'I’d pick the ones with you in them',
-  ]
-
-  const outro = [
-    `This one’s yours, ${name}`,
-    'Only ever yours',
-  ]
+  const outro = [`This one’s yours, ${name}`]
 
   const title = memories.nickname
     ? `${clean(memories.nickname)}`
@@ -99,14 +87,12 @@ export function writeSong(order: any): Song {
 
   return {
     title,
-    style: [music.genre, music.voice !== 'No preference' && music.voice, music.language].filter(Boolean).join(' · '),
+    style: [music.genre, music.voice !== 'No preference' && music.voice, 'English'].filter(Boolean).join(' · '),
     duration_sec: 60,
     audio_url: null,
     sections: [
-      { label: 'Verse 1', lines: verse },
-      { label: 'Pre-Chorus', lines: preChorus },
+      { label: 'Verse', lines: verse },
       { label: 'Chorus', lines: chorus },
-      { label: 'Bridge', lines: bridge },
       { label: 'Outro', lines: outro },
     ],
   }

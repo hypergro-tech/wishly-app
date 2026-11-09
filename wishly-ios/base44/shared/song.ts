@@ -56,18 +56,28 @@ export function nameHeard(text: string, name: string, spellings: string[]) {
 const nameCount = (song: any, name: string) =>
   (song?.sections || []).flatMap((s: { lines: string[] }) => s.lines).join('\n').split(new RegExp(`\\b${escape(name)}\\b`, 'i')).length - 1
 
+// deno-lint-ignore no-explicit-any
+const words = (song: any) => (song?.sections || []).flatMap((s: { lines: string[] }) => s.lines).join(' ').split(/\s+/).filter(Boolean).length
+export const MAX_WORDS = 90
+// deno-lint-ignore no-explicit-any
+const fits = (song: any, name: string) => nameCount(song, name) >= 4 && words(song) <= MAX_WORDS
+// Fitting beats not; then more names; then fewer words.
+// deno-lint-ignore no-explicit-any
+const score = (song: any, name: string) => (fits(song, name) ? 1000 : 0) + Math.min(nameCount(song, name), 4) * 100 - words(song)
+
 // Writes the lyrics (if asked), then sings and checks up to three takes.
 // `order.song` is updated in place with the new lyrics.
 export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: string; schema: object } | null) {
   if (lyrics) {
     const n = order.recipient.name.trim()
     try {
-      // The name has to be heard, so lyrics with it fewer than four times are
-      // written once more (Gemini sometimes stops at three).
+      // The name has to be heard, and the song has to end by about a minute,
+      // so lyrics with the name fewer than four times or over 90 words are
+      // written once more (Gemini sometimes stops at three names, or runs long).
       let written = await writeLyrics(lyrics.prompt, lyrics.schema, n, keys.gemini)
-      if (nameCount(written, n) < 4) {
+      if (!fits(written, n)) {
         const again = await writeLyrics(lyrics.prompt, lyrics.schema, n, keys.gemini).catch(() => null)
-        if (nameCount(again, n) > nameCount(written, n)) written = again
+        if (again?.sections?.length && score(again, n) > score(written, n)) written = again
       }
       if (written?.sections?.length) order.song = { ...order.song, ...written }
     } catch (error) {
@@ -146,23 +156,29 @@ async function plan(name: string, chosen: string | undefined, geminiKey: string)
 }
 
 // The lyrics keep the real name; the singer gets the sounds-like spelling.
+// The song opens on a short instrumental intro and closes with a melodic
+// fade and an explicit end, so it resolves cleanly at around 50–60 seconds
+// (the same tags as lyricsText in src/services/lyricGenerator.ts). Always
+// sung in English.
 export function songPrompt(order: Order, spelling: string) {
   const name = new RegExp(`\\b${escape(order.recipient.name.trim())}\\b`, 'gi')
-  const lyrics = order.song.sections
-    .map((s: { label: string; lines: string[] }) => `[${s.label}]\n${s.lines.map((l) => l.replace(name, spelling)).join('\n')}`)
+  const sung = order.song.sections
+    .map((s: { label: string; lines: string[] }) => `[${s.label === 'Outro' ? 'Outro - Melodic fade' : s.label}]\n${s.lines.map((l) => l.replace(name, spelling)).join('\n')}`)
     .join('\n\n')
-  const { mood, genre, voice, language } = order.music || {}
+  const lyrics = `[Short Intro]\n\n${sung}\n\n[Fade Out]\n[End]`
+  const { mood, genre, voice } = order.music || {}
   const occasion = (order.occasion || 'celebration').toLowerCase()
   // A plain style line, then the lyrics. Wording like "a song for Birthday, a
   // personal gift" made Lyria refuse whole songs, even for Emily (30 Oct 2026).
   // Orders since 6 Nov 2026 carry sound tags (src/services/soundMapper.ts).
   const tags: string | undefined = order.song.style_tags
+  const ending = 'sung in English (en), 50 to 60 seconds, short intro, clean resolved ending.'
   let style: string
-  if (tags) style = `${tags}, ${occasion} song, sung in ${language || 'English'}, about 1 minute.`
+  if (tags) style = `${tags}, ${occasion} song, ${ending}`
   else {
     const sound = [mood, genre].filter(Boolean).join(' ').toLowerCase() || 'warm acoustic pop'
     const singer = voice && voice !== 'No preference' ? `, clear ${voice.toLowerCase().replace('vocal', 'lead vocal')}` : ''
-    style = `${sound} ${occasion} song${singer}, ${language || 'English'}, about 1 minute.`
+    style = `${sound} ${occasion} song${singer}, ${ending}`
   }
   return `${style[0].toUpperCase()}${style.slice(1)}\n\nLyrics:\n${lyrics}`
 }

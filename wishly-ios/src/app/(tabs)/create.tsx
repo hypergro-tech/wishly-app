@@ -154,10 +154,13 @@ function CreateForm() {
               <Label>Voice</Label>
               <Segmented label="Voice" options={VOICES} value={draft.music.voice} onChange={(voice) => set('music', { voice })} />
             </View>
-            <View>
-              <Label>Language</Label>
-              <Pills options={LANGUAGES} value={draft.music.language} onChange={(language) => set('music', { language })} />
-            </View>
+            {/* Only shown when there's more than one to choose from. */}
+            {LANGUAGES.length > 1 && (
+              <View>
+                <Label>Language</Label>
+                <Pills options={LANGUAGES} value={draft.music.language} onChange={(language) => set('music', { language })} />
+              </View>
+            )}
           </Section>
 
           <Animated.View layout={settle}>
