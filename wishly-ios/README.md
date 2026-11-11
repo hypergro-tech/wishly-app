@@ -40,7 +40,7 @@ succeeds, and only then does the app ask once about notifications.
 | Home | First visit: Who's it for? and how it works. Later: your songs in progress. Always: example songs, occasion tiles with pictures |
 | Create | One scrolling screen: who it's for, occasion (picture cards), their story (+ add details), the sound |
 | My songs | Every song with its cover and status; filter by in progress or ready to give |
-| Profile | Who's signed in, notifications, help and every policy page from the website (opened in Safari inside the app), log out |
+| Profile | Who's signed in, notifications, help and every policy page from the website (opened in Safari inside the app), log out, delete account |
 | Mini player | Above the tab bar whenever something is playing; tap to open the full player |
 | Now playing | Full-screen player: big cover, scrubber, play, lyrics following along |
 | Review | Cover from their name, details to check (with pronunciation), delivery, extras, total |
@@ -202,14 +202,30 @@ set`). With a Base44 app ID set, the app always makes songs this way.
 
 ## Ship to the App Store
 
-No local Xcode needed: Expo builds in the cloud.
+No local Xcode needed: Expo builds in the cloud (EAS). Set up on 11 Nov 2026:
 
-```bash
-npx eas-cli@latest build --platform ios
-```
+- Bundle ID `com.hypergro.wishly` (`app.json`). It can't change once the app is on the store.
+- `eas.json`: a `production` profile (build numbers kept by Expo, raised each build) and a
+  `simulator` profile for an iPhone simulator build without Apple.
+- `ios.config.usesNonExemptEncryption: false`: the app only uses standard HTTPS, so App Store
+  Connect won't ask about encryption on every build.
 
-You'll need an Apple Developer account, and EAS will ask for a bundle identifier
-(for example `com.yourcompany.wishly`).
+First TestFlight build, once you're on the Apple Developer team as Admin:
+
+1. `npx eas-cli@latest login` (an Expo account), then `npx eas-cli@latest init` to link the
+   project. It adds the Expo project ID to `app.json`; commit that.
+2. `sh scripts/eas-env.sh` copies the `EXPO_PUBLIC_…` settings from `.env.local` to EAS.
+   Cloud builds don't see `.env.local`.
+3. Optional, so builds don't ask for an Apple password: an App Store Connect API key (Users and
+   Access → Integrations → App Store Connect API, Team key, Admin). Keep the `.p8` file outside
+   the repo and export `ASC_API_KEY_PATH`, `ASC_API_KEY_ISSUER_ID` and `ASC_API_KEY_ID`, which
+   `eas.json`'s submit profile reads.
+4. `npx eas-cli@latest build --platform ios --profile production --auto-submit`. The first run
+   asks to sign in to Apple and creates the certificates and the App Store Connect app.
+
+**Account deletion.** Apple requires it in any app with sign-up: Profile → Delete my account
+runs the `deleteAccount` function, which deletes the buyer's orders (so gift links stop
+working) and their Base44 user. Base44 keeps a removed user in "Recently deleted" for 30 days.
 
 ## Checks
 

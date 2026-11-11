@@ -16,7 +16,7 @@ export default function Profile() {
   const insets = useSafeAreaInsets()
   const tabBar = useBottomTabBarHeight()
   const header = useScrollHeader(12)
-  const { isBase44, user, signOut } = useSession()
+  const { isBase44, user, signOut, deleteAccount } = useSession()
   const name = user?.full_name?.trim()
 
   const logOut = () =>
@@ -24,6 +24,23 @@ export default function Profile() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Log out', style: 'destructive', onPress: () => signOut() },
     ])
+
+  const deleteForGood = () =>
+    Alert.alert(
+      'Delete your account?',
+      'This deletes your account and every song in it. Gift links you’ve sent will stop working. This can’t be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete account',
+          style: 'destructive',
+          onPress: () =>
+            deleteAccount().catch(() =>
+              Alert.alert('Couldn’t delete your account', 'Check your connection and try again.'),
+            ),
+        },
+      ],
+    )
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -72,6 +89,11 @@ export default function Profile() {
         </Section>
 
         {user && <Button label="Log out" variant="ghost" size="md" onPress={logOut} style={{ marginTop: 28 }} />}
+        {user && (
+          <Pressable accessibilityRole="button" onPress={deleteForGood} hitSlop={8} style={{ marginTop: 14, alignSelf: 'center' }}>
+            <Text style={[type.regular, { fontSize: 14, color: colors.muted, textDecorationLine: 'underline' }]}>Delete my account</Text>
+          </Pressable>
+        )}
 
         <Text style={[type.regular, { marginTop: 20, fontSize: 12, color: colors.muted, textAlign: 'center' }]}>
           Wishly {Constants.expoConfig?.version ?? ''}

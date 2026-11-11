@@ -29,6 +29,7 @@ type Session = {
   resendCode: (email: string) => Promise<void>
   resetPassword: (email: string) => Promise<void>
   signOut: () => Promise<void>
+  deleteAccount: () => Promise<void>
   // Something to finish once sign-in succeeds, e.g. saving the song.
   setAfterSignIn: (fn: ((user: User) => void) | null) => void
   runAfterSignIn: () => void
@@ -162,6 +163,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  // Removes the account and every song in it (base44/functions/deleteAccount).
+  async function deleteAccount() {
+    if (isBase44) await b44().functions.invoke('deleteAccount', {})
+    else await b44().auth.deleteAccount()
+    await signOut()
+  }
+
   const setAfterSignIn = (fn: ((user: User) => void) | null) => { after.current = fn }
   const runAfterSignIn = () => {
     const fn = after.current
@@ -171,7 +179,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   return (
     <SessionContext.Provider
-      value={{ ready, user, isBase44, signInWithProvider, continueWithEmail, confirmCode, resendCode, resetPassword, signOut, setAfterSignIn, runAfterSignIn }}
+      value={{ ready, user, isBase44, signInWithProvider, continueWithEmail, confirmCode, resendCode, resetPassword, signOut, deleteAccount, setAfterSignIn, runAfterSignIn }}
     >
       {children}
     </SessionContext.Provider>

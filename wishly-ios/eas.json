@@ -1,0 +1,23 @@
+{
+  "cli": {
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "simulator": {
+      "ios": { "simulator": true }
+    },
+    "production": {
+      "environment": "production",
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascApiKeyPath": "$ASC_API_KEY_PATH",
+        "ascApiKeyIssuerId": "$ASC_API_KEY_ISSUER_ID",
+        "ascApiKeyId": "$ASC_API_KEY_ID"
+      }
+    }
+  }
+}

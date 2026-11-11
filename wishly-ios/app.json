@@ -9,7 +9,11 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "icon": "./assets/images/icon.png"
+      "bundleIdentifier": "com.hypergro.wishly",
+      "icon": "./assets/images/icon.png",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {

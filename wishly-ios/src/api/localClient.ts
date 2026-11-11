@@ -127,6 +127,16 @@ const localAuth = {
   // Stand-in for the Apple / Google web sign-in.
   signInWithProvider: (provider: string) => signInAs(`you@${provider}.example`),
   forget: () => AsyncStorage.removeItem(USER_KEY),
+  // Stand-in for the deleteAccount function: the account and its orders.
+  async deleteAccount() {
+    await delay(400)
+    const raw = await AsyncStorage.getItem(USER_KEY)
+    if (!raw) throw fail(401)
+    const all = await accounts()
+    delete all[JSON.parse(raw).email]
+    await AsyncStorage.setItem(ACCOUNTS_KEY, JSON.stringify(all))
+    await AsyncStorage.multiRemove([USER_KEY, PREFIX + 'Order'])
+  },
 }
 
 export function createLocalClient() {
