@@ -7,5 +7,5 @@ grep -E '^EXPO_PUBLIC_[A-Z0-9_]+=.+' .env.local |
   grep -vE '^EXPO_PUBLIC_(BASE44_SERVER_URL|DEMO_TOOLS|REAL_SONGS)=' |
   while IFS='=' read -r name value; do
     npx eas-cli@latest env:set --name "$name" --value "$value" \
-      --environment production --visibility plaintext --non-interactive --force
+      --environment production --visibility plaintext --non-interactive < /dev/null
   done

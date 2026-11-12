@@ -2,6 +2,7 @@
   "expo": {
     "name": "Wishly",
     "slug": "wishly",
+    "owner": "hypergro",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -49,6 +50,11 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "backgroundColor": "#FFF5EB"
+    "backgroundColor": "#FFF5EB",
+    "extra": {
+      "eas": {
+        "projectId": "514e198d-3976-4072-bfe2-fd141c750779"
+      }
+    }
   }
 }
