@@ -5,11 +5,15 @@
   "build": {
     "simulator": {
       "environment": "production",
-      "ios": { "simulator": true }
+      "ios": {
+        "simulator": true
+      },
+      "channel": "simulator"
     },
     "production": {
       "environment": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "production"
     }
   },
   "submit": {
