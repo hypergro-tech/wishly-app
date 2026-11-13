@@ -8,6 +8,7 @@ import { BellIcon } from '@/components/icons'
 import { Body, Button, tap } from '@/components/ui'
 import { popIn, stillFade } from '@/lib/motion'
 import { notNow, turnOnNotifications } from '@/lib/notifications'
+import { rememberPushToken } from '@/api/orders'
 import { colors, type } from '@/theme'
 
 // The bell swings from its top, a small ring, once the sheet is up.
@@ -22,7 +23,7 @@ const RING = {
 }
 
 export default function Notify() {
-  const { name, day } = useLocalSearchParams<{ name?: string; day?: string }>()
+  const { name, day, id } = useLocalSearchParams<{ name?: string; day?: string; id?: string }>()
   const still = useReducedMotion()
 
   return (
@@ -43,7 +44,7 @@ export default function Notify() {
       <Body muted style={{ marginTop: 8, lineHeight: 21, textAlign: 'center' }}>
         One notification{day ? ` on ${day}` : ''}, when it’s ready to listen and check. Nothing else.
       </Body>
-      <Button label="Turn on notifications" onPress={async () => { await turnOnNotifications(); router.back() }} style={{ marginTop: 22, alignSelf: 'stretch' }} />
+      <Button label="Turn on notifications" onPress={async () => { if ((await turnOnNotifications()) && id) rememberPushToken(id); router.back() }} style={{ marginTop: 22, alignSelf: 'stretch' }} />
       <Pressable accessibilityRole="button" onPress={() => { tap(); notNow(); router.back() }} style={{ marginTop: 6, height: 44, paddingHorizontal: 16, justifyContent: 'center' }}>
         <Text style={[type.bold, { fontSize: 15, color: colors.muted }]}>Not now</Text>
       </Pressable>

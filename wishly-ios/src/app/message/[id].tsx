@@ -1,8 +1,8 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { Alert, ScrollView, View } from 'react-native'
 
-import { approveAndWrap, getOrder, type Order } from '@/api/orders'
+import { approveAndWrap, getOrder, wakeGiftLink, type Order } from '@/api/orders'
 import { Body, Button, Field, SheetBody, Title, success } from '@/components/ui'
 import { colors, type } from '@/theme'
 
@@ -12,6 +12,8 @@ export default function AddMessage() {
   const [message, setMessage] = useState('')
   const [from, setFrom] = useState('')
   const [saving, setSaving] = useState(false)
+
+  useEffect(wakeGiftLink, [])
 
   useEffect(() => {
     getOrder(id).then((o) => {
@@ -25,9 +27,15 @@ export default function AddMessage() {
 
   async function save() {
     setSaving(true)
-    await approveAndWrap(order!, { message: message.trim(), from_name: from.trim() })
-    success()
-    router.back()
+    try {
+      await approveAndWrap(order!, { message: message.trim(), from_name: from.trim() })
+      success()
+      router.back()
+    } catch {
+      Alert.alert('Couldn’t make the link', 'Check your connection and try again. Your message is still here.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (

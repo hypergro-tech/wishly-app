@@ -11,7 +11,7 @@ import { scheduleOnRN } from 'react-native-worklets'
 
 import Cover from '@/components/Cover'
 import { ChevronDownIcon, LyricsIcon } from '@/components/icons'
-import { BigPlay, LyricView, Scrubber, useFollowLyrics } from '@/components/playback'
+import { BigPlay, LyricView, Scrubber, SkipButton, useFollowLyrics } from '@/components/playback'
 import { Body, Button, Eyebrow, IconButton } from '@/components/ui'
 import { OCCASIONS } from '@/lib/catalog'
 import { useDraft } from '@/lib/draft'
@@ -26,7 +26,7 @@ export default function NowPlaying() {
   const insets = useSafeAreaInsets()
   const { width, height } = useWindowDimensions()
   const still = useReducedMotion()
-  const { track, playing, elapsed, total, line, toggle } = usePlayer()
+  const { track, playing, elapsed, total, line, toggle, seek } = usePlayer()
   const { set } = useDraft()
   const follow = useFollowLyrics()
   const { offset } = follow
@@ -150,11 +150,13 @@ export default function NowPlaying() {
                 ))}
               </View>
 
-              <View style={{ marginTop: 24 }}><Scrubber elapsed={elapsed} total={total} /></View>
+              <View style={{ marginTop: 24 }}><Scrubber elapsed={elapsed} total={total} onSeek={seek} /></View>
 
               <View style={{ marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <View style={{ width: 48 }} />
+                <SkipButton by={-10} onPress={() => seek(elapsed - 10)} />
                 <BigPlay playing={playing} onPress={toggle} />
+                <SkipButton by={10} onPress={() => seek(elapsed + 10)} />
                 <IconButton label="Lyrics" size={48} onPress={() => follow.scrollTo(lyricsAt.current - 16)}>
                   <LyricsIcon />
                 </IconButton>

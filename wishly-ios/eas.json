@@ -4,6 +4,7 @@
   },
   "build": {
     "simulator": {
+      "environment": "production",
       "ios": { "simulator": true }
     },
     "production": {
@@ -14,6 +15,8 @@
   "submit": {
     "production": {
       "ios": {
+        "ascAppId": "6834450274",
+        "appleTeamId": "G5MDAX84U7",
         "ascApiKeyPath": "$ASC_API_KEY_PATH",
         "ascApiKeyIssuerId": "$ASC_API_KEY_ISSUER_ID",
         "ascApiKeyId": "$ASC_API_KEY_ID"

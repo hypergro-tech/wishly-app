@@ -17,8 +17,11 @@ const offered = (choice: string) => live(MARKET_ONLY[choice])
 
 export const CURRENCY = 'USD'
 
-export const formatPrice = (n: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: CURRENCY, maximumFractionDigits: 0 }).format(n)
+// Whole dollars show without cents ($29); anything else shows cents ($5.53).
+export const formatPrice = (n: number) => {
+  const digits = Number.isInteger(n) ? 0 : 2
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: CURRENCY, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n)
+}
 
 export const RELATIONSHIPS = ['Partner', 'Parent', 'Friend', 'Sibling', 'Child', 'Couple', 'Grandparent', 'Colleague', 'Someone else']
 
@@ -142,10 +145,31 @@ export const STORY_TIPS = [
   'One true detail is enough to begin. You can add more any time.',
 ]
 
+// How people pay, confirmed 13 Nov 2026: one song, or a monthly or yearly plan
+// with 3 songs a month. Payment goes through Apple, so each plan is an App
+// Store product with the id below, and its price in App Store Connect must
+// match the one here. No free trial; unused songs don't carry over.
+export const SONGS_PER_MONTH = 3
+export type PlanId = 'song' | 'monthly' | 'yearly'
+export type Plan = { id: PlanId; productId: string; name: string; price: number; per?: 'month' | 'year' }
+export const PLANS: Plan[] = [
+  { id: 'song', productId: 'com.hypergro.wishly.song', name: 'One song', price: 29 },
+  { id: 'monthly', productId: 'com.hypergro.wishly.monthly', name: 'Monthly', price: 39, per: 'month' },
+  { id: 'yearly', productId: 'com.hypergro.wishly.yearly', name: 'Yearly', price: 199, per: 'year' },
+]
+export const planById = (id: PlanId) => PLANS.find((p) => p.id === id)!
+
+// What one song works out to on each plan, rounded to the cent.
+export const pricePerSong = (p: Plan) =>
+  Math.round((p.per === 'year' ? p.price / (SONGS_PER_MONTH * 12) : p.per === 'month' ? p.price / SONGS_PER_MONTH : p.price) * 100) / 100
+
+// "Save 57%": yearly against twelve months of the monthly plan.
+export const yearlySaving = () => Math.round((1 - planById('yearly').price / (planById('monthly').price * 12)) * 100)
+
 export const CORE_PACKAGE = {
   id: 'core',
   name: 'Your song',
-  price: 59,
+  price: planById('song').price,
   includes: [
     'A complete song, about 1 minute',
     'Lyrics written from the details you share',
@@ -192,7 +216,13 @@ export type Example = {
   photoAlt: string
   tint: Tint
   coverName: string
-  lines: string[]
+  lines: string[] // a few lines to quote on cards
+  // A real song made with the Wishly song engine, and its full lyrics. Only
+  // examples with a recording are shown: a music-only preview doesn't show
+  // people what they'd get.
+  art?: number // which cover artwork (0–4), for examples without a photo
+  audio?: number
+  sections?: { label: string; lines: string[] }[]
   market?: Market // only shown in this market
 }
 
@@ -202,23 +232,45 @@ const ALL_EXAMPLES: Example[] = [
     title: 'Five More Minutes',
     for: 'For Maya, from her husband',
     occasion: 'Anniversary',
-    mood: 'playful',
-    tags: ['Anniversary', 'Playful', 'Acoustic'],
+    mood: 'tender',
+    tags: ['Anniversary', 'Romantic', 'Acoustic'],
     photo: require('../../assets/brand/sunday-pancakes.jpg'),
     photoAlt: 'A couple laughing on the kitchen floor over a stack of pancakes',
     tint: 'lilac',
     coverName: 'Maya',
     lines: [
-      'You say "five more minutes" and I know what that means',
-      'Half an hour of sunlight spilling through the seams',
-      'Sunday pancakes, and the first one always burns',
-      'Ten years in, Maya, and it’s still my favorite turn',
+      'You whisper five more minutes from the bed',
+      'On Sunday mornings, Maya, at the stove',
+      'You made every new city feel like home',
+      'With you, my Maya, I never look back',
+    ],
+    audio: require('../../assets/audio/examples/maya.mp3'),
+    sections: [
+      {
+        label: 'Verse',
+        lines: [
+          'You whisper five more minutes from the bed,',
+          'Though you have never meant just five instead.',
+          'On Sunday mornings, Maya, at the stove,',
+          'You eat the first burned pancake that you strove.',
+        ],
+      },
+      {
+        label: 'Chorus',
+        lines: [
+          'Oh Maya, sweet Bubs, look how far we roam,',
+          'You made every new city feel like home.',
+          'Through every single box we had to pack,',
+          'With you, my Maya, I never look back.',
+        ],
+      },
+      { label: 'Outro', lines: ['I love our Sunday mornings, my sweet Maya.'] },
     ],
   },
   {
     id: 'ex2',
-    title: 'Every Plan Better',
-    for: 'For Mei, from her roommates',
+    title: 'Seven-Stop Map',
+    for: 'For Mei, from her friends',
     occasion: 'Birthday',
     mood: 'joyful',
     tags: ['Birthday', 'Upbeat', 'Pop'],
@@ -227,10 +279,32 @@ const ALL_EXAMPLES: Example[] = [
     tint: 'butter',
     coverName: 'Mei',
     lines: [
-      'Group chat’s gone quiet, then Mei sends a map',
-      'Seven stops, a picnic and a forty-minute nap',
-      'You turn a Tuesday into something we retell',
-      'Happy birthday to the friend who plans it all so well',
+      'You plan every trip we take, Mei',
+      'With a seven-stop map for the day',
+      'Walked home singing with all our might',
+      'Happy birthday to you, sweet Mei',
+    ],
+    audio: require('../../assets/audio/examples/mei.mp3'),
+    sections: [
+      {
+        label: 'Verse',
+        lines: [
+          'You plan every trip we take, Mei',
+          'With a seven-stop map for the day',
+          'A forty-minute nap on the way',
+          'Then you are ready to go and play',
+        ],
+      },
+      {
+        label: 'Chorus',
+        lines: [
+          'Oh Mei, remember that late night',
+          'We missed the last train out of sight',
+          'Walked home singing with all our might',
+          'Happy birthday to you, sweet Mei',
+        ],
+      },
+      { label: 'Outro', lines: ['Walking and singing with you, dear Mei'] },
     ],
   },
   {
@@ -274,18 +348,46 @@ const ALL_EXAMPLES: Example[] = [
     id: 'ex4',
     title: 'Captain of the Kitchen',
     for: 'For Dad, from his three kids',
-    occasion: "Father's Day",
+    occasion: 'Birthday',
     mood: 'playful',
-    tags: ['Father’s Day', 'Playful', 'Acoustic'],
+    tags: ['Birthday', 'Playful', 'Acoustic'],
     photo: null,
     photoAlt: '',
     tint: 'mint',
     coverName: 'Dad',
     lines: [
-      'Captain of the kitchen with a dish towel on your arm',
-      'Singing to the radio and setting off the alarm',
-      'Every Saturday the onions and the rain',
-      'Dad, we’d choose you all over again',
+      'Dad, you are the Captain of the Kitchen',
+      'Saturday pancakes and singing to the radio',
+      'Happy birthday to our favorite Dad',
+      'I know we would choose you all over again',
+    ],
+    art: 1,
+    audio: require('../../assets/audio/examples/dad.mp3'),
+    sections: [
+      {
+        label: 'Verse',
+        lines: [
+          'Dad, you are the Captain of the Kitchen,',
+          'Saturday pancakes and singing to the radio.',
+          'You set off the smoke alarm every single time,',
+          'Just to let the whole neighborhood know.',
+        ],
+      },
+      {
+        label: 'Chorus',
+        lines: [
+          'Oh Dad, you taught the three of us to ride,',
+          'In that same empty parking lot back then.',
+          'Happy birthday to our favorite Dad,',
+          'I know we would choose you all over again.',
+        ],
+      },
+      {
+        label: 'Outro',
+        lines: [
+          'Put the spatula down now, Dad.',
+        ],
+      },
     ],
   },
   {
@@ -308,7 +410,7 @@ const ALL_EXAMPLES: Example[] = [
   },
   {
     id: 'ex6',
-    title: 'Ninety Summers',
+    title: 'Sweet Tea and Peach Pie',
     for: 'For Grandma, from all of us',
     occasion: 'Milestone',
     mood: 'nostalgic',
@@ -318,10 +420,84 @@ const ALL_EXAMPLES: Example[] = [
     tint: 'butter',
     coverName: 'Grandma',
     lines: [
-      'Ninety summers on the front porch swing',
-      'Sweet tea in July and the songs you used to sing',
-      'Every story starts with “When I was your age”',
-      'Grandma, you’re the first line on every page',
+      'Sweet tea on the front porch swing',
+      'You taught us to bake peach pie',
+      'Ninety years, oh sweet Grandma',
+      'Still the heart of our family, Grandma',
+    ],
+    art: 4,
+    audio: require('../../assets/audio/examples/grandma.mp3'),
+    sections: [
+      {
+        label: 'Verse',
+        lines: [
+          'Sweet tea on the front porch swing',
+          'Every July evening with you',
+          'Grandma, when I was your age',
+          'Begins every story so true',
+        ],
+      },
+      {
+        label: 'Chorus',
+        lines: [
+          'You taught us to bake peach pie',
+          'Never wrote the recipe down',
+          'Ninety years, oh sweet Grandma',
+          'Grandma, you are the heart of this family',
+        ],
+      },
+      {
+        label: 'Outro',
+        lines: [
+          'Still the heart of our family, Grandma',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ex7',
+    title: 'Five Alarms and Graduating',
+    for: 'For Leo, from Mom',
+    occasion: 'Milestone',
+    mood: 'joyful',
+    tags: ['Milestone', 'Upbeat', 'Pop'],
+    photo: null,
+    photoAlt: '',
+    tint: 'mint',
+    coverName: 'Leo',
+    lines: [
+      'First day of kindergarten, Leo',
+      'Five alarms and still late for the bus',
+      'Oh Leo, look how far you came',
+      'I am so proud of who you became',
+    ],
+    art: 2,
+    audio: require('../../assets/audio/examples/leo.mp3'),
+    sections: [
+      {
+        label: 'Verse',
+        lines: [
+          'First day of kindergarten, Leo,',
+          'You refused to let go of my hand.',
+          'Late-night study snacks at the kitchen table,',
+          "Now you're a graduating man.",
+        ],
+      },
+      {
+        label: 'Chorus',
+        lines: [
+          'Oh Leo, you always make a fuss,',
+          'Five alarms and still late for the bus!',
+          'Oh Leo, look how far you came,',
+          'I am so proud of who you became.',
+        ],
+      },
+      {
+        label: 'Outro',
+        lines: [
+          'Keep chasing those midnight snacks, my Leo.',
+        ],
+      },
     ],
   },
   {
@@ -345,6 +521,6 @@ const ALL_EXAMPLES: Example[] = [
   },
 ]
 
-export const EXAMPLES = ALL_EXAMPLES.filter((e) => live(e.market) && OCCASIONS.includes(e.occasion))
+export const EXAMPLES = ALL_EXAMPLES.filter((e) => e.audio && live(e.market) && OCCASIONS.includes(e.occasion))
 // The welcome screen's photo and song: a birthday, since that's what Wishly leads with.
 export const HERO_EXAMPLE = ALL_EXAMPLES.find((e) => e.id === 'ex2')!

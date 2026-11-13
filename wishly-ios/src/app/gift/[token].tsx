@@ -9,7 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { findGift, type Order } from '@/api/orders'
 import { Logo, Spark } from '@/components/brand'
 import Cover from '@/components/Cover'
-import { BigPlay, LyricView, Scrubber, useFollowLyrics } from '@/components/playback'
+import { BigPlay, LyricView, Scrubber, SkipButton, useFollowLyrics } from '@/components/playback'
 import { Accent, Body, Button, tap } from '@/components/ui'
 import { useRise, wait } from '@/lib/motion'
 import { usePlayer, useTrack } from '@/lib/player'
@@ -109,10 +109,14 @@ export default function GiftPreview() {
           </Body>
 
           <View style={{ marginTop: 20, marginHorizontal: 8 }}>
-            <Scrubber elapsed={now.elapsed} total={now.total} />
+            <Scrubber elapsed={now.elapsed} total={now.total} onSeek={now.isCurrent ? player.seek : undefined} />
           </View>
           <View style={{ alignItems: 'center', marginTop: 6 }}>
-            <BigPlay size={70} playing={now.playing} onPress={() => (now.isCurrent ? player.toggle() : player.play(track))} />
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 22 }}>
+              <SkipButton by={-10} onPress={() => now.isCurrent && player.seek(now.elapsed - 10)} />
+              <BigPlay size={70} playing={now.playing} onPress={() => (now.isCurrent ? player.toggle() : player.play(track))} />
+              <SkipButton by={10} onPress={() => now.isCurrent && player.seek(now.elapsed + 10)} />
+            </View>
           </View>
 
           {order.gift?.message ? (

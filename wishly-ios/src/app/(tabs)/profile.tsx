@@ -9,7 +9,9 @@ import { useSession } from '@/api/session'
 import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { ChevronRightIcon } from '@/components/icons'
 import { Body, Button, Title, tap } from '@/components/ui'
+import { SONGS_PER_MONTH, planById } from '@/lib/catalog'
 import { HELP, LEGAL, openSitePage } from '@/lib/site'
+import { testStore, useWallet } from '@/lib/wallet'
 import { colors, type, shade } from '@/theme'
 
 export default function Profile() {
@@ -18,6 +20,14 @@ export default function Profile() {
   const header = useScrollHeader(12)
   const { isBase44, user, signOut, deleteAccount } = useSession()
   const name = user?.full_name?.trim()
+  const wallet = useWallet()
+  const plan = wallet.plan ? planById(wallet.plan.id) : null
+  const refill = wallet.refillsOn?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+  const restore = async () => {
+    const found = await wallet.restore().catch(() => false)
+    Alert.alert(found ? 'Purchases restored' : 'Nothing to restore', found ? 'Your plan and songs are back.' : 'We couldn’t find a Wishly plan or song bought with this Apple Account.')
+  }
 
   const logOut = () =>
     Alert.alert('Log out of Wishly?', 'Your songs stay saved to your account.', [
@@ -70,6 +80,18 @@ export default function Profile() {
             <Button label="Sign in" size="md" onPress={() => router.push('/sign-in')} style={{ marginTop: 14 }} />
           </View>
         )}
+
+        <Section title="Your plan">
+          <Row
+            label={plan ? `${plan.name} plan` : 'No plan'}
+            detail={plan ? `${wallet.planSongsLeft} of ${SONGS_PER_MONTH} left · refills ${refill}` : 'See plans'}
+            onPress={() => router.push('/plans')}
+          />
+          {wallet.singles > 0 && <Row label="Single songs" detail={`${wallet.singles} to use`} onPress={() => router.push('/plans')} />}
+          {plan && <Row label="Manage subscription" detail="Apple" onPress={() => Linking.openURL('https://apps.apple.com/account/subscriptions')} />}
+          <Row label="Restore purchases" onPress={restore} />
+          {testStore && (wallet.plan || wallet.singles > 0) ? <Row label="Clear test purchases" onPress={() => wallet.resetTest()} /> : null}
+        </Section>
 
         <Section title="Your songs">
           <Row label="My songs" onPress={() => router.navigate('/songs')} />

@@ -8,10 +8,15 @@ import type { Track } from './player'
 
 export const songTitle = (o: Order) => o.song?.title?.replace(/^["“]|["”]$/g, '') || o.recipient.name
 
+// Songs made before covers were numbered get one picked from their id, so
+// it never changes.
+const coverFromId = (id: string) => [...id].reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 9973, 7) % 5
+
 export const orderCover = (o: Order): CoverSpec => ({
   name: songTitle(o),
   tint: OCCASION_TONES[o.occasion]?.tint ?? 'lilac',
   caption: `for ${o.recipient.name}`,
+  art: typeof o.cover === 'number' ? o.cover : coverFromId(o.id),
 })
 
 
@@ -36,7 +41,8 @@ export const orderedLine = (o: Order) =>
 export function orderTrack(o: Order): Track | null {
   if (!o.song) return null
   return {
-    key: `order:${o.id}`,
+    // Each version is its own recording, so a remade song gets a new key.
+    key: `order:${o.id}:v${o.song_version}`,
     title: songTitle(o),
     subtitle: `A song for ${o.recipient.name} · v${o.song_version}`,
     label: 'Your song',

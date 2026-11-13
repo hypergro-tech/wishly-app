@@ -5,12 +5,12 @@ import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Share, Text, 
 import Animated, { useReducedMotion } from 'react-native-reanimated'
 
 import { realSongs } from '@/api/base44Client'
-import { applyCorrection, finishProduction, getOrder, giftUrl, type Order } from '@/api/orders'
+import { applyCorrection, finishProduction, getOrder, giftUrl, wakeGiftLink, type Order } from '@/api/orders'
 import { Rhythm, Ribbon, Spark } from '@/components/brand'
 import Cover from '@/components/Cover'
 import { DownloadIcon, EmailIcon, InstagramIcon, LinkIcon, MessageIcon, MoreIcon, WhatsAppIcon } from '@/components/icons'
 import { Burst, Glow, Squish } from '@/components/motion'
-import { BigPlay, LyricView, Scrubber, useFollowLyrics } from '@/components/playback'
+import { BigPlay, LyricView, Scrubber, SkipButton, useFollowLyrics } from '@/components/playback'
 import { SongFeedback } from '@/components/SongFeedback'
 import { Accent, Body, Button, Card, CheckCircle, Chip, Eyebrow, Footer, say, success, tap } from '@/components/ui'
 import { MOODS, OCCASION_TONES } from '@/lib/catalog'
@@ -30,6 +30,8 @@ export default function SongScreen() {
 
   // Reload when coming back, e.g. after a correction or message sheet closes.
   useFocusEffect(useCallback(() => { getOrder(id).then(setOrder, () => setMissing(true)) }, [id]))
+  // Wake the gift link maker while they listen, so sending is quick.
+  useEffect(wakeGiftLink, [])
 
   const run = async (fn: () => Promise<Order>) => {
     setBusy(true)
@@ -180,10 +182,14 @@ function Check({ order }: { order: Order }) {
         <Header order={order} size={240} celebrate={celebrate} />
 
         <View style={{ marginTop: 18, marginHorizontal: 12 }}>
-          <Scrubber elapsed={now.elapsed} total={now.isCurrent ? now.total : track.sections.reduce((n, s) => n + s.lines.length, 0) * 3.2} />
+          <Scrubber elapsed={now.elapsed} total={now.isCurrent ? now.total : track.sections.reduce((n, s) => n + s.lines.length, 0) * 3.2} onSeek={now.isCurrent ? player.seek : undefined} />
         </View>
         <View style={{ alignItems: 'center', marginTop: 6 }}>
-          <BigPlay size={66} playing={now.playing} onPress={() => (now.isCurrent ? player.toggle() : player.play(track))} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 22 }}>
+            <SkipButton by={-10} onPress={() => now.isCurrent && player.seek(now.elapsed - 10)} />
+            <BigPlay size={66} playing={now.playing} onPress={() => (now.isCurrent ? player.toggle() : player.play(track))} />
+            <SkipButton by={10} onPress={() => now.isCurrent && player.seek(now.elapsed + 10)} />
+          </View>
           <SaveSong order={order} />
         </View>
         <View style={{ marginTop: 14 }}>
@@ -222,7 +228,7 @@ function Check({ order }: { order: Order }) {
         <View style={{ gap: 10 }}>
           {/* Glows once all three are ticked. */}
           <Glow on={allChecked} radius={28}>
-            <Button label="Looks right · add your message" celebrate={allChecked} onPress={() => router.push(`/message/${order.id}`)} />
+            <Button label="Looks right · send it" celebrate={allChecked} onPress={() => router.push(`/message/${order.id}`)} />
           </Glow>
           <Button label="Fix something" variant="ghost" size="md" onPress={() => router.push(`/fix/${order.id}`)} />
         </View>

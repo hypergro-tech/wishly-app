@@ -122,6 +122,12 @@
       }
     },
     "gift_token": { "type": "string", "rls": { "write": false } },
+    // Which of the five cover artworks the song shows (0–4). Each new song
+    // takes the next one; the app sets it when the order is placed.
+    "cover": { "type": "integer", "minimum": 0, "maximum": 4 },
+    // The buyer's phone address for push notifications (an Expo push token),
+    // so makeSong can say "your song is ready".
+    "push_token": { "type": "string", "maxLength": 200 },
     "gift": {
       "type": "object",
       "properties": {

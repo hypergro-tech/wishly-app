@@ -66,5 +66,29 @@ async function produce(admin: any, order: Order, keys: Keys, lyrics: { prompt: s
     // A take that never passed waits for a person to listen before the buyer hears it.
     ...(passed ? { status: 'ready_for_review' } : {}),
   })
+  if (passed) await tellBuyer(admin, order).catch((e) => console.error('push failed', order.id, e))
   return { passed, sung_as: best.spelling }
+}
+
+// "Your song is ready" on the buyer's phone. The app saves the phone's push
+// address on the order after it's placed, so read the order again. Expo's
+// push service passes it on to Apple.
+// deno-lint-ignore no-explicit-any
+async function tellBuyer(admin: any, order: Order) {
+  const fresh = await admin.entities.Order.get(order.id).catch(() => null)
+  const to = fresh?.push_token
+  if (typeof to !== 'string' || !to.startsWith('ExponentPushToken[')) return
+  const name = order.recipient?.name || 'their'
+  const res = await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      to,
+      title: (order.song_version || 1) > 1 ? `${name}’s new version is ready` : `${name}’s song is ready`,
+      body: 'Tap to listen and check every name.',
+      sound: 'default',
+      data: { url: `/song/${order.id}` },
+    }),
+  })
+  if (!res.ok) console.error('push send', res.status, await res.text())
 }

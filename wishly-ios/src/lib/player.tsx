@@ -30,6 +30,7 @@ export type Track = {
   mood: string
   tags: string[]
   audioUrl?: string | null
+  audio?: number // a recording bundled with the app (example songs)
   occasion?: string // for "Start a song like this"
   orderId?: string
   feedback?: { rating: Rating; reason?: string } | null // the buyer's thumbs on an order's song
@@ -45,12 +46,15 @@ type Player = {
   play: (track: Track) => void
   toggle: () => void
   pause: () => void
+  seek: (seconds: number) => void // jump to a point in the song
 }
 
 const PlayerContext = createContext<Player | null>(null)
 
 const lineCount = (t: Track) => t.sections.reduce((n, s) => n + s.lines.length, 0)
-const sourceFor = (t: Track): AudioSource => (t.audioUrl ? { uri: t.audioUrl } : MUSIC_BOX[t.mood] ?? MUSIC_BOX.tender)
+// A track has a real recording when it's a finished song or a bundled example.
+const recorded = (t: Track) => Boolean(t.audio || t.audioUrl)
+const sourceFor = (t: Track): AudioSource => t.audio ?? (t.audioUrl ? { uri: t.audioUrl } : MUSIC_BOX[t.mood] ?? MUSIC_BOX.tender)
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const audio = useAudioPlayer(MUSIC_BOX.tender)
@@ -61,19 +65,23 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [track, setTrack] = useState<Track | null>(null)
   const [playing, setPlaying] = useState(false)
   const [elapsed, setElapsed] = useState(0)
-  const base = useRef(0) // seconds played before the current run
+  // The music-box preview has no length of its own, so its time is counted
+  // on the clock: seconds played before the current run, and when it began.
+  const base = useRef(0)
   const startedAt = useRef(0)
   const tick = useRef<ReturnType<typeof setInterval> | null>(null)
   const current = useRef<Track | null>(null)
 
   const estimate = (t: Track) => lineCount(t) * SECONDS_PER_LINE
-  const totalFor = (t: Track | null, length: number) => (!t ? 0 : t.audioUrl && length > 0 ? length : estimate(t))
-  // A recording ends when it finishes playing, not at the estimate, which
-  // only stands in for its length until it loads.
+  const lengthOf = () => loaded.current.duration || audio.duration || 0
+  const totalFor = (t: Track | null, length: number) => (!t ? 0 : recorded(t) && length > 0 ? length : estimate(t))
+  // Where the song is now. A recording reports its own position, so the
+  // lyrics and the bar follow what is actually heard, even if it buffers.
+  const position = (t: Track) => (recorded(t) ? audio.currentTime : base.current + (Date.now() - startedAt.current) / 1000)
   const ended = (t: Track, now: number) => {
-    if (!t.audioUrl) return now >= estimate(t)
-    const length = loaded.current.duration || audio.duration
-    return loaded.current.didJustFinish || (length > 0 ? now >= length : now >= estimate(t) * 3)
+    if (!recorded(t)) return now >= estimate(t)
+    const length = lengthOf()
+    return loaded.current.didJustFinish || (length > 0 && now >= length - 0.05)
   }
 
   const stopTicking = () => {
@@ -81,7 +89,20 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     tick.current = null
   }
 
+  // Back to the start, ready to play again. Without the rewind, the next
+  // play would start at the very end and the song would be silent.
+  const finish = () => {
+    stopTicking()
+    audio.pause()
+    audio.seekTo(0)
+    base.current = 0
+    setElapsed(0)
+    setPlaying(false)
+  }
+
   const run = () => {
+    const t = current.current
+    if (t && recorded(t) && lengthOf() > 0 && audio.currentTime >= lengthOf() - 0.05) audio.seekTo(0)
     startedAt.current = Date.now()
     audio.play()
     setPlaying(true)
@@ -89,21 +110,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     tick.current = setInterval(() => {
       const t = current.current
       if (!t) return
-      const now = base.current + (Date.now() - startedAt.current) / 1000
       // The music-box loop is four bars long; start it again when it ends.
-      if (!t.audioUrl && !audio.playing) {
+      if (!recorded(t) && !audio.playing) {
         audio.seekTo(0)
         audio.play()
       }
-      if (ended(t, now)) {
-        stopTicking()
-        audio.pause()
-        base.current = 0
-        setElapsed(0)
-        setPlaying(false)
-      } else {
-        setElapsed(now)
-      }
+      const now = position(t)
+      if (ended(t, now)) finish()
+      else setElapsed(now)
     }, 250)
   }
 
@@ -111,7 +125,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (!playing) return
     stopTicking()
     audio.pause()
-    base.current += (Date.now() - startedAt.current) / 1000
+    const t = current.current
+    if (t && !recorded(t)) base.current += (Date.now() - startedAt.current) / 1000
     setPlaying(false)
   }
 
@@ -136,13 +151,25 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     else run()
   }
 
+  const seek = (seconds: number) => {
+    const t = current.current
+    if (!t) return
+    const to = Math.max(0, Math.min(seconds, totalFor(t, lengthOf()) - 0.5))
+    if (recorded(t)) audio.seekTo(to)
+    else {
+      base.current = to
+      startedAt.current = Date.now()
+    }
+    setElapsed(to)
+  }
+
   useEffect(() => stopTicking, [])
 
   const total = totalFor(track, status.duration)
   const line = track && (playing || elapsed > 0) ? Math.min(lineCount(track) - 1, Math.floor(elapsed / (total / lineCount(track)))) : -1
 
   return (
-    <PlayerContext.Provider value={{ track, playing, elapsed, total, line, play, toggle, pause }}>
+    <PlayerContext.Provider value={{ track, playing, elapsed, total, line, play, toggle, pause, seek }}>
       {children}
     </PlayerContext.Provider>
   )
@@ -175,8 +202,9 @@ export function exampleTrack(e: Example): Track {
     title: e.title,
     subtitle: e.for,
     label: 'Example song',
-    cover: { name: e.coverName, tint: e.tint, photo: e.photo, photoAlt: e.photoAlt },
-    sections: [{ label: '', lines: e.lines }],
+    cover: { name: e.title, tint: e.tint, photo: e.photo, photoAlt: e.photoAlt, art: e.photo ? undefined : e.art, caption: `for ${e.coverName}` },
+    sections: e.sections ?? [{ label: '', lines: e.lines }],
+    audio: e.audio,
     mood: e.mood,
     tags: e.tags,
     occasion: e.occasion,

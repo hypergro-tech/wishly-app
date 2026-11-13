@@ -9,6 +9,7 @@ import type { SongPayload } from '@shared/songEngine'
 import { watchSong } from '@/lib/watch'
 import type { Rating } from './feedbackApi'
 import { b44, realSongs } from './base44Client'
+import { pushToken } from '@/lib/notifications'
 
 export type Status = 'in_production' | 'ready_for_review' | 'correction_requested' | 'approved'
 
@@ -30,6 +31,8 @@ export type Order = {
   song_version: number
   corrections: { kind: string; note: string; changes: Record<string, unknown>; at: string; resolved: boolean }[]
   gift_token?: string
+  push_token?: string // this phone's Expo push address, for "your song is ready"
+  cover?: number // which of the five cover artworks, 0–4: each new song takes the next
   gift: { message: string; from_name: string; opened_count: number } | null
   // Set by the makeSong function: which spellings were sung and whether the name was heard.
   name_check?: { passed: boolean; needs_person: boolean; tries: { spelling: string; heard: number; refused?: boolean }[]; error?: string }
@@ -63,8 +66,11 @@ const newToken = () =>
 // Create song is tapped); corrections make a fresh one from the changed order.
 export async function placeOrder(brief: Brief, payload?: SongPayload): Promise<Order> {
   const q = quote(brief.package)
+  // Each new song takes the next of the five covers: 1, 2, 3, 4, 5, then 1 again.
+  const earlier = await listOrders().catch(() => [])
   const order: Order = await Orders().create({
     ...brief,
+    cover: earlier.length % 5,
     price_total: q.total,
     ready_by: q.readyBy,
     corrections: [],
@@ -133,6 +139,20 @@ export async function approveAndWrap(order: Order, { message, from_name }: { mes
     gift_token: order.gift_token || newToken(),
     gift: { message, from_name, opened_count: order.gift?.opened_count || 0 },
   }) as Promise<Order>
+}
+
+// Backend functions sleep when unused and take several seconds to wake.
+// Waking approveSong while the buyer writes their message makes "Create
+// their gift link" quick. It's called with no order, so it changes nothing.
+export const wakeGiftLink = () => {
+  if (realSongs) b44().functions.invoke('approveSong', {}).catch(() => {})
+}
+
+// Keeps this phone's push address on the song, so the backend can say when
+// it's ready. Quietly does nothing when notifications are off.
+export async function rememberPushToken(orderId: string) {
+  const token = await pushToken()
+  if (token) await Orders().update(orderId, { push_token: token }).catch(() => {})
 }
 
 export const getOrder = (id: string): Promise<Order> => Orders().get(id)

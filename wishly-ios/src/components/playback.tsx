@@ -1,5 +1,6 @@
-import { useEffect, useEffectEvent, useRef, type ComponentRef } from 'react'
+import { useEffect, useEffectEvent, useRef, useState, type ComponentRef } from 'react'
 import { Text, View, type LayoutChangeEvent, type ScrollView } from 'react-native'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
   ReduceMotion,
   useAnimatedScrollHandler,
@@ -10,6 +11,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated'
+import Svg, { Path } from 'react-native-svg'
 
 import { useGlide, spring } from '@/lib/motion'
 import { formatTime } from '@/lib/player'
@@ -19,22 +21,74 @@ import { Spark } from './brand'
 import { PlayPause, Squish } from './motion'
 import { tap } from './ui'
 
-export function Scrubber({ elapsed, total }: { elapsed: number; total: number }) {
-  const p = total ? Math.min(1, elapsed / total) : 0
+// The song's progress. Drag the knob, or tap anywhere on the bar, to jump
+// there. Without `onSeek` it only shows progress.
+export function Scrubber({ elapsed, total, onSeek }: { elapsed: number; total: number; onSeek?: (seconds: number) => void }) {
+  const [width, setWidth] = useState(0)
+  const [drag, setDrag] = useState<number | null>(null) // where the finger is, 0–1, while dragging
+  const at = (x: number) => (width ? Math.max(0, Math.min(1, x / width)) : 0)
+  const p = drag ?? (total ? Math.min(1, elapsed / total) : 0)
   const glide = useGlide(p)
   const fill = useAnimatedStyle(() => ({ width: `${glide.get() * 100}%` }))
   const knob = useAnimatedStyle(() => ({ left: `${glide.get() * 100}%` }))
+  const pan = Gesture.Pan()
+    .enabled(Boolean(onSeek && total))
+    .minDistance(0)
+    .runOnJS(true)
+    .onBegin((e) => setDrag(at(e.x)))
+    .onUpdate((e) => setDrag(at(e.x)))
+    .onEnd((e) => { tap(); onSeek?.(at(e.x) * total) })
+    .onFinalize(() => setDrag(null))
+  const shown = drag !== null ? drag * total : elapsed
+  const step = Math.max(5, total / 10)
   return (
-    <View accessible accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: Math.round(total), now: Math.round(elapsed) }}>
-      <View style={{ height: 4, borderRadius: 2, backgroundColor: shade(0.18) }}>
-        <Animated.View style={[{ height: 4, borderRadius: 2, backgroundColor: colors.text }, fill]} />
-        <Animated.View style={[{ position: 'absolute', top: -4, marginLeft: -6, width: 12, height: 12, borderRadius: 6, backgroundColor: colors.text }, knob]} />
-      </View>
+    <View
+      accessible
+      accessibilityRole={onSeek ? 'adjustable' : 'progressbar'}
+      accessibilityLabel="Song position"
+      accessibilityValue={{ min: 0, max: Math.round(total), now: Math.round(elapsed), text: `${formatTime(elapsed)} of ${formatTime(total)}` }}
+      accessibilityActions={onSeek ? [{ name: 'increment' }, { name: 'decrement' }] : undefined}
+      onAccessibilityAction={(e) => onSeek?.(elapsed + (e.nativeEvent.actionName === 'increment' ? step : -step))}
+    >
+      <GestureDetector gesture={pan}>
+        {/* A taller touch area than the thin bar, so it's easy to grab. */}
+        <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)} style={{ paddingVertical: 12, marginVertical: -12 }}>
+          <View style={{ height: drag !== null ? 6 : 4, borderRadius: 3, backgroundColor: shade(0.18) }}>
+            <Animated.View style={[{ height: '100%', borderRadius: 3, backgroundColor: colors.text }, fill]} />
+            <Animated.View
+              style={[
+                { position: 'absolute', top: drag !== null ? -6 : -4, marginLeft: drag !== null ? -9 : -6, width: drag !== null ? 18 : 12, height: drag !== null ? 18 : 12, borderRadius: 9, backgroundColor: colors.text },
+                knob,
+              ]}
+            />
+          </View>
+        </View>
+      </GestureDetector>
       <View style={{ marginTop: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={[type.regular, { fontSize: 12, color: colors.muted }]}>{formatTime(elapsed)}</Text>
-        <Text style={[type.regular, { fontSize: 12, color: colors.muted }]}>{formatTime(total)}</Text>
+        <Text style={[type.regular, { fontSize: 12, color: colors.muted, fontVariant: ['tabular-nums'] }]}>{formatTime(shown)}</Text>
+        <Text style={[type.regular, { fontSize: 12, color: colors.muted, fontVariant: ['tabular-nums'] }]}>{formatTime(total)}</Text>
       </View>
     </View>
+  )
+}
+
+// Jump 10 seconds back or forward.
+export function SkipButton({ by, onPress, size = 48 }: { by: -10 | 10; onPress: () => void; size?: number }) {
+  const back = by < 0
+  return (
+    <Squish
+      accessibilityRole="button"
+      accessibilityLabel={back ? 'Back 10 seconds' : 'Forward 10 seconds'}
+      to={0.88}
+      onPress={() => { tap(); onPress() }}
+      style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Svg width={30} height={30} viewBox="0 0 30 30" style={back ? undefined : { transform: [{ scaleX: -1 }] }}>
+        <Path d="M8.2 9.5A9.5 9.5 0 1 1 5.5 16" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" />
+        <Path d="M8.6 4.6 8 9.8l5.2.4" fill="none" stroke={colors.text} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      </Svg>
+      <Text style={[type.bold, { position: 'absolute', top: size / 2 - 6, fontSize: 10, color: colors.text }]}>10</Text>
+    </Squish>
   )
 }
 

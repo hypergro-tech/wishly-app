@@ -22,6 +22,9 @@ import { exampleTrack, usePlayer } from '@/lib/player'
 import { orderCover, songTitle } from '@/lib/songs'
 import { colors, tint, type, shade } from '@/theme'
 
+// Examples without a photo are listed under the occasion tiles.
+const MORE_EXAMPLES = EXAMPLES.filter((e) => !e.photo)
+
 const OCCASION_TILES = OCCASIONS
 
 const greeting = () => {
@@ -178,7 +181,7 @@ export default function Home() {
               ))}
             </View>
             <Body muted size={13} style={{ marginTop: 12, marginHorizontal: 20 }}>
-              {formatPrice(CORE_PACKAGE.price)} · one correction round included · no subscription
+              From {formatPrice(CORE_PACKAGE.price)} a song · one correction round included
             </Body>
           </>
         )}
@@ -250,9 +253,11 @@ export default function Home() {
           ))}
         </View>
 
+        {MORE_EXAMPLES.length > 0 && (
+        <>
         <Text accessibilityRole="header" style={[type.bold, { marginTop: 32, marginHorizontal: 20, fontSize: 21, color: colors.text }]}>More examples</Text>
         <View style={{ marginTop: 8, marginHorizontal: 20 }}>
-          {EXAMPLES.filter((e) => !e.photo).map((e, i, all) => {
+          {MORE_EXAMPLES.map((e, i, all) => {
             const t = exampleTrack(e)
             const on = player.track?.key === t.key && player.playing
             return (
@@ -269,6 +274,8 @@ export default function Home() {
             )
           })}
         </View>
+        </>
+        )}
         <Text style={[type.regular, { marginTop: 10, marginHorizontal: 20, fontSize: 12, color: colors.muted }]}>Example songs and illustrative photography, not customer stories.</Text>
       </ScrollView>
       <ScrollHeader title="Home" solid={header.solid} />

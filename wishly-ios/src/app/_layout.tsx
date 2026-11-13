@@ -2,7 +2,8 @@
 import 'react-native-get-random-values'
 
 import { setAudioModeAsync } from 'expo-audio'
-import { Stack } from 'expo-router'
+import * as Notifications from 'expo-notifications'
+import { Stack, router } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
@@ -12,6 +13,7 @@ import { SessionProvider, useSession } from '@/api/session'
 import { DraftProvider } from '@/lib/draft'
 import { PlayerProvider } from '@/lib/player'
 import { SongReadyProvider } from '@/lib/songReady'
+import { WalletProvider } from '@/lib/wallet'
 import { colors, type } from '@/theme'
 
 SplashScreen.preventAutoHideAsync()
@@ -31,13 +33,15 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
       <SessionProvider>
-        <DraftProvider>
-          <PlayerProvider>
-            <SongReadyProvider>
-              <RootStack />
-            </SongReadyProvider>
-          </PlayerProvider>
-        </DraftProvider>
+        <WalletProvider>
+          <DraftProvider>
+            <PlayerProvider>
+              <SongReadyProvider>
+                <RootStack />
+              </SongReadyProvider>
+            </PlayerProvider>
+          </DraftProvider>
+        </WalletProvider>
       </SessionProvider>
     </GestureHandlerRootView>
   )
@@ -54,6 +58,14 @@ function RootStack() {
   useEffect(() => {
     if (ready) SplashScreen.hideAsync()
   }, [ready])
+
+  // Tapping "your song is ready" opens that song, whether the app was
+  // closed or in the background.
+  const opened = Notifications.useLastNotificationResponse()
+  useEffect(() => {
+    const url = opened?.notification.request.content.data?.url
+    if (ready && typeof url === 'string') router.push(url as never)
+  }, [opened, ready])
 
   if (!ready) return null
 
@@ -80,6 +92,7 @@ function RootStack() {
         <Stack.Screen name="message/[id]" options={{ ...sheet, sheetAllowedDetents: [0.68, 0.92] }} />
         <Stack.Screen name="welcome" options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="sign-in" options={{ ...sheet, sheetAllowedDetents: [0.62, 0.95] }} />
+        <Stack.Screen name="plans" options={{ ...sheet, sheetAllowedDetents: [0.92] }} />
         <Stack.Screen name="notify" options={{ ...sheet, sheetAllowedDetents: 'fitToContents' }} />
         <Stack.Screen name="gift/[token]" options={{ presentation: 'fullScreenModal', headerShown: false }} />
         <Stack.Screen name="auth" options={{ headerShown: false, animation: 'none' }} />

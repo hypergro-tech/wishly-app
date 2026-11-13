@@ -175,7 +175,7 @@ function CreateForm() {
               <Body muted size={13} style={{ marginTop: 12, textAlign: 'center' }}>
                 {todo.length > 0
                   ? `Still to add: ${todo.join(', ')}`
-                  : `${formatPrice(CORE_PACKAGE.price)} · ready in minutes · you check every name first`}
+                  : `From ${formatPrice(CORE_PACKAGE.price)} · ready in minutes · you check every name first`}
               </Body>
             </Animated.View>
           </Animated.View>
