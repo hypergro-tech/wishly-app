@@ -56,6 +56,16 @@ function CreateForm() {
     wasComplete.current = complete
   }, [complete])
 
+  // "Kaku and Kartik" typed as one name, then Anniversary picked: split it
+  // into the two boxes, so each name is sung and checked on its own.
+  const pickOccasion = (o: string) => {
+    set('occasion', o)
+    const both = r.name.trim().match(/^(.+?)\s+(?:and|&)\s+(.+)$/i)
+    if (o === 'Anniversary' && both && !r.partner_name?.trim()) {
+      set('recipient', { name: both[1].trim(), pronunciation: '', partner_name: both[2].trim(), partner_pronunciation: '' })
+    }
+  }
+
   const startOver = () =>
     Alert.alert('Start over?', 'This clears the song you’re creating.', [
       { text: 'Keep it', style: 'cancel' },
@@ -95,27 +105,42 @@ function CreateForm() {
 
           <Section title="The occasion">
             <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {OCCASIONS.map((o) => <OccasionCard key={o} occasion={o} selected={draft.occasion === o} onPress={() => set('occasion', o)} />)}
+              {OCCASIONS.map((o) => <OccasionCard key={o} occasion={o} selected={draft.occasion === o} onPress={() => pickOccasion(o)} />)}
             </View>
             {tone && (
               <Animated.View key={draft.occasion} entering={FadeIn.duration(260)} style={{ paddingLeft: 12, borderLeftWidth: 3, borderLeftColor: colors.coral }}>
                 <Text style={[type.accent, { fontSize: 17, lineHeight: 23, color: colors.text }]}>{tone.line}</Text>
               </Animated.View>
             )}
-            {/* An anniversary is for the couple: both names are sung. */}
+            {/* An anniversary is for a couple: one name in each box, both sung.
+                Both boxes show here together, so it's plain the second one is
+                the partner, not the person giving the song (15 Nov 2026). */}
             {draft.occasion === 'Anniversary' && (
-              <Animated.View entering={FadeIn.duration(260)} layout={settle} style={{ gap: 14 }}>
+              <Animated.View entering={FadeIn.duration(260)} layout={settle} style={{ gap: 14, padding: 14, borderRadius: 18, backgroundColor: colors.bg }}>
+                <View>
+                  <Text style={[type.bold, { fontSize: 17, color: colors.text }]}>The couple</Text>
+                  <Body muted size={14} style={{ marginTop: 4 }}>An anniversary song is for two people. Put one name in each box, and we’ll sing both.</Body>
+                </View>
                 <Field
-                  label={r.name.trim() ? `Who is ${r.name.trim()} celebrating with?` : 'Their partner’s name'}
-                  big
+                  label="First name"
+                  value={r.name}
+                  onChangeText={(name) => set('recipient', { name })}
+                  placeholder="e.g. Kaku"
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                />
+                <Field
+                  label="Their partner’s name"
                   value={r.partner_name ?? ''}
                   onChangeText={(partner_name) => set('recipient', { partner_name })}
-                  placeholder="e.g. George"
+                  placeholder="e.g. Kartik"
                   autoCapitalize="words"
                   autoCorrect={false}
                 />
                 <SoundsLike name={r.partner_name ?? ''} value={r.partner_pronunciation ?? ''} onChange={(partner_pronunciation) => set('recipient', { partner_pronunciation })} />
-                <Body muted size={13}>We’ll sing both names, and the song is for the two of them.</Body>
+                {r.name.trim() && r.partner_name?.trim() ? (
+                  <Text style={[type.accent, { fontSize: 16, color: colors.text }]}>A song for {r.name.trim()} & {r.partner_name.trim()}</Text>
+                ) : null}
               </Animated.View>
             )}
           </Section>
