@@ -5,6 +5,7 @@ import { Alert, ScrollView, View } from 'react-native'
 import { approveAndWrap, getOrder, wakeGiftLink, type Order } from '@/api/orders'
 import { Body, Button, Field, SheetBody, Title, success } from '@/components/ui'
 import { colors, type } from '@/theme'
+import { forWhom } from '@/lib/songs'
 
 export default function AddMessage() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -43,7 +44,7 @@ export default function AddMessage() {
       <SheetBody>
         <View>
           <Title size={26}>A few words from you</Title>
-          <Body muted style={{ marginTop: 6 }}>{order.recipient.name} will see this just before the song.</Body>
+          <Body muted style={{ marginTop: 6 }}>{forWhom(order)} will see this just before the song.</Body>
         </View>
         <Field
           label="Your message"

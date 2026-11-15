@@ -35,7 +35,7 @@ export function startingSong(brief: BriefLike, { title, lyrics, styleTags }: Son
 
 // What Create saves (an Order's brief) as the engine's inputs.
 type BriefLike = {
-  recipient: { name: string; pronunciation?: string; pronouns?: string; relationship?: string }
+  recipient: { name: string; pronunciation?: string; partner_name?: string; partner_pronunciation?: string; pronouns?: string; relationship?: string }
   occasion: string
   memories: Record<string, string | undefined>
   music: { mood?: string; genre?: string; voice?: string; language?: string }
@@ -60,6 +60,8 @@ export function songInputs(brief: BriefLike): SongInputs {
     story: {
       recipientName: text(r.name),
       sungAs: text(r.pronunciation),
+      partnerName: text(r.partner_name),
+      partnerSungAs: text(r.partner_pronunciation),
       pronouns: text(r.pronouns),
       relationship: text(r.relationship),
       occasion: text(brief.occasion),
@@ -79,7 +81,8 @@ export function songInputs(brief: BriefLike): SongInputs {
 // The template songwriter reads the brief's shape.
 function briefOf({ story, mood, style, voice }: SongInputs) {
   return {
-    recipient: { name: story.recipientName },
+    // A couple's template lyrics sing "Rebel and George" together.
+    recipient: { name: [story.recipientName, story.partnerName].filter(Boolean).join(' and ') },
     occasion: story.occasion,
     memories: { nickname: story.nickname, inside_joke: story.catchphrase, ritual: story.ritual, memory: story.memory, want_to_say: story.wantToSay },
     music: {

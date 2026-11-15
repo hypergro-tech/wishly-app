@@ -13,7 +13,7 @@ import { BigPlay, LyricView, Scrubber, SkipButton, useFollowLyrics } from '@/com
 import { Accent, Body, Button, tap } from '@/components/ui'
 import { useRise, wait } from '@/lib/motion'
 import { usePlayer, useTrack } from '@/lib/player'
-import { orderCover, orderTrack, songTitle } from '@/lib/songs'
+import { forWhom, orderCover, orderTrack, songTitle } from '@/lib/songs'
 import { quoted } from '@/lib/text'
 import { colors, type, shade } from '@/theme'
 
@@ -55,7 +55,7 @@ export default function GiftPreview() {
   }
 
   const listen = async () => {
-    player.play({ ...track, label: `A song for ${order.recipient.name}` })
+    player.play({ ...track, label: `A song for ${forWhom(order)}` })
     setStage('opening')
     await wait(650)
     setStage('open')
@@ -85,7 +85,7 @@ export default function GiftPreview() {
         <Spark size={120} bloom />
       </Animated.View>
       <Animated.Text entering={rise(750, 18)} accessibilityRole="header" style={[type.bold, { fontSize: 46, lineHeight: 50, letterSpacing: -1.2, color: colors.ink, textAlign: 'center', marginTop: 40 }]}>
-        A song for {order.recipient.name}
+        A song for {forWhom(order)}
       </Animated.Text>
       <Animated.Text entering={rise(900)} style={[type.regular, { fontSize: 18, color: shade(0.75), marginTop: 14 }]}>From someone who knows you.</Animated.Text>
       <Animated.View entering={rise(1100)} style={{ marginTop: 40, alignSelf: 'stretch' }}>
@@ -101,11 +101,11 @@ export default function GiftPreview() {
         <Animated.ScrollView {...follow.scrollProps} entering={FadeIn.duration(500)} contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
           <View style={{ alignItems: 'center' }}><Logo size={20} /></View>
           <View style={{ alignItems: 'center', marginTop: 18 }}>
-            <Cover spec={{ ...orderCover(order), caption: `for ${order.recipient.name}` }} size={260} shadow />
+            <Cover spec={{ ...orderCover(order), caption: `for ${forWhom(order)}` }} size={260} shadow />
           </View>
           <Text accessibilityRole="header" style={[type.bold, { marginTop: 20, textAlign: 'center', fontSize: 26, color: colors.text }]}>{songTitle(order)}</Text>
           <Body muted style={{ marginTop: 4, textAlign: 'center' }}>
-            A song for {order.recipient.name}{order.gift?.from_name ? `, from ${order.gift.from_name}` : ''}
+            A song for {forWhom(order)}{order.gift?.from_name ? `, from ${order.gift.from_name}` : ''}
           </Body>
 
           <View style={{ marginTop: 20, marginHorizontal: 8 }}>

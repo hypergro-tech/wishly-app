@@ -7,6 +7,8 @@ export type Song = {
   audio_url?: string | null
   // The spelling the singer was given, e.g. "Shivawn" for Siobhan.
   sung_as?: string
+  // An anniversary couple's second name, as sung.
+  partner_sung_as?: string
   sections: { label: string; lines: string[] }[]
 }
 

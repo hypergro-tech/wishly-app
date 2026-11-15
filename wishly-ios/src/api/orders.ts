@@ -18,7 +18,8 @@ export type Order = {
   created_date: string
   updated_date?: string
   status: Status
-  recipient: { name: string; pronunciation: string; pronouns: string; relationship: string }
+  // partner_*: an anniversary's second name (both are sung). Empty otherwise.
+  recipient: { name: string; pronunciation: string; partner_name?: string; partner_pronunciation?: string; pronouns: string; relationship: string }
   occasion: string
   occasion_date: string
   memories: Record<string, string>
@@ -68,8 +69,14 @@ export async function placeOrder(brief: Brief, payload?: SongPayload): Promise<O
   const q = quote(brief.package)
   // Each new song takes the next of the five covers: 1, 2, 3, 4, 5, then 1 again.
   const earlier = await listOrders().catch(() => [])
+  // Only an anniversary is for two people; a second name typed and then left
+  // behind by switching occasion is dropped.
+  const couple = brief.occasion === 'Anniversary'
+  const { partner_name, partner_pronunciation, ...one } = brief.recipient
+  const recipient = couple ? { ...one, partner_name: partner_name?.trim() ?? '', partner_pronunciation: partner_pronunciation ?? '' } : one
   const order: Order = await Orders().create({
     ...brief,
+    recipient,
     cover: earlier.length % 5,
     price_total: q.total,
     ready_by: q.readyBy,

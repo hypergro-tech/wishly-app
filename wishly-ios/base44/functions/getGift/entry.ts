@@ -1,10 +1,14 @@
 // The song and message behind a gift link, for the person receiving it.
-// POST { token, opened? } -> { name, title, occasion, audio_url, sections, message, from_name }
+// POST { token, opened? } -> { name, names, title, occasion, cover, audio_url, sections, message, from_name }
+// `names` is one name, or both of an anniversary couple; `name` joins them
+// ("Rebel & George"). `cover` is which of the five artworks the song shows.
 // Anyone with the link may call it, so it returns only what the gift page
 // shows, and only for songs the buyer has approved. The Order entity itself
 // stays private to its buyer. `opened: true` counts a visit.
 
 import { createClientFromRequest } from 'npm:@base44/sdk'
+
+import { coverIndex, honourees } from '../../shared/names.ts'
 
 export default async function (req: Request) {
   try {
@@ -19,9 +23,11 @@ export default async function (req: Request) {
       await admin.entities.Order.update(order.id, { gift: { ...order.gift, opened_count: (order.gift?.opened_count || 0) + 1 } })
     }
     return Response.json({
-      name: order.recipient.name,
+      name: honourees(order.recipient).map((h) => h.name).join(' & '),
+      names: honourees(order.recipient).map((h) => h.name),
       title: order.song.title,
       occasion: order.occasion,
+      cover: coverIndex(order as { id: string; cover?: number }),
       audio_url: order.song.audio_url,
       sections: order.song.sections,
       message: order.gift?.message ?? '',

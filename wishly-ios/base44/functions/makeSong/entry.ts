@@ -7,7 +7,7 @@
 //
 //   0. Write the lyrics with Gemini first, from a prompt built here from the
 //      saved order (never one the app sends), using the name at least four
-//      times. The template lyrics startSong saved stay if it fails.
+//      times (an anniversary couple: both names, three times each). The template lyrics startSong saved stay if it fails.
 //   1. Sing it with the buyer's sounds-like spelling (else a tested or
 //      suggested one for tricky names, else the name as written).
 //   2. Listen three times. The name must be heard at least twice.
@@ -22,6 +22,7 @@ import { cleanKey } from '../../shared/ai.ts'
 import { buildLyricPrompt, LYRICS_SCHEMA } from '../../shared/lyricGenerator.ts'
 import { makeTakes, type Keys, type Order } from '../../shared/song.ts'
 import { songInputs } from '../../shared/songPipeline.ts'
+import { together } from '../../shared/names.ts'
 
 export default async function (req: Request) {
   try {
@@ -61,7 +62,8 @@ async function produce(admin: any, order: Order, keys: Keys, lyrics: { prompt: s
   const { file_url } = await admin.integrations.Core.UploadFile({ file })
 
   await admin.entities.Order.update(order.id, {
-    song: { ...order.song, audio_url: file_url, sung_as: best.spelling },
+    // One spelling per name; a couple's second name keeps its own.
+    song: { ...order.song, audio_url: file_url, sung_as: best.sung?.[0] ?? best.spelling, ...(best.sung?.[1] ? { partner_sung_as: best.sung[1] } : {}) },
     name_check: { passed, needs_person: !passed, tries: tries.map(({ spelling, heard, refused }) => ({ spelling, heard, refused: Boolean(refused) })) },
     // A take that never passed waits for a person to listen before the buyer hears it.
     ...(passed ? { status: 'ready_for_review' } : {}),
@@ -78,7 +80,7 @@ async function tellBuyer(admin: any, order: Order) {
   const fresh = await admin.entities.Order.get(order.id).catch(() => null)
   const to = fresh?.push_token
   if (typeof to !== 'string' || !to.startsWith('ExponentPushToken[')) return
-  const name = order.recipient?.name || 'their'
+  const name = order.recipient?.name ? together(order.recipient) : 'their'
   const res = await fetch('https://exp.host/--/api/v2/push/send', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },

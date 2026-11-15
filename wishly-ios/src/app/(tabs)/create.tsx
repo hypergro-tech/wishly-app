@@ -102,6 +102,22 @@ function CreateForm() {
                 <Text style={[type.accent, { fontSize: 17, lineHeight: 23, color: colors.text }]}>{tone.line}</Text>
               </Animated.View>
             )}
+            {/* An anniversary is for the couple: both names are sung. */}
+            {draft.occasion === 'Anniversary' && (
+              <Animated.View entering={FadeIn.duration(260)} layout={settle} style={{ gap: 14 }}>
+                <Field
+                  label={r.name.trim() ? `Who is ${r.name.trim()} celebrating with?` : 'Their partner’s name'}
+                  big
+                  value={r.partner_name ?? ''}
+                  onChangeText={(partner_name) => set('recipient', { partner_name })}
+                  placeholder="e.g. George"
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                />
+                <SoundsLike name={r.partner_name ?? ''} value={r.partner_pronunciation ?? ''} onChange={(partner_pronunciation) => set('recipient', { partner_pronunciation })} />
+                <Body muted size={13}>We’ll sing both names, and the song is for the two of them.</Body>
+              </Animated.View>
+            )}
           </Section>
 
           <Section title="Their story" sub={tone?.gentle

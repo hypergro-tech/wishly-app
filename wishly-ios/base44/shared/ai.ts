@@ -44,10 +44,15 @@ Return JSON with:
 // sections. The prompt sets the shape (lyricGenerator.ts). The
 // name has to be heard, so it must come up often (Base44's own AI used it once
 // or twice per song, and uses a Base44 credit each time).
-export async function writeLyrics(prompt: string, schema: object, name: string, key: string) {
+// `name` is one name, or a couple's two names for an anniversary.
+export async function writeLyrics(prompt: string, schema: object, name: string | string[], key: string) {
+  const names = Array.isArray(name) ? name : [name]
+  const use = names.length > 1
+    ? `Use both names, ${names.map((n) => `"${n}"`).join(' and ')}, at least three times each`
+    : `Use the name "${names[0]}" at least four times`
   const ask = `${prompt}
 
-Use the name "${name}" at least four times, in no more than 90 words, all in English. Reply only with JSON matching this schema:
+${use}, in no more than 90 words, all in English. Reply only with JSON matching this schema:
 ${JSON.stringify(schema)}`
   const res = await gemini(ARGON, key, ask, { responseMimeType: 'application/json', temperature: 0.9 })
   const written = JSON.parse(textOf(res))

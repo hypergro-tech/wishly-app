@@ -3,7 +3,7 @@
 // same keys, without using Base44). Keep it free of Base44 calls.
 
 import { listen, sing, suggestSpellings, writeLyrics } from './ai.ts'
-import { isTricky, plainName, singable, testedSpelling } from './names.ts'
+import { honourees, isTricky, plainName, singable, testedSpelling } from './names.ts'
 
 export const MAX_TRIES = 3
 const LISTENS = 3
@@ -11,7 +11,7 @@ const LISTENS = 3
 export type Keys = { gemini: string }
 // deno-lint-ignore no-explicit-any
 export type Order = any
-export type Try = { spelling: string; heard: number; audio?: Uint8Array<ArrayBuffer>; refused?: boolean; lines?: string[] }
+export type Try = { spelling: string; sung?: string[]; heard: number; audio?: Uint8Array<ArrayBuffer>; refused?: boolean; lines?: string[] }
 
 // Lowercase letters and spaces only: "O'Sheen!" -> "osheen".
 const spoken = (s: string) => plainName(s).replace(/['’-]/g, '').replace(/[^a-z]+/g, ' ').trim()
@@ -59,73 +59,83 @@ const nameCount = (song: any, name: string) =>
 // deno-lint-ignore no-explicit-any
 const words = (song: any) => (song?.sections || []).flatMap((s: { lines: string[] }) => s.lines).join(' ').split(/\s+/).filter(Boolean).length
 export const MAX_WORDS = 90
+// One name is sung at least four times; a couple's names at least three times each.
+const NEEDED = (names: string[]) => (names.length > 1 ? 3 : 4)
 // deno-lint-ignore no-explicit-any
-const fits = (song: any, name: string) => nameCount(song, name) >= 4 && words(song) <= MAX_WORDS
+const fits = (song: any, names: string[]) => names.every((n) => nameCount(song, n) >= NEEDED(names)) && words(song) <= MAX_WORDS
 // Fitting beats not; then more names; then fewer words.
 // deno-lint-ignore no-explicit-any
-const score = (song: any, name: string) => (fits(song, name) ? 1000 : 0) + Math.min(nameCount(song, name), 4) * 100 - words(song)
+const score = (song: any, names: string[]) =>
+  (fits(song, names) ? 1000 : 0) + names.reduce((t, n) => t + Math.min(nameCount(song, n), NEEDED(names)) * 100, 0) - words(song)
 
 // Writes the lyrics (if asked), then sings and checks up to three takes.
-// `order.song` is updated in place with the new lyrics.
+// `order.song` is updated in place with the new lyrics. For an anniversary
+// with two names, every name must be heard in the same listen.
 export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: string; schema: object } | null) {
+  const people = honourees(order.recipient)
+  const names = people.map((p) => p.name)
   if (lyrics) {
-    const n = order.recipient.name.trim()
     try {
-      // The name has to be heard, and the song has to end by about a minute,
-      // so lyrics with the name fewer than four times or over 90 words are
-      // written once more (Gemini sometimes stops at three names, or runs long).
-      let written = await writeLyrics(lyrics.prompt, lyrics.schema, n, keys.gemini)
-      if (!fits(written, n)) {
-        const again = await writeLyrics(lyrics.prompt, lyrics.schema, n, keys.gemini).catch(() => null)
-        if (again?.sections?.length && score(again, n) > score(written, n)) written = again
+      // The names have to be heard, and the song has to end by about a minute,
+      // so lyrics with too few names or over 90 words are written once more
+      // (Gemini sometimes stops at three names, or runs long).
+      let written = await writeLyrics(lyrics.prompt, lyrics.schema, names, keys.gemini)
+      if (!fits(written, names)) {
+        const again = await writeLyrics(lyrics.prompt, lyrics.schema, names, keys.gemini).catch(() => null)
+        if (again?.sections?.length && score(again, names) > score(written, names)) written = again
       }
       if (written?.sections?.length) order.song = { ...order.song, ...written }
     } catch (error) {
       console.error('Writing lyrics failed, singing the template', order.id, error)
     }
   }
-  const name: string = order.recipient.name.trim()
-  const { spellings } = await plan(name, order.recipient.pronunciation, keys.gemini)
-
-  const heardIn = (text: string) => nameHeard(text, name, spellings)
+  // Spellings to try for each name, best first.
+  const lists = await Promise.all(people.map((p) => plan(p.name, p.pronunciation, keys.gemini).then((r) => r.spellings)))
+  const heardIn = (text: string) => names.every((n, k) => nameHeard(text, n, lists[k]))
 
   // Each try is sung and listened to. Lyria refuses some names outright: famous
   // singers' first names (Taylor, Selena, Ariana, Adele) and a few sounds-like
   // spellings. A refusal comes back at once and costs nothing, so it doesn't use
   // up a try; a same-sounding spelling (Tayler, Selina) usually gets through.
+  // Try i sings each name's i-th spelling (or its last one, if it has fewer).
   const tries: Try[] = []
-  let askedGemini = isTricky(name)
-  for (let i = 0; i < spellings.length; i++) {
-    const spelling = spellings[i]
+  const asked = names.map((n) => isTricky(n))
+  const longest = () => Math.max(...lists.map((l) => l.length))
+  for (let i = 0; i < longest(); i++) {
+    const sung = lists.map((l) => l[Math.min(i, l.length - 1)])
+    const spelling = sung.join(' & ')
     if (tries.filter((t) => !t.refused).length >= MAX_TRIES) break
     let audio: Uint8Array<ArrayBuffer>
     try {
-      audio = await sing(songPrompt(order, spelling), keys.gemini)
+      audio = await sing(songPrompt(order, sung), keys.gemini)
     } catch (error) {
       if (!/no audio/i.test(String((error as Error).message))) throw error
       console.error('Lyria refused', order.id, spelling, (error as Error).message)
-      tries.push({ spelling, heard: 0, refused: true })
+      tries.push({ spelling, sung, heard: 0, refused: true })
       // Everything planned was refused: ask for spellings that sound the same.
-      if (i === spellings.length - 1 && !askedGemini) {
-        askedGemini = true
-        try {
-          const s = await suggestSpellings(name, keys.gemini)
-          for (const alt of s.spellings.map(singable)) if (!spellings.some((x) => x.toLowerCase() === alt.toLowerCase())) spellings.push(alt)
-        } catch (e) {
-          console.error('suggestSpellings failed', name, e)
+      if (i === longest() - 1) {
+        for (let k = 0; k < names.length; k++) {
+          if (asked[k]) continue
+          asked[k] = true
+          try {
+            const s = await suggestSpellings(names[k], keys.gemini)
+            for (const alt of s.spellings.map(singable)) if (!lists[k].some((x) => x.toLowerCase() === alt.toLowerCase())) lists[k].push(alt)
+          } catch (e) {
+            console.error('suggestSpellings failed', names[k], e)
+          }
         }
       }
       continue
     }
     const texts = await Promise.all(Array.from({ length: LISTENS }, () => listen(audio, keys.gemini)))
     const heard = texts.filter(heardIn).length
-    tries.push({ spelling, heard, audio, lines: texts.map((t) => (t.match(/[^.!?\n]*birthday[^.!?\n]*/i) || [''])[0].trim()) })
+    tries.push({ spelling, sung, heard, audio, lines: texts.map((t) => (t.match(/[^.!?\n]*birthday[^.!?\n]*/i) || [''])[0].trim()) })
     if (heard >= 2) break
   }
 
-  const sung = tries.filter((t) => t.audio)
-  if (!sung.length) throw new Error(`Lyria refused every spelling: ${tries.map((t) => t.spelling).join(', ')}`)
-  const best = sung.reduce((a, b) => (b.heard > a.heard ? b : a))
+  const done = tries.filter((t) => t.audio)
+  if (!done.length) throw new Error(`Lyria refused every spelling: ${tries.map((t) => t.spelling).join(', ')}`)
+  const best = done.reduce((a, b) => (b.heard > a.heard ? b : a))
   return { tries, best, passed: best.heard >= 2 }
 }
 
@@ -155,15 +165,19 @@ async function plan(name: string, chosen: string | undefined, geminiKey: string)
   return { spellings: tried }
 }
 
-// The lyrics keep the real name; the singer gets the sounds-like spelling.
+// The lyrics keep the real names; the singer gets the sounds-like spellings
+// (one per name, in honourees() order).
 // The song opens on a short instrumental intro and closes with a melodic
 // fade and an explicit end, so it resolves cleanly at around 50–60 seconds
 // (the same tags as lyricsText in lyricGenerator.ts). Always
 // sung in English.
-export function songPrompt(order: Order, spelling: string) {
-  const name = new RegExp(`\\b${escape(order.recipient.name.trim())}\\b`, 'gi')
+export function songPrompt(order: Order, spelling: string | string[]) {
+  const people = honourees(order.recipient)
+  const spellings = Array.isArray(spelling) ? spelling : [spelling]
+  const swap = (line: string) =>
+    people.reduce((l, p, k) => l.replace(new RegExp(`\\b${escape(p.name)}\\b`, 'gi'), spellings[k] ?? p.name), line)
   const sung = order.song.sections
-    .map((s: { label: string; lines: string[] }) => `[${s.label === 'Outro' ? 'Outro - Melodic fade' : s.label}]\n${s.lines.map((l) => l.replace(name, spelling)).join('\n')}`)
+    .map((s: { label: string; lines: string[] }) => `[${s.label === 'Outro' ? 'Outro - Melodic fade' : s.label}]\n${s.lines.map(swap).join('\n')}`)
     .join('\n\n')
   const lyrics = `[Short Intro]\n\n${sung}\n\n[Fade Out]\n[End]`
   const { mood, genre, voice } = order.music || {}

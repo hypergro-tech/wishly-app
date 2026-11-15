@@ -11,7 +11,8 @@ import { CORE_PACKAGE, EXTRAS, MOODS, OCCASION_TONES, formatPrice } from '@/lib/
 import { filledMemories, useDraft } from '@/lib/draft'
 import { wait } from '@/lib/motion'
 import { shouldAskForNotifications } from '@/lib/notifications'
-import { pronoun } from '@/lib/songs'
+import { honourees } from '@/lib/names'
+import { forWhom, pronoun } from '@/lib/songs'
 import { generateSongPayload, songInputs } from '@shared/songPipeline'
 import { quoted } from '@/lib/text'
 import { useWallet } from '@/lib/wallet'
@@ -72,7 +73,7 @@ export default function Review() {
       await wait(550)
       reset()
       router.replace(`/song/${order.id}`)
-      if (await shouldAskForNotifications()) router.push({ pathname: '/notify', params: { name: order.recipient.name, id: order.id } })
+      if (await shouldAskForNotifications()) router.push({ pathname: '/notify', params: { name: forWhom(order), id: order.id } })
       else rememberPushToken(order.id)
     } catch {
       Alert.alert('We couldn’t create your song', 'Check your connection and try again. Nothing has been charged.')
@@ -86,7 +87,7 @@ export default function Review() {
         <View style={{ alignItems: 'center', marginTop: 14 }}>
           <Cover spec={{ name: r.name, tint: OCCASION_TONES[draft.occasion]?.tint ?? 'lilac' }} size={200} shadow />
         </View>
-        <Text accessibilityRole="header" style={[type.bold, { marginTop: 18, textAlign: 'center', fontSize: 22, color: colors.text }]}>A song for {r.name}</Text>
+        <Text accessibilityRole="header" style={[type.bold, { marginTop: 18, textAlign: 'center', fontSize: 22, color: colors.text }]}>A song for {forWhom(draft)}</Text>
         <Body muted size={14} style={{ marginTop: 4, textAlign: 'center' }}>
           {[draft.occasion, mood, draft.music.genre, draft.music.language].filter(Boolean).join(' · ')}
         </Body>
@@ -98,11 +99,15 @@ export default function Review() {
               <Text style={[type.bold, { fontSize: 15, color: colors.text, textDecorationLine: 'underline', textDecorationColor: colors.coral }]}>Edit</Text>
             </Pressable>
           </View>
-          <Text style={[type.bold, { marginTop: 14, fontSize: 28, letterSpacing: -0.5, color: colors.text }]}>{r.name}</Text>
-          <View style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-            <Body muted style={{ flex: 1 }}>Sung as “{r.pronunciation || r.name}” · your {r.relationship.toLowerCase()}</Body>
-            <SpeakPill text={r.pronunciation || r.name} />
-          </View>
+          {honourees(r).map((h, i) => (
+            <View key={i}>
+              <Text style={[type.bold, { marginTop: 14, fontSize: 28, letterSpacing: -0.5, color: colors.text }]}>{h.name}</Text>
+              <View style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+                <Body muted style={{ flex: 1 }}>Sung as “{h.pronunciation || h.name}”{i === 0 ? ` · your ${r.relationship.toLowerCase()}` : ''}</Body>
+                <SpeakPill text={h.pronunciation || h.name} />
+              </View>
+            </View>
+          ))}
           <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.line, gap: 12 }}>
             {filledMemories(draft).map((m) => (
               <View key={m.key}>

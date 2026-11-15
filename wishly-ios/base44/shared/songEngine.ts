@@ -13,6 +13,9 @@ export type UserStoryDetails = {
   recipientName: string
   // The sounds-like spelling the singer is given, e.g. "Shivawn" for Siobhan.
   sungAs: string
+  // An anniversary's second name ("" otherwise): the song is for the couple.
+  partnerName: string
+  partnerSungAs: string
   pronouns: string
   relationship: string
   occasion: string

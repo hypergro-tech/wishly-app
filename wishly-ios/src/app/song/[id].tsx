@@ -6,7 +6,7 @@ import Animated, { useReducedMotion } from 'react-native-reanimated'
 
 import { realSongs } from '@/api/base44Client'
 import { applyCorrection, finishProduction, getOrder, giftUrl, wakeGiftLink, type Order } from '@/api/orders'
-import { Rhythm, Ribbon, Spark } from '@/components/brand'
+import { Rhythm, Ribbon } from '@/components/brand'
 import Cover from '@/components/Cover'
 import { DownloadIcon, EmailIcon, InstagramIcon, LinkIcon, MessageIcon, MoreIcon, WhatsAppIcon } from '@/components/icons'
 import { Burst, Glow, Squish } from '@/components/motion'
@@ -17,10 +17,11 @@ import { MOODS, OCCASION_TONES } from '@/lib/catalog'
 import { usePop } from '@/lib/motion'
 import { markSeen, seen } from '@/lib/once'
 import { usePlayer, useTrack } from '@/lib/player'
-import { orderCover, orderTrack, pronoun, songTitle } from '@/lib/songs'
+import { honourees } from '@/lib/names'
+import { forWhom, orderCover, orderTrack, pronoun, songTitle } from '@/lib/songs'
 import { saveSong } from '@/lib/saveSong'
 import { quoted } from '@/lib/text'
-import { colors, tint, type, shade } from '@/theme'
+import { colors, type, shade } from '@/theme'
 
 export default function SongScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -82,13 +83,13 @@ function Header({ order, size, badge, celebrate, ribbon }: { order: Order; size:
         {ribbon ? <View pointerEvents="none" style={{ position: 'absolute', top: size * 0.21 }}>{ribbon}</View> : null}
         <Glow on={Boolean(celebrate) && gentle} radius={Math.round(size * 0.09)}>
           <Animated.View style={pop}>
-            <Cover spec={{ ...orderCover(order), caption: `for ${order.recipient.name}` }} size={size} shadow badge={badge} />
+            <Cover spec={{ ...orderCover(order), caption: `for ${forWhom(order)}` }} size={size} shadow badge={badge} />
           </Animated.View>
         </Glow>
         {celebrate && !gentle ? <Burst /> : null}
       </View>
       <Text accessibilityRole="header" style={[type.bold, { marginTop: 18, textAlign: 'center', fontSize: 26, letterSpacing: -0.5, color: colors.text }]}>{songTitle(order)}</Text>
-      <Body muted size={14} style={{ marginTop: 4, textAlign: 'center' }}>A song for {order.recipient.name} · version {order.song_version}</Body>
+      <Body muted size={14} style={{ marginTop: 4, textAlign: 'center' }}>A song for {forWhom(order)} · version {order.song_version}</Body>
     </>
   )
 }
@@ -104,16 +105,22 @@ function Writing({ order, demo }: { order: Order; demo: ReactNode }) {
   ]
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}>
-      <View style={{ alignSelf: 'center', marginTop: 12, width: 280, height: 280, borderRadius: 22, padding: 20, backgroundColor: tint(cover.tint), justifyContent: 'space-between' }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Spark size={32} spin />
-          <Chip label={correcting ? 'Correcting' : 'Writing'} bg={colors.ink} fg={tint(cover.tint)} />
+      {/* The song's own artwork from the start, the same one it keeps when
+          it's ready and on the gift page. The title isn't written yet, so
+          the cover carries their name. */}
+      <View style={{ alignItems: 'center', marginTop: 12 }}>
+        <Cover
+          spec={{ ...cover, name: forWhom(order), caption: undefined }}
+          size={280}
+          shadow
+          badge={<Chip label={correcting ? 'Correcting' : 'Writing'} bg="rgba(255,255,255,0.92)" fg={colors.ink} />}
+        />
+        <View style={{ marginTop: 16, width: 180 }}>
+          <Rhythm height={22} on={colors.muted} live />
         </View>
-        <Text numberOfLines={1} adjustsFontSizeToFit style={[type.bold, { fontSize: 52, letterSpacing: -1.4, color: colors.ink }]}>{order.recipient.name}</Text>
-        <Rhythm height={40} on="rgba(20,52,56,0.75)" live />
       </View>
 
-      <Text accessibilityRole="header" style={[type.bold, { marginTop: 18, textAlign: 'center', fontSize: 24, color: colors.text }]}>A song for {order.recipient.name}</Text>
+      <Text accessibilityRole="header" style={[type.bold, { marginTop: 18, textAlign: 'center', fontSize: 24, color: colors.text }]}>A song for {forWhom(order)}</Text>
       <Body muted size={14} style={{ marginTop: 4, textAlign: 'center' }}>
         {[order.occasion, MOODS.find((m) => m.id === order.music.mood)?.label, order.music.genre].filter(Boolean).join(' · ')}
       </Body>
@@ -131,7 +138,7 @@ function Writing({ order, demo }: { order: Order; demo: ReactNode }) {
 
       <Card style={{ marginTop: 22 }}>
         <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>
-          {correcting ? 'We’re making your correction.' : `We’re writing ${order.recipient.name}’s song.`}
+          {correcting ? 'We’re making your correction.' : `We’re writing ${forWhom(order)}’s song.`}
         </Text>
         {correcting ? (
           <Body muted style={{ marginTop: 8 }}>
@@ -171,7 +178,7 @@ function Check({ order }: { order: Order }) {
   }, [order.id])
 
   const items = [
-    `${order.recipient.name} is sung the way you say it`,
+    order.recipient.partner_name?.trim() ? `${forWhom(order)} are both sung the way you say them` : `${order.recipient.name} is sung the way you say it`,
     'The details and facts are right',
     `Nothing feels off for ${her}`,
   ]
@@ -207,7 +214,7 @@ function Check({ order }: { order: Order }) {
                   <Body style={{ flex: 1 }}>{label}</Body>
                 </Pressable>
                 {i === 0 && (
-                  <Pressable accessibilityRole="button" accessibilityLabel={`Hear ${order.recipient.name}`} hitSlop={10} onPress={() => { tap(); say(order.recipient.pronunciation || order.recipient.name) }}>
+                  <Pressable accessibilityRole="button" accessibilityLabel={`Hear ${forWhom(order)}`} hitSlop={10} onPress={() => { tap(); say(honourees(order.recipient).map((h) => h.pronunciation || h.name).join(' and ')) }}>
                     <Text style={[type.bold, { fontSize: 14, color: colors.text, textDecorationLine: 'underline', textDecorationColor: colors.coral }]}>Hear it</Text>
                   </Pressable>
                 )}
@@ -267,7 +274,7 @@ function SaveSong({ order, button }: { order: Order; button?: boolean }) {
 
 function Give({ order }: { order: Order }) {
   const link = giftUrl(order)
-  const name = order.recipient.name
+  const name = forWhom(order)
   const her = pronoun(order, 'her')
   const she = pronoun(order, 'she')
   const text = `A song for ${name}. Press play when you have a quiet minute.`

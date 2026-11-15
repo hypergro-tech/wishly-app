@@ -11,7 +11,7 @@ import Cover from '@/components/Cover'
 import { PlayPause } from '@/components/motion'
 import { Body, Button, Chip, success } from '@/components/ui'
 import { usePlayer, useTrack } from '@/lib/player'
-import { orderCover, orderTrack, songTitle } from '@/lib/songs'
+import { forWhom, orderCover, orderTrack, songTitle } from '@/lib/songs'
 import { colors, type } from '@/theme'
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
@@ -61,7 +61,7 @@ export function SongReadyModal({ order, onClose }: { order: Order | null; onClos
               <Cover spec={orderCover(order)} size={156} shadow badge={<Chip label="♪ New song" bg={colors.coral} />} />
             </View>
             <Text numberOfLines={2} style={[type.bold, { marginTop: 16, fontSize: 19, color: colors.text, textAlign: 'center' }]}>{songTitle(order)}</Text>
-            <Body muted size={14} style={{ marginTop: 4, textAlign: 'center' }}>A song for {order.recipient.name}</Body>
+            <Body muted size={14} style={{ marginTop: 4, textAlign: 'center' }}>A song for {forWhom(order)}</Body>
             <Button
               label={now.playing ? 'Pause' : 'Quick play'}
               icon={<PlayPause playing={now.playing} size={18} color={colors.ink} />}

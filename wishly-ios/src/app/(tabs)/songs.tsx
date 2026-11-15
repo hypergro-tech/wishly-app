@@ -12,7 +12,7 @@ import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { ChevronRightIcon } from '@/components/icons'
 import { Squish } from '@/components/motion'
 import { Body, Button, Chip, Pill, Title, tap } from '@/components/ui'
-import { orderCover, orderedLine, statusChip } from '@/lib/songs'
+import { forWhom, orderCover, orderedLine, statusChip } from '@/lib/songs'
 import { colors, type, shade } from '@/theme'
 
 const FILTERS = [
@@ -78,7 +78,7 @@ export default function MySongs() {
                   >
                     <Cover spec={orderCover(o)} size={68} />
                     <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text numberOfLines={1} style={[type.bold, { fontSize: 17, color: colors.text }]}>A song for {o.recipient.name}</Text>
+                      <Text numberOfLines={1} style={[type.bold, { fontSize: 17, color: colors.text }]}>A song for {forWhom(o)}</Text>
                       <Text numberOfLines={1} style={[type.regular, { fontSize: 13, color: colors.muted, marginTop: 2 }]}>{orderedLine(o)}</Text>
                       <View style={{ marginTop: 7 }}><Chip label={chip.label} bg={chip.bg} fg={chip.fg} /></View>
                     </View>

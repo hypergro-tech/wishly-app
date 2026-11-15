@@ -21,6 +21,9 @@
       "properties": {
         "name": { "type": "string", "minLength": 1, "maxLength": 80 },
         "pronunciation": { "type": "string", "maxLength": 80 }, // the sounds-like spelling that gets sung
+        // An anniversary is for a couple: the second name, sung and checked too.
+        "partner_name": { "type": "string", "maxLength": 80 },
+        "partner_pronunciation": { "type": "string", "maxLength": 80 },
         "pronouns": { "type": "string" },
         "relationship": { "type": "string" }
       },
@@ -77,6 +80,8 @@
         "audio_url": { "type": ["string", "null"] },
         // The spelling the singer was given, e.g. "Shivawn" for Siobhan.
         "sung_as": { "type": "string" },
+        // The couple's second name, as sung (anniversaries).
+        "partner_sung_as": { "type": "string" },
         "sections": {
           "type": "array",
           "items": {

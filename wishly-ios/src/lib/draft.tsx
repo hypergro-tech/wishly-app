@@ -10,7 +10,7 @@ import { MEMORY_PROMPTS } from './catalog'
 const DRAFT_KEY = 'wishly:draft'
 
 export const EMPTY_DRAFT: Brief = {
-  recipient: { name: '', pronunciation: '', pronouns: '', relationship: '' },
+  recipient: { name: '', pronunciation: '', partner_name: '', partner_pronunciation: '', pronouns: '', relationship: '' },
   occasion: '',
   occasion_date: '',
   memories: { ritual: '', nickname: '', inside_joke: '', memory: '', want_to_say: '', avoid: '' },
@@ -27,6 +27,8 @@ export function missing(b: Brief): string[] {
   if (!b.recipient.name.trim()) out.push('their name')
   if (!b.recipient.relationship) out.push('who they are to you')
   if (!b.occasion) out.push('the occasion')
+  // An anniversary is for both of them, so both names are needed.
+  if (b.occasion === 'Anniversary' && !b.recipient.partner_name?.trim()) out.push('the second name')
   if (filledMemories(b).length === 0) out.push('one detail about them')
   if (!b.music.mood) out.push('a mood')
   if (!b.music.genre) out.push('a style')

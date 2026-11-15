@@ -46,3 +46,23 @@ export const singable = (spelling: string) =>
     .filter(Boolean)
     .map((part) => part[0].toUpperCase() + part.slice(1).toLowerCase())
     .join(' ')
+
+// Who a song is for: one person, or a couple for an anniversary (15 Nov 2026:
+// both names are given, sung and checked). Each name keeps its own
+// sounds-like spelling.
+export type Recipient = { name: string; pronunciation?: string; partner_name?: string; partner_pronunciation?: string }
+export type Honouree = { name: string; pronunciation: string }
+
+export function honourees(r: Recipient): Honouree[] {
+  const first = { name: (r.name || '').trim(), pronunciation: (r.pronunciation || '').trim() }
+  const partner = (r.partner_name || '').trim()
+  return partner ? [first, { name: partner, pronunciation: (r.partner_pronunciation || '').trim() }] : [first]
+}
+
+// "Rebel", or "Rebel & George" (`and` for lyrics: "Rebel and George").
+export const together = (r: Recipient, and = '&') => honourees(r).map((h) => h.name).join(` ${and} `)
+
+// Which of the five cover artworks a song shows. Orders since build 6 carry
+// `cover`; older ones get a steady pick from their id.
+export const coverIndex = (o: { id: string; cover?: number | null }) =>
+  typeof o.cover === 'number' ? o.cover % 5 : [...o.id].reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 9973, 7) % 5

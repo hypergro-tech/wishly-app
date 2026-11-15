@@ -21,6 +21,9 @@ export default function FixSomething() {
   const [note, setNote] = useState('')
   const [name, setName] = useState('')
   const [pronunciation, setPronunciation] = useState('')
+  // An anniversary couple's second name.
+  const [partner, setPartner] = useState('')
+  const [partnerSays, setPartnerSays] = useState('')
   const [field, setField] = useState('ritual')
   const [value, setValue] = useState('')
   const [sending, setSending] = useState(false)
@@ -30,6 +33,8 @@ export default function FixSomething() {
       setOrder(o)
       setName(o.recipient.name)
       setPronunciation(o.recipient.pronunciation)
+      setPartner(o.recipient.partner_name ?? '')
+      setPartnerSays(o.recipient.partner_pronunciation ?? '')
       const first = MEMORY_PROMPTS.find((m) => o.memories[m.key])?.key ?? 'ritual'
       setField(first)
       setValue(o.memories[first] ?? '')
@@ -39,12 +44,15 @@ export default function FixSomething() {
   if (!order) return null
 
   // A name or detail fix needs the corrected text; the others need a note.
-  const canSend = kind === 'name' ? name.trim() : kind === 'fact' ? value.trim() : note.trim()
+  const couple = Boolean(order.recipient.partner_name?.trim())
+  const canSend = kind === 'name' ? name.trim() && (!couple || partner.trim()) : kind === 'fact' ? value.trim() : note.trim()
   const filled = MEMORY_PROMPTS.filter((m) => order.memories[m.key])
 
   async function send() {
     setSending(true)
-    const changes = kind === 'name' ? { recipient: { name: name.trim(), pronunciation: pronunciation.trim() } } : kind === 'fact' ? { memories: { [field]: value.trim() } } : {}
+    const changes = kind === 'name'
+      ? { recipient: { name: name.trim(), pronunciation: pronunciation.trim(), ...(couple ? { partner_name: partner.trim(), partner_pronunciation: partnerSays.trim() } : {}) } }
+      : kind === 'fact' ? { memories: { [field]: value.trim() } } : {}
     await requestCorrection(order!, { kind, note: note || KINDS.find((k) => k.id === kind)!.label, changes })
     success()
     router.back()
@@ -87,6 +95,18 @@ export default function FixSomething() {
                 <SpeakButton text={pronunciation || name} size={50} />
               </View>
             </View>
+            {couple && (
+              <>
+                <Field label="Second name" value={partner} onChangeText={setPartner} autoCorrect={false} style={{ fontWeight: '700' }} />
+                <View style={{ gap: 8 }}>
+                  <Text style={[type.bold, { fontSize: 13, color: colors.muted }]}>Sounds like (one word)</Text>
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <View style={{ flex: 1 }}><Field value={partnerSays} onChangeText={setPartnerSays} autoCorrect={false} accessibilityLabel="Second name sounds like" autoCapitalize="words" /></View>
+                    <SpeakButton text={partnerSays || partner} size={50} />
+                  </View>
+                </View>
+              </>
+            )}
           </View>
         )}
 

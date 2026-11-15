@@ -19,7 +19,7 @@ import { openPlayer } from '@/lib/flight'
 import { occasionColour, occasionPicture } from '@/lib/occasions'
 import { WELCOMED, seen } from '@/lib/once'
 import { exampleTrack, usePlayer } from '@/lib/player'
-import { orderCover, songTitle } from '@/lib/songs'
+import { forWhom, orderCover, songTitle } from '@/lib/songs'
 import { colors, tint, type, shade } from '@/theme'
 
 // Examples without a photo are listed under the occasion tiles.
@@ -119,7 +119,7 @@ export default function Home() {
               <Eyebrow color={colors.coral}>Your first song</Eyebrow>
               {draft.recipient.name.trim() ? (
                 <>
-                  <Text style={[type.bold, { marginTop: 8, fontSize: 24, lineHeight: 28, color: colors.text }]}>A song for {draft.recipient.name}</Text>
+                  <Text style={[type.bold, { marginTop: 8, fontSize: 24, lineHeight: 28, color: colors.text }]}>A song for {forWhom(draft)}</Text>
                   <Body muted size={14} style={{ marginTop: 4 }}>Your details are saved. Pick up where you left off.</Body>
                   <Squish
                     accessibilityRole="button"
@@ -195,7 +195,7 @@ export default function Home() {
             <Cover spec={orderCover(ready)} size={96} />
             <View style={{ flex: 1 }}>
               <Eyebrow color={colors.coral}>Ready to listen and check</Eyebrow>
-              <Text style={[type.bold, { fontSize: 19, lineHeight: 23, color: colors.text, marginTop: 6 }]}>A song for {ready.recipient.name}</Text>
+              <Text style={[type.bold, { fontSize: 19, lineHeight: 23, color: colors.text, marginTop: 6 }]}>A song for {forWhom(ready)}</Text>
               <Text style={[type.regular, { fontSize: 14, color: colors.muted, marginTop: 2 }]}>{ready.occasion} · from you</Text>
               <View style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999, backgroundColor: colors.coral }}>
                 <PlayIcon size={11} color={colors.ink} />
@@ -215,7 +215,7 @@ export default function Home() {
             <Cover spec={{ ...orderCover(o), name: '' }} size={48} />
             <View style={{ flex: 1 }}>
               <Text style={[type.bold, { fontSize: 15, color: colors.text }]}>
-                {o.status === 'correction_requested' ? `Making your correction to ${songTitle(o)}` : `Writing ${o.recipient.name}’s song`}
+                {o.status === 'correction_requested' ? `Making your correction to ${songTitle(o)}` : `Writing ${forWhom(o)}’s song`}
               </Text>
               <View style={{ marginTop: 8, height: 4, borderRadius: 2, backgroundColor: shade(0.12) }}>
                 <View style={{ width: o.status === 'correction_requested' ? '75%' : '40%', height: 4, borderRadius: 2, backgroundColor: tint(orderCover(o).tint) }} />

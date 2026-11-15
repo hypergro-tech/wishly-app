@@ -45,6 +45,9 @@ export const LYRICS_SCHEMA = {
 
 export function buildLyricPrompt(story: UserStoryDetails, mood: Mood, occasion: string) {
   const name = story.recipientName.trim()
+  const partner = story.partnerName?.trim() ?? ''
+  // An anniversary for two: the song is sung to the couple, using both names.
+  const couple = partner ? `${name} and ${partner}` : ''
   const details = [
     story.nickname && `The name only the singer calls them: ${story.nickname}`,
     story.catchphrase && `The thing they always say: ${story.catchphrase}`,
@@ -55,11 +58,13 @@ export function buildLyricPrompt(story: UserStoryDetails, mood: Mood, occasion: 
 
   return `You are a professional songwriter writing a short, original song for one real person.
 
-Who it's for: ${name}${story.pronouns ? ` (${story.pronouns})` : ''}${story.relationship ? `, the singer's ${story.relationship.toLowerCase()}` : ''}.
+Who it's for: ${couple
+    ? `${couple}, a couple${story.relationship ? ` (the singer's ${story.relationship.toLowerCase()})` : ''}, celebrating together`
+    : `${name}${story.pronouns ? ` (${story.pronouns})` : ''}${story.relationship ? `, the singer's ${story.relationship.toLowerCase()}` : ''}`}.
 Occasion: ${occasion || 'just because'}.
 Mood: ${mood}: ${MOOD_WRITING[mood]}.
 Language: English only.
-Voice: sung by the person giving it${story.fromName ? ` (${story.fromName})` : ''}, speaking to ${name} as "I" and "you". Never sing the giver's name.
+Voice: sung by the person giving it${story.fromName ? ` (${story.fromName})` : ''}, speaking to ${couple ? `both of them as "I" and "you two"` : `${name} as "I" and "you"`}. Never sing the giver's name.
 
 Their story:
 ${details.length ? details.map((d) => `- ${d}`).join('\n') : '- No details given: keep it warm and specific to the occasion.'}
@@ -72,8 +77,10 @@ Rules:
 - Write ALL lyrics strictly in English. Do not include any foreign phrases, Spanish words, or translations under any circumstances.
 - Weave in every detail naturally, in the singer's own voice. Keep their exact words for the catchphrase and the nickname.
 - Never invent facts about the people: no new names, places, jobs or events.
-- Use the name "${name}" at least four times: twice in the [Chorus], once in the [Verse] and once in the outro.
-- Every section needs at least one line that could only be about ${name}. No stock party lines ("raise a glass", "hooray", "special day", "shine so bright").
+${couple
+    ? `- Use BOTH names, "${name}" and "${partner}", at least three times each: together as "${couple}" twice in the [Chorus] and once in the outro, and each name at least once in the [Verse]. Never leave either name out.`
+    : `- Use the name "${name}" at least four times: twice in the [Chorus], once in the [Verse] and once in the outro.`}
+- Every section needs at least one line that could only be about ${couple || name}. No stock party lines ("raise a glass", "hooray", "special day", "shine so bright").
 - Lines of 6 to 9 syllables with a steady rhythm, rhyming at the line ends where it feels natural.
 - Original lines only; don't quote or imitate existing songs.${story.avoid ? `\n- Leave out completely: ${story.avoid}.` : ''}
 

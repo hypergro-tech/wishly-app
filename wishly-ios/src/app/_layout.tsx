@@ -2,7 +2,6 @@
 import 'react-native-get-random-values'
 
 import { setAudioModeAsync } from 'expo-audio'
-import * as Notifications from 'expo-notifications'
 import { Stack, router } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
@@ -11,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import { SessionProvider, useSession } from '@/api/session'
 import { DraftProvider } from '@/lib/draft'
+import { useOpenedNotification } from '@/lib/notifications'
 import { PlayerProvider } from '@/lib/player'
 import { SongReadyProvider } from '@/lib/songReady'
 import { WalletProvider } from '@/lib/wallet'
@@ -61,7 +61,7 @@ function RootStack() {
 
   // Tapping "your song is ready" opens that song, whether the app was
   // closed or in the background.
-  const opened = Notifications.useLastNotificationResponse()
+  const opened = useOpenedNotification()
   useEffect(() => {
     const url = opened?.notification.request.content.data?.url
     if (ready && typeof url === 'string') router.push(url as never)

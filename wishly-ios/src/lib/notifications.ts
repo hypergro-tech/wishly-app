@@ -4,6 +4,7 @@
 // the song is done (base44/functions/makeSong).
 import Constants from 'expo-constants'
 import * as Notifications from 'expo-notifications'
+import { Platform } from 'react-native'
 
 import { NOTIFY_ASKED, markSeen, seen } from './once'
 
@@ -50,3 +51,9 @@ export async function pushToken(): Promise<string | null> {
     return null // Expo Go, the simulator or the web preview
   }
 }
+
+// The notification they tapped to open the app ("your song is ready"), so
+// the app can go to that song. Phones only: the web preview has no
+// notifications, and the hook throws there.
+export const useOpenedNotification: () => Notifications.NotificationResponse | null | undefined =
+  Platform.OS === 'web' ? () => null : Notifications.useLastNotificationResponse
