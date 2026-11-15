@@ -52,7 +52,7 @@ export async function writeLyrics(prompt: string, schema: object, name: string |
     : `Use the name "${names[0]}" at least four times`
   const ask = `${prompt}
 
-${use}, in no more than 90 words, all in English. Reply only with JSON matching this schema:
+${use}, in no more than 100 words, all in English. Reply only with JSON matching this schema:
 ${JSON.stringify(schema)}`
   const res = await gemini(ARGON, key, ask, { responseMimeType: 'application/json', temperature: 0.9 })
   const written = JSON.parse(textOf(res))
@@ -101,4 +101,20 @@ export async function listen(audio: Uint8Array<ArrayBuffer>, key: string): Promi
   for (let i = 0; i < audio.length; i += 0x8000) data += String.fromCharCode(...audio.subarray(i, i + 0x8000))
   const ask = 'Transcribe every sung word in this song. Write each name the way it sounds to you, spelled the way an American would write what they hear. Do not guess a name from context or fix it to a common spelling. Output only the lyrics you hear.'
   return textOf(await gemini(ARGON, key, ask, {}, [{ inlineData: { mimeType: 'audio/mpeg', data: btoa(data) } }]))
+}
+
+// When the singing starts, in seconds from the beginning, or null if it
+// can't tell. Lyria sometimes plays 10 to 20 seconds of music before anyone
+// sings (15 Nov 2026), so makeTakes sings those again.
+export async function vocalStart(audio: Uint8Array<ArrayBuffer>, key: string): Promise<number | null> {
+  try {
+    let data = ''
+    for (let i = 0; i < audio.length; i += 0x8000) data += String.fromCharCode(...audio.subarray(i, i + 0x8000))
+    const ask = 'Listen to this song. At what time, in seconds from the start, does the first sung word begin? Reply as JSON: {"first_vocal_seconds": number}'
+    const res = await gemini(ARGON, key, ask, { responseMimeType: 'application/json', temperature: 0 }, [{ inlineData: { mimeType: 'audio/mpeg', data: btoa(data) } }])
+    const at = Number(JSON.parse(textOf(res)).first_vocal_seconds)
+    return Number.isFinite(at) ? at : null
+  } catch {
+    return null
+  }
 }

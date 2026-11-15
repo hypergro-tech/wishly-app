@@ -64,7 +64,7 @@ async function produce(admin: any, order: Order, keys: Keys, lyrics: { prompt: s
   await admin.entities.Order.update(order.id, {
     // One spelling per name; a couple's second name keeps its own.
     song: { ...order.song, audio_url: file_url, sung_as: best.sung?.[0] ?? best.spelling, ...(best.sung?.[1] ? { partner_sung_as: best.sung[1] } : {}) },
-    name_check: { passed, needs_person: !passed, tries: tries.map(({ spelling, heard, refused }) => ({ spelling, heard, refused: Boolean(refused) })) },
+    name_check: { passed, needs_person: !passed, tries: tries.map(({ spelling, heard, refused, startsAt }) => ({ spelling, heard, refused: Boolean(refused), starts_at: startsAt ?? null })) },
     // A take that never passed waits for a person to listen before the buyer hears it.
     ...(passed ? { status: 'ready_for_review' } : {}),
   })
@@ -79,7 +79,10 @@ async function produce(admin: any, order: Order, keys: Keys, lyrics: { prompt: s
 async function tellBuyer(admin: any, order: Order) {
   const fresh = await admin.entities.Order.get(order.id).catch(() => null)
   const to = fresh?.push_token
-  if (typeof to !== 'string' || !to.startsWith('ExponentPushToken[')) return
+  if (typeof to !== 'string' || !to.startsWith('ExponentPushToken[')) {
+    console.log('push skipped: no phone address on the order', order.id)
+    return
+  }
   const name = order.recipient?.name ? together(order.recipient) : 'their'
   const res = await fetch('https://exp.host/--/api/v2/push/send', {
     method: 'POST',
@@ -92,5 +95,9 @@ async function tellBuyer(admin: any, order: Order) {
       data: { url: `/song/${order.id}` },
     }),
   })
-  if (!res.ok) console.error('push send', res.status, await res.text())
+  // Expo answers 200 even when Apple refuses (DeviceNotRegistered,
+  // InvalidCredentials…): the ticket says what happened, so log it.
+  const body = await res.text()
+  if (!res.ok) console.error('push send', res.status, body)
+  else console.log('push ticket', order.id, body.slice(0, 300))
 }

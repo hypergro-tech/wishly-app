@@ -2,16 +2,19 @@
 // makeSong function and by scripts/song-tests (which runs it on a Mac with the
 // same keys, without using Base44). Keep it free of Base44 calls.
 
-import { listen, sing, suggestSpellings, writeLyrics } from './ai.ts'
-import { honourees, isTricky, plainName, singable, testedSpelling } from './names.ts'
+import { listen, sing, suggestSpellings, vocalStart, writeLyrics } from './ai.ts'
+import { hasWish, honourees, isTricky, plainName, singable, testedSpelling, wishLine } from './names.ts'
 
 export const MAX_TRIES = 3
 const LISTENS = 3
+// The singing must start within this many seconds; a longer music-only
+// opening is sung again (15 Nov 2026: some songs waited 23 seconds).
+export const MAX_LEAD_IN = 8
 
 export type Keys = { gemini: string }
 // deno-lint-ignore no-explicit-any
 export type Order = any
-export type Try = { spelling: string; sung?: string[]; heard: number; audio?: Uint8Array<ArrayBuffer>; refused?: boolean; lines?: string[] }
+export type Try = { spelling: string; sung?: string[]; heard: number; startsAt?: number | null; audio?: Uint8Array<ArrayBuffer>; refused?: boolean; lines?: string[] }
 
 // Lowercase letters and spaces only: "O'Sheen!" -> "osheen".
 const spoken = (s: string) => plainName(s).replace(/['’-]/g, '').replace(/[^a-z]+/g, ' ').trim()
@@ -58,15 +61,34 @@ const nameCount = (song: any, name: string) =>
 
 // deno-lint-ignore no-explicit-any
 const words = (song: any) => (song?.sections || []).flatMap((s: { lines: string[] }) => s.lines).join(' ').split(/\s+/).filter(Boolean).length
-export const MAX_WORDS = 90
+export const MAX_WORDS = 100
 // One name is sung at least four times; a couple's names at least three times each.
 const NEEDED = (names: string[]) => (names.length > 1 ? 3 : 4)
 // deno-lint-ignore no-explicit-any
-const fits = (song: any, names: string[]) => names.every((n) => nameCount(song, n) >= NEEDED(names)) && words(song) <= MAX_WORDS
-// Fitting beats not; then more names; then fewer words.
+const lines = (song: any): string[] => (song?.sections || []).flatMap((s: { lines: string[] }) => s.lines)
 // deno-lint-ignore no-explicit-any
-const score = (song: any, names: string[]) =>
-  (fits(song, names) ? 1000 : 0) + names.reduce((t, n) => t + Math.min(nameCount(song, n), NEEDED(names)) * 100, 0) - words(song)
+const wished = (song: any, occasion: string, names: string[]) => hasWish(lines(song), occasion, names)
+// deno-lint-ignore no-explicit-any
+const fits = (song: any, names: string[], occasion = '') =>
+  names.every((n) => nameCount(song, n) >= NEEDED(names)) && words(song) <= MAX_WORDS && wished(song, occasion, names)
+// Fitting beats not; then the wish; then more names; then fewer words.
+// deno-lint-ignore no-explicit-any
+const score = (song: any, names: string[], occasion = '') =>
+  (fits(song, names, occasion) ? 1000 : 0) + (wished(song, occasion, names) ? 500 : 0) +
+  names.reduce((t, n) => t + Math.min(nameCount(song, n), NEEDED(names)) * 100, 0) - words(song)
+
+// Last guardrail: lyrics that still don't wish them end on the wish
+// ("Happy birthday, Rebel") as the outro line.
+// deno-lint-ignore no-explicit-any
+function withWish(song: any, occasion: string, names: string[]) {
+  const wish = wishLine(occasion, names.join(' and '))
+  if (!wish || wished(song, occasion, names)) return song
+  const sections = [...(song.sections || [])]
+  const outro = sections.findIndex((s: { label: string }) => /^outro/i.test(s.label))
+  if (outro >= 0) sections[outro] = { ...sections[outro], lines: [wish] }
+  else sections.push({ label: 'Outro', lines: [wish] })
+  return { ...song, sections }
+}
 
 // Writes the lyrics (if asked), then sings and checks up to three takes.
 // `order.song` is updated in place with the new lyrics. For an anniversary
@@ -76,15 +98,16 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
   const names = people.map((p) => p.name)
   if (lyrics) {
     try {
-      // The names have to be heard, and the song has to end by about a minute,
-      // so lyrics with too few names or over 90 words are written once more
+      // The names have to be heard, and the song has to end by about 1:10,
+      // so lyrics with too few names or over 100 words are written once more
       // (Gemini sometimes stops at three names, or runs long).
+      const occasion = order.occasion || ''
       let written = await writeLyrics(lyrics.prompt, lyrics.schema, names, keys.gemini)
-      if (!fits(written, names)) {
+      if (!fits(written, names, occasion)) {
         const again = await writeLyrics(lyrics.prompt, lyrics.schema, names, keys.gemini).catch(() => null)
-        if (again?.sections?.length && score(again, names) > score(written, names)) written = again
+        if (again?.sections?.length && score(again, names, occasion) > score(written, names, occasion)) written = again
       }
-      if (written?.sections?.length) order.song = { ...order.song, ...written }
+      if (written?.sections?.length) order.song = { ...order.song, ...withWish(written, occasion, names) }
     } catch (error) {
       console.error('Writing lyrics failed, singing the template', order.id, error)
     }
@@ -127,17 +150,24 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
       }
       continue
     }
-    const texts = await Promise.all(Array.from({ length: LISTENS }, () => listen(audio, keys.gemini)))
+    const [startsAt, ...texts] = await Promise.all([vocalStart(audio, keys.gemini), ...Array.from({ length: LISTENS }, () => listen(audio, keys.gemini))]) as [number | null, ...string[]]
     const heard = texts.filter(heardIn).length
-    tries.push({ spelling, sung, heard, audio, lines: texts.map((t) => (t.match(/[^.!?\n]*birthday[^.!?\n]*/i) || [''])[0].trim()) })
-    if (heard >= 2) break
+    tries.push({ spelling, sung, heard, startsAt, audio, lines: texts.map((t) => (t.match(/[^.!?\n]*birthday[^.!?\n]*/i) || [''])[0].trim()) })
+    if (heard >= 2 && !late(startsAt)) break
+    // The names were right but the music ran on too long before the
+    // singing: sing the same spellings again.
+    if (heard >= 2) i--
   }
 
   const done = tries.filter((t) => t.audio)
   if (!done.length) throw new Error(`Lyria refused every spelling: ${tries.map((t) => t.spelling).join(', ')}`)
-  const best = done.reduce((a, b) => (b.heard > a.heard ? b : a))
+  // Names heard first, then an opening that gets to the singing quickly.
+  const rank = (t: Try) => (t.heard >= 2 ? 100 : 0) + (late(t.startsAt) ? 0 : 50) + t.heard * 10 - (t.startsAt ?? 0) / 10
+  const best = done.reduce((a, b) => (rank(b) > rank(a) ? b : a))
   return { tries, best, passed: best.heard >= 2 }
 }
+
+const late = (startsAt?: number | null) => typeof startsAt === 'number' && startsAt > MAX_LEAD_IN
 
 // Spellings to try, best first.
 async function plan(name: string, chosen: string | undefined, geminiKey: string) {
@@ -167,8 +197,8 @@ async function plan(name: string, chosen: string | undefined, geminiKey: string)
 
 // The lyrics keep the real names; the singer gets the sounds-like spellings
 // (one per name, in honourees() order).
-// The song opens on a short instrumental intro and closes with a melodic
-// fade and an explicit end, so it resolves cleanly at around 50–60 seconds
+// The singing starts straight away (no instrumental intro) and the song closes
+// with a melodic fade and an explicit end, so it resolves cleanly at around 65–70 seconds
 // (the same tags as lyricsText in lyricGenerator.ts). Always
 // sung in English.
 export function songPrompt(order: Order, spelling: string | string[]) {
@@ -179,14 +209,16 @@ export function songPrompt(order: Order, spelling: string | string[]) {
   const sung = order.song.sections
     .map((s: { label: string; lines: string[] }) => `[${s.label === 'Outro' ? 'Outro - Melodic fade' : s.label}]\n${s.lines.map(swap).join('\n')}`)
     .join('\n\n')
-  const lyrics = `[Short Intro]\n\n${sung}\n\n[Fade Out]\n[End]`
+  // No intro tag: an [Intro] let Lyria play 7 to 23 seconds of music before
+  // anyone sang (15 Nov 2026). The singing starts with the first verse.
+  const lyrics = `${sung}\n\n[Fade Out]\n[End]`
   const { mood, genre, voice } = order.music || {}
   const occasion = (order.occasion || 'celebration').toLowerCase()
   // A plain style line, then the lyrics. Wording like "a song for Birthday, a
   // personal gift" made Lyria refuse whole songs, even for Emily (30 Oct 2026).
   // Orders since 6 Nov 2026 carry sound tags (soundMapper.ts).
   const tags: string | undefined = order.song.style_tags
-  const ending = 'sung in English (en), 50 to 60 seconds, short intro, clean resolved ending.'
+  const ending = 'sung in English (en), about 65 to 70 seconds long, vocals start right away in the first 2 seconds with no instrumental intro, clean resolved ending.'
   let style: string
   if (tags) style = `${tags}, ${occasion} song, ${ending}`
   else {

@@ -66,3 +66,23 @@ export const together = (r: Recipient, and = '&') => honourees(r).map((h) => h.n
 // `cover`; older ones get a steady pick from their id.
 export const coverIndex = (o: { id: string; cover?: number | null }) =>
   typeof o.cover === 'number' ? o.cover % 5 : [...o.id].reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 9973, 7) % 5
+
+// The wish every song sings for its occasion (15 Nov 2026), word for word:
+// "Happy birthday, Rebel", "Happy anniversary, Kaku and Kartik",
+// "Here's to you, Rebel". `who` is the name(s) as sung ("Kaku and Kartik").
+const WISHES: Record<string, { say: (who: string) => string; heard: RegExp }> = {
+  Birthday: { say: (who) => `Happy birthday, ${who}`, heard: /happy\s+birthday/i },
+  Anniversary: { say: (who) => `Happy anniversary, ${who}`, heard: /happy\s+anniversary/i },
+  Milestone: { say: (who) => `Here’s to you, ${who}`, heard: /here[’']?s\s+to\s+you/i },
+}
+
+export const wishLine = (occasion: string, who: string): string | null => WISHES[occasion]?.say(who) ?? null
+
+// True when one line of the lyrics carries the wish and every name, or the
+// occasion has no set wish.
+export function hasWish(lines: string[], occasion: string, names: string[]) {
+  const wish = WISHES[occasion]
+  if (!wish) return true
+  const named = (line: string) => names.every((n) => new RegExp(`\\b${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(line))
+  return lines.some((line) => wish.heard.test(line) && named(line))
+}

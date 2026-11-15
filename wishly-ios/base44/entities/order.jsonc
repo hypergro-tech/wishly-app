@@ -121,7 +121,8 @@
           "type": "array",
           "items": {
             "type": "object",
-            "properties": { "spelling": { "type": "string" }, "heard": { "type": "integer" }, "refused": { "type": "boolean" } }
+            // starts_at: seconds of music before the singing starts.
+            "properties": { "spelling": { "type": "string" }, "heard": { "type": "integer" }, "refused": { "type": "boolean" }, "starts_at": { "type": ["number", "null"] } }
           }
         }
       }

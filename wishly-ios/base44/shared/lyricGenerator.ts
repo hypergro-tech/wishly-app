@@ -2,26 +2,26 @@
 // [Verse], [Chorus], [Outro - Melodic fade], [Fade Out], [End]) with the
 // buyer's details woven in, in English only. Gemini 4 Argon writes from it on
 // the backend (makeSong), and replies as JSON matching LYRICS_SCHEMA. Kept to
-// 70–90 words so the song resolves cleanly at around 50–60 seconds.
+// 80–100 words so the song resolves cleanly at around 65–70 seconds.
 
 import type { Mood, UserStoryDetails } from './songEngine.ts'
+import { wishLine } from './names.ts'
 
-export const MAX_WORDS = 90
-export const MIN_WORDS = 70
+// About 1:05 to 1:10 when sung (15 Nov 2026; was 70–90 words for ~1:00).
+export const MAX_WORDS = 100
+export const MIN_WORDS = 80
 
 // Sung sections, then the tags with no words that shape the start and end.
 export const SECTION_TAGS = ['Verse', 'Chorus', 'Outro'] as const
-export const INTRO_TAG = 'Short Intro'
 export const ENDING_TAGS = ['Fade Out', 'End'] as const
 // The outro's full tag; it shows as plain "Outro" in the app.
 export const OUTRO_TAG = 'Outro - Melodic fade'
 
-const SHAPE = `[${INTRO_TAG}]
-(no words: 4 to 8 seconds of instrumental)
-[Verse]
-(at most 4 short lines that set the scene with their details)
+// No intro: the first verse is sung from the very start (15 Nov 2026).
+const SHAPE = `[Verse]
+(4 to 5 short lines that set the scene with their details)
 [Chorus]
-(2 to 4 catchy lines, the hook, built around their name)
+(3 to 5 catchy lines, the hook, built around their name)
 [${OUTRO_TAG}]
 (1 short line that lands on their name)
 ${ENDING_TAGS.map((t) => `[${t}]`).join('\n')}`
@@ -48,6 +48,8 @@ export function buildLyricPrompt(story: UserStoryDetails, mood: Mood, occasion: 
   const partner = story.partnerName?.trim() ?? ''
   // An anniversary for two: the song is sung to the couple, using both names.
   const couple = partner ? `${name} and ${partner}` : ''
+  // The wish for the occasion, sung word for word ("Happy birthday, Rebel").
+  const wish = wishLine(occasion, couple || name)
   const details = [
     story.nickname && `The name only the singer calls them: ${story.nickname}`,
     story.catchphrase && `The thing they always say: ${story.catchphrase}`,
@@ -69,18 +71,19 @@ Voice: sung by the person giving it${story.fromName ? ` (${story.fromName})` : '
 Their story:
 ${details.length ? details.map((d) => `- ${d}`).join('\n') : '- No details given: keep it warm and specific to the occasion.'}
 
-Structure, about one minute when sung. Write exactly these tags, each alone on its own line, in this order:
+Structure, about 1 minute 5 to 10 seconds when sung. Write exactly these tags, each alone on its own line, in this order:
 ${SHAPE}
 
 Rules:
-- ${MIN_WORDS} to ${MAX_WORDS} words in total across all sections, and NO MORE than ${MAX_WORDS}. Short lines, so the song finishes cleanly at around 50 to 60 seconds.
+- ${MIN_WORDS} to ${MAX_WORDS} words in total across all sections, and NO MORE than ${MAX_WORDS}. Short lines, so the song finishes cleanly at around 65 to 70 seconds.
 - Write ALL lyrics strictly in English. Do not include any foreign phrases, Spanish words, or translations under any circumstances.
 - Weave in every detail naturally, in the singer's own voice. Keep their exact words for the catchphrase and the nickname.
 - Never invent facts about the people: no new names, places, jobs or events.
 ${couple
     ? `- Use BOTH names, "${name}" and "${partner}", at least three times each: together as "${couple}" twice in the [Chorus] and once in the outro, and each name at least once in the [Verse]. Never leave either name out.`
     : `- Use the name "${name}" at least four times: twice in the [Chorus], once in the [Verse] and once in the outro.`}
-- Every section needs at least one line that could only be about ${couple || name}. No stock party lines ("raise a glass", "hooray", "special day", "shine so bright").
+${wish ? `- This is a ${occasion.toLowerCase()} song, so it must wish them. Sing the line "${wish}" word for word, exactly as written, once in the [Chorus], and make it the whole outro line too.
+` : ''}- Every section needs at least one line that could only be about ${couple || name}. No stock party lines ("raise a glass", "hooray", "special day", "shine so bright").
 - Lines of 6 to 9 syllables with a steady rhythm, rhyming at the line ends where it feels natural.
 - Original lines only; don't quote or imitate existing songs.${story.avoid ? `\n- Leave out completely: ${story.avoid}.` : ''}
 
@@ -110,10 +113,9 @@ export function parseLyrics(text: string): Section[] {
   return sections.filter((s) => s.lines.length)
 }
 
-// What the singer gets: the intro, the sung sections, then the fade and end.
+// What the singer gets: the sung sections, then the fade and end.
 export const lyricsText = (sections: Section[]) =>
   [
-    `[${INTRO_TAG}]`,
     ...sections.map((s) => `[${s.label === 'Outro' ? OUTRO_TAG : s.label}]\n${s.lines.join('\n')}`),
     ENDING_TAGS.map((t) => `[${t}]`).join('\n'),
   ].join('\n\n')

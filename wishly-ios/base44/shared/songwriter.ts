@@ -1,3 +1,5 @@
+import { wishLine } from './names.ts'
+
 export type Song = {
   title: string
   style?: string
@@ -63,7 +65,7 @@ export function writeSong(order: any): Song {
   }
   const catchphrase = catchphraseOf(memories.inside_joke)
 
-  // The same short shape the lyrics model writes (about 70–90 words): a
+  // The same short shape the lyrics model writes (about 80–100 words): a
   // verse, the chorus once and a one-line outro.
   const verse = [
     OPENERS[mood] || OPENERS.tender,
@@ -79,7 +81,8 @@ export function writeSong(order: any): Song {
     `Oh ${name}, this one’s yours`,
   ]
 
-  const outro = [`This one’s yours, ${name}`]
+  // The occasion's wish ("Happy birthday, Rebel"), else a plain sign-off.
+  const outro = [wishLine(occasion, name) ?? `This one’s yours, ${name}`]
 
   const title = memories.nickname
     ? `${clean(memories.nickname)}`
