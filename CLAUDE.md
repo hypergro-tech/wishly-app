@@ -76,8 +76,9 @@ The Order entity is pushed. The web app still runs on its local stand-in.
    environment variables first; `.env.local` isn't uploaded with cloud builds.
 4. **Test on a real iPhone.** Especially the Apple and Google sign-in round trip back to
    `wishly://auth`, haptics, Liquid Glass and notifications.
-5. **Replace the photography before launch.** The photos in `wishly-ios/assets/brand/` and
-   `wishly/public/brand/` are illustrative, from the brand kit.
+5. **Photography.** The iPhone app's photos in `wishly-ios/assets/brand/` were replaced on
+   16 Nov 2026 with Wishly's own AI-generated photos. The web app's `wishly/public/brand/`
+   still has the illustrative brand-kit photos.
 6. **Later:** other markets, starting with adding them to `MARKETS`.
 
 ## Not in this repository

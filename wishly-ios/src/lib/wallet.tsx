@@ -134,17 +134,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!IAP || !realSongs) return
     let live = true
-    const updated = IAP.purchaseUpdatedListener((p) => {
-      settle(p)
-        .then(() => { if (pending.current?.sku === p.productId) pending.current.resolve() })
-        .catch((e) => { if (pending.current?.sku === p.productId) pending.current.reject(e) })
-        .finally(() => { if (pending.current?.sku === p.productId) pending.current = null })
-    })
-    const failed = IAP.purchaseErrorListener((e) => {
-      const cancelled = e.code === 'user-cancelled'
-      pending.current?.reject(cancelled ? new PurchaseCancelled() : new Error(e.message))
-      pending.current = null
-    })
+    // Without the native module (e.g. Expo Go) this throws: stay on test purchases.
+    let updated: { remove: () => void }, failed: { remove: () => void }
+    try {
+      updated = IAP.purchaseUpdatedListener((p) => {
+        settle(p)
+          .then(() => { if (pending.current?.sku === p.productId) pending.current.resolve() })
+          .catch((e) => { if (pending.current?.sku === p.productId) pending.current.reject(e) })
+          .finally(() => { if (pending.current?.sku === p.productId) pending.current = null })
+      })
+      failed = IAP.purchaseErrorListener((e) => {
+        const cancelled = e.code === 'user-cancelled'
+        pending.current?.reject(cancelled ? new PurchaseCancelled() : new Error(e.message))
+        pending.current = null
+      })
+    } catch {
+      return
+    }
     ;(async () => {
       try {
         await IAP.initConnection()
