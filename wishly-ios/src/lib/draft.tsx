@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
 import type { Brief } from '@/api/orders'
-import { MEMORY_PROMPTS } from './catalog'
+import { MEMORY_PROMPTS, forCouple } from './catalog'
 
 const DRAFT_KEY = 'wishly:draft'
 
@@ -14,6 +14,7 @@ export const EMPTY_DRAFT: Brief = {
   occasion: '',
   occasion_date: '',
   occasion_note: '',
+  song_line: '',
   memories: { ritual: '', nickname: '', inside_joke: '', memory: '', want_to_say: '', avoid: '' },
   music: { mood: '', genre: '', voice: 'No preference', language: 'English' },
   package: { delivery: 'standard', extras: [] },
@@ -22,21 +23,16 @@ export const EMPTY_DRAFT: Brief = {
 
 export const filledMemories = (b: Brief) => MEMORY_PROMPTS.filter((m) => b.memories[m.key]?.trim())
 
-// A milestone with "What are we celebrating?" filled in has enough to write
-// from, so its story details are optional (16 Nov 2026).
-export const storyOptional = (b: Brief) => b.occasion === 'Milestone' && !!b.occasion_note?.trim()
-
 // What still needs choosing before the song can be reviewed, in screen order.
 export function missing(b: Brief): string[] {
   const out: string[] = []
   if (!b.recipient.name.trim()) out.push('their name')
   if (!b.recipient.relationship) out.push('who they are to you')
   if (!b.occasion) out.push('the occasion')
-  // An anniversary is for both of them, so both names are needed.
-  if (b.occasion === 'Anniversary' && !b.recipient.partner_name?.trim()) out.push('the second name')
-  if (filledMemories(b).length === 0 && !storyOptional(b)) {
-    out.push(b.occasion === 'Milestone' ? 'what you’re celebrating, or one detail about them' : 'one detail about them')
-  }
+  // An anniversary or wedding is for both of them, so both names are needed.
+  if (forCouple(b.occasion) && !b.recipient.partner_name?.trim()) out.push('the second name')
+  // Their story is optional (Neha, 16 Nov 2026: a must-fill list looked like
+  // too much). With no details, the song is written from the name and occasion.
   if (!b.music.mood) out.push('a mood')
   if (!b.music.genre) out.push('a style')
   return out

@@ -1,7 +1,7 @@
 // Orders, the one Base44 entity Wishly uses (schema: base44/entities/order.jsonc).
 // The web app reads and writes the same records.
 
-import { quote, type Tint } from '@/lib/catalog'
+import { forCouple, quote, type Tint } from '@/lib/catalog'
 import { type Song } from '@shared/songwriter'
 import { LYRICS_SCHEMA, parseLyrics } from '@shared/lyricGenerator'
 import { generateSongPayload, songInputs, startingSong } from '@shared/songPipeline'
@@ -24,6 +24,8 @@ export type Order = {
   occasion_date: string
   // Milestones only, optional: what they're celebrating ("Promotion to Head of Design"). Sung in the song.
   occasion_note?: string
+  // Couple occasions only, optional: a line the buyer wants sung, in their words.
+  song_line?: string
   memories: Record<string, string>
   music: { mood: string; genre: string; voice: string; language: string }
   package: { delivery: string; extras: string[] }
@@ -43,7 +45,7 @@ export type Order = {
   feedback?: { rating: Rating; reason?: string; version?: number; at: string } | null
 }
 
-export type Brief = Pick<Order, 'recipient' | 'occasion' | 'occasion_date' | 'occasion_note' | 'memories' | 'music' | 'package' | 'buyer'>
+export type Brief = Pick<Order, 'recipient' | 'occasion' | 'occasion_date' | 'occasion_note' | 'song_line' | 'memories' | 'music' | 'package' | 'buyer'>
 
 // Order.status lifecycle:
 // in_production -> ready_for_review -> (correction_requested -> ready_for_review)* -> approved
@@ -71,9 +73,9 @@ export async function placeOrder(brief: Brief, payload?: SongPayload): Promise<O
   const q = quote(brief.package)
   // Each new song takes the next of the five covers: 1, 2, 3, 4, 5, then 1 again.
   const earlier = await listOrders().catch(() => [])
-  // Only an anniversary is for two people; a second name typed and then left
-  // behind by switching occasion is dropped.
-  const couple = brief.occasion === 'Anniversary'
+  // Only an anniversary or wedding is for two people; a second name typed and
+  // then left behind by switching occasion is dropped.
+  const couple = forCouple(brief.occasion)
   const { partner_name, partner_pronunciation, ...one } = brief.recipient
   const recipient = couple ? { ...one, partner_name: partner_name?.trim() ?? '', partner_pronunciation: partner_pronunciation ?? '' } : one
   // What's being celebrated is only asked for a milestone.
@@ -82,6 +84,8 @@ export async function placeOrder(brief: Brief, payload?: SongPayload): Promise<O
     ...brief,
     recipient,
     occasion_note,
+    // The line to sing is only asked for a couple's song.
+    song_line: couple ? brief.song_line?.trim() ?? '' : '',
     cover: earlier.length % 5,
     price_total: q.total,
     ready_by: q.readyBy,

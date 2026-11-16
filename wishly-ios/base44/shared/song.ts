@@ -74,20 +74,23 @@ const wished = (song: any, occasion: string, names: string[]) => hasWish(lines(s
 const SMALL = new Set(['their', 'there', 'about', 'after', 'being', 'from', 'into', 'with', 'this', 'that', 'your', 'have', 'just', 'finally', 'first', 'new'])
 const main = (text: string) =>
   text.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 3 && !SMALL.has(w)).map((w) => w.slice(0, 5))
+// The milestone counts with one main word; the buyer's own line needs most
+// of its main words, so it's really their line and not a loose echo.
 // deno-lint-ignore no-explicit-any
-const celebrated = (song: any, note: string) => {
+const celebrated = (song: any, note: string, share = 0) => {
   const wanted = main(note)
   if (!wanted.length) return true
   const sung = new Set(main(lines(song).join(' ')))
-  return wanted.some((w) => sung.has(w))
+  const found = wanted.filter((w) => sung.has(w)).length
+  return share ? found / wanted.length >= share : found > 0
 }
 // deno-lint-ignore no-explicit-any
-const fits = (song: any, names: string[], occasion = '', note = '') =>
-  names.every((n) => nameCount(song, n) >= NEEDED(names)) && words(song) <= MAX_WORDS && wished(song, occasion, names) && celebrated(song, note)
+const fits = (song: any, names: string[], occasion = '', note = '', line = '') =>
+  names.every((n) => nameCount(song, n) >= NEEDED(names)) && words(song) <= MAX_WORDS && wished(song, occasion, names) && celebrated(song, note) && celebrated(song, line, 0.6)
 // Fitting beats not; then the wish; then the milestone; then more names; then fewer words.
 // deno-lint-ignore no-explicit-any
-const score = (song: any, names: string[], occasion = '', note = '') =>
-  (fits(song, names, occasion, note) ? 1000 : 0) + (wished(song, occasion, names) ? 500 : 0) + (celebrated(song, note) ? 300 : 0) +
+const score = (song: any, names: string[], occasion = '', note = '', line = '') =>
+  (fits(song, names, occasion, note, line) ? 1000 : 0) + (wished(song, occasion, names) ? 500 : 0) + (celebrated(song, note) ? 300 : 0) + (celebrated(song, line, 0.6) ? 300 : 0) +
   names.reduce((t, n) => t + Math.min(nameCount(song, n), NEEDED(names)) * 100, 0) - words(song)
 
 // Last guardrail: lyrics that still don't wish them end on the wish
@@ -117,10 +120,12 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
       const occasion = order.occasion || ''
       // What a milestone celebrates, if the buyer said ("Promotion").
       const note = occasion === 'Milestone' ? (order.occasion_note || '').trim() : ''
+      // A couple's own line for the song, if the buyer gave one.
+      const line = names.length > 1 ? (order.song_line || '').trim() : ''
       let written = await writeLyrics(lyrics.prompt, lyrics.schema, names, keys.gemini)
-      if (!fits(written, names, occasion, note)) {
+      if (!fits(written, names, occasion, note, line)) {
         const again = await writeLyrics(lyrics.prompt, lyrics.schema, names, keys.gemini).catch(() => null)
-        if (again?.sections?.length && score(again, names, occasion, note) > score(written, names, occasion, note)) written = again
+        if (again?.sections?.length && score(again, names, occasion, note, line) > score(written, names, occasion, note, line)) written = again
       }
       if (written?.sections?.length) order.song = { ...order.song, ...withWish(written, occasion, names) }
     } catch (error) {

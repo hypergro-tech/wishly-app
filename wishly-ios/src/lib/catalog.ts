@@ -29,10 +29,16 @@ const ALL_OCCASIONS = [
   'Birthday', 'Anniversary', 'Wedding', "Valentine's Day", "Mother's Day", "Father's Day",
   'Christmas', 'Milestone', 'Remembrance', 'Just because',
 ]
-// Everyday celebrations only for now (1 Nov 2026). Holidays like Mother's
-// Day or Christmas go back in close to their date: add them here then.
-const OCCASIONS_ON = ['Birthday', 'Anniversary', 'Milestone']
-export const OCCASIONS = ALL_OCCASIONS.filter((o) => OCCASIONS_ON.includes(o))
+// Six occasions, in this order (16 Nov 2026, from Neha's feedback): they sit
+// in one row on Create that scrolls sideways. Add Mother's Day and the others
+// here close to their dates.
+const OCCASIONS_ON = ['Birthday', 'Anniversary', 'Christmas', 'Milestone', 'Wedding', "Valentine's Day"]
+export const OCCASIONS = OCCASIONS_ON.filter((o) => ALL_OCCASIONS.includes(o))
+
+// Songs for two people: Create asks for both names (each with its own
+// "Sounds like") and both are sung.
+export const COUPLE_OCCASIONS = ['Anniversary', 'Wedding', "Valentine's Day"]
+export const forCouple = (occasion: string) => COUPLE_OCCASIONS.includes(occasion)
 
 export const PRONOUNS = ['she/her', 'he/him', 'they/them']
 
@@ -142,7 +148,7 @@ export const STORY_TIPS = [
   'Specific places, pet names and inside jokes make the song sound like them.',
   'Use their exact words. “Did you feed the cat?” beats “they’re caring.”',
   'Small and specific wins: “burns the first pancake” over “loves cooking.”',
-  'One true detail is enough to begin. You can add more any time.',
+  'Even one true detail makes the song sound like them.',
 ]
 
 // How people pay, confirmed 13 Nov 2026: one song, or a monthly or yearly plan

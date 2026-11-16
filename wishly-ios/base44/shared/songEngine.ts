@@ -21,6 +21,8 @@ export type UserStoryDetails = {
   occasion: string
   // A milestone's "what are we celebrating" ("Promotion"), optional; "" otherwise.
   milestone: string
+  // A couple occasion's "line for the song", in the buyer's words; "" otherwise.
+  songLine: string
   nickname: string
   // "The thing they always say".
   catchphrase: string

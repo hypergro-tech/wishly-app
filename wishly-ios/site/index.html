@@ -33,7 +33,7 @@
     body.gift { display: block; text-align: left; padding: 0; }
     .gift main { max-width: 440px; margin: 0 auto; padding: 28px 20px 48px; }
     .gift .logo { font-size: 24px; letter-spacing: -1px; }
-    /* The greeting from Wishly, above the song. */
+    /* The greeting from whoever made the song, above it. */
     .hello { margin-top: 26px; text-align: center; }
     .hello .from-us { font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: #5B6466; }
     .hello .from-us span { color: #FF6B7A; }
@@ -72,6 +72,7 @@
     .lyrics p { margin: 0; color: #143438; }
     .made { margin-top: 32px; text-align: center; font-size: 14px; }
     .made a { color: #143438; font-weight: 700; }
+    .made .get-app { display: inline-block; margin-top: 14px; padding: 12px 20px; border-radius: 999px; background: #143438; color: #FFF5EB; text-decoration: none; font-size: 15px; }
   </style>
 </head>
 <body>
@@ -113,7 +114,9 @@
       <div class="from" id="from"></div>
     </div>
     <div class="card lyrics" id="lyrics" hidden><div class="eyebrow">The words</div></div>
-    <div class="made">Made with <a href="https://trywishly.co">Wishly</a>, personal songs from the memories that matter.</div>
+    <!-- Opens Wishly on the App Store, so whoever gets a song can make one. -->
+    <div class="made">Made with <a href="https://apps.apple.com/us/app/id6834450274">Wishly</a>, personal songs from the memories that matter.
+      <a class="get-app" href="https://apps.apple.com/us/app/id6834450274">Make a song for someone you love ›</a></div>
   </main>
   <script>
     (function () {
@@ -196,19 +199,22 @@
             document.querySelector('.player').hidden = true
           })
 
-        // Wishly's greeting for the occasion: "Happy Birthday, Rebel!",
-        // "Happy Anniversary, Rebel & George!", "Here’s to you, Rebel!".
+        // The greeting comes from the person who made the song (16 Nov 2026):
+        // "Neha made you a song" over "Happy Birthday, Angela!".
         function greet(g) {
           var who = g.name
           var lines = {
-            'Birthday': ['Wishly wishes you a', 'Happy Birthday, ' + who + '!'],
-            'Anniversary': ['Wishly wishes you a', 'Happy Anniversary, ' + who + '!'],
-            'Milestone': ['A little something from Wishly', 'Here’s to you, ' + who + '!'],
+            'Birthday': 'Happy Birthday, ' + who + '!',
+            'Anniversary': 'Happy Anniversary, ' + who + '!',
+            'Milestone': 'Here’s to you, ' + who + '!',
+            'Christmas': 'Merry Christmas, ' + who + '!',
+            'Wedding': 'Congratulations, ' + who + '!',
+            "Valentine's Day": 'Happy Valentine’s Day, ' + who + '!',
           }
-          var line = lines[g.occasion] || ['A little something from Wishly', 'This one’s for you, ' + who + '.']
+          var sender = (g.from_name || '').trim().split(/\s+/)[0]
           $('hello-top').innerHTML = '<span>✱</span> '
-          $('hello-top').append(line[0])
-          $('hello-line').textContent = line[1]
+          $('hello-top').append(sender ? sender + ' made you a song' : 'A song made just for you')
+          $('hello-line').textContent = lines[g.occasion] || 'This one’s for you, ' + who + '.'
           $('hello').hidden = false
         }
 

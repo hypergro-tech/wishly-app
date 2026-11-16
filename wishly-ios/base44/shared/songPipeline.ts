@@ -38,6 +38,7 @@ type BriefLike = {
   recipient: { name: string; pronunciation?: string; partner_name?: string; partner_pronunciation?: string; pronouns?: string; relationship?: string }
   occasion: string
   occasion_note?: string
+  song_line?: string
   memories: Record<string, string | undefined>
   music: { mood?: string; genre?: string; voice?: string; language?: string }
   buyer?: { name?: string }
@@ -67,6 +68,8 @@ export function songInputs(brief: BriefLike): SongInputs {
       relationship: text(r.relationship),
       occasion: text(brief.occasion),
       milestone: brief.occasion === 'Milestone' ? text(brief.occasion_note) : '',
+      // Only couples' songs (two names) get the buyer's own line.
+      songLine: text(r.partner_name) ? text(brief.song_line) : '',
       nickname: text(m.nickname),
       catchphrase: text(m.inside_joke),
       ritual: text(m.ritual),

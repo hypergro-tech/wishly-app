@@ -11,10 +11,10 @@ import { StoryCards, StoryTip } from '@/components/StoryCards'
 import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { Squish } from '@/components/motion'
 import { Body, Button, Field, Label, Pills, Segmented, SpeakButton, Title, nudge, styles as ui, tap } from '@/components/ui'
-import { CORE_PACKAGE, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
+import { CORE_PACKAGE, forCouple, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
 import { realSongs } from '@/api/base44Client'
 import { suggestSpelling } from '@/api/orders'
-import { filledMemories, missing, storyOptional, useDraft } from '@/lib/draft'
+import { filledMemories, missing, useDraft } from '@/lib/draft'
 import { isTricky, singable, testedSpelling } from '@/lib/names'
 import { useRise } from '@/lib/motion'
 import { occasionColour, occasionPicture } from '@/lib/occasions'
@@ -34,7 +34,16 @@ const VOICES = [
 const MILESTONE_IDEAS = ['Promotion', 'New job', 'Graduation', 'First home', 'Retirement']
 const OTHER_MILESTONE = 'Something else'
 
-const occasionLabel =(o: string) => o.replace("'", '’')
+const LINE_EXAMPLES: Record<string, string> = {
+  Anniversary: 'e.g. Ten years in, and I’d still choose you',
+  Wedding: 'e.g. From that rainy bus stop to forever',
+  "Valentine's Day": 'e.g. You’re still my favourite hello',
+}
+
+const COUPLE_SONG: Record<string, string> = { Anniversary: 'An anniversary song', Wedding: 'A wedding song', "Valentine's Day": 'A Valentine’s song' }
+
+// "Valentine's Day" is too long for its tile, so the tile says "Valentine’s".
+const occasionLabel = (o: string) => (o === "Valentine's Day" ? 'Valentine’s' : o).replace("'", '’')
 
 export default function Create() {
   const { version } = useDraft()
@@ -77,7 +86,7 @@ function CreateForm() {
   const pickOccasion = (o: string) => {
     set('occasion', o)
     const both = r.name.trim().match(/^(.+?)\s+(?:and|&)\s+(.+)$/i)
-    if (o === 'Anniversary' && both && !r.partner_name?.trim()) {
+    if (forCouple(o) && both && !r.partner_name?.trim()) {
       set('recipient', { name: both[1].trim(), pronunciation: '', partner_name: both[2].trim(), partner_pronunciation: '' })
     }
   }
@@ -112,7 +121,8 @@ function CreateForm() {
 
           <Section title="Who’s it for?">
             <Field label="Their name, as it’s written" big value={r.name} onChangeText={(name) => set('recipient', { name })} placeholder="e.g. Grace" autoCapitalize="words" autoCorrect={false} />
-            <SoundsLike name={r.name} value={r.pronunciation} onChange={(pronunciation) => set('recipient', { pronunciation })} />
+            {/* A couple's card below has a "Sounds like" for each name instead. */}
+            {!forCouple(draft.occasion) && <SoundsLike name={r.name} value={r.pronunciation} onChange={(pronunciation) => set('recipient', { pronunciation })} />}
             <View>
               <Label>They are your…</Label>
               <Pills options={RELATIONSHIPS} value={r.relationship} onChange={(relationship) => set('recipient', { relationship })} />
@@ -120,22 +130,31 @@ function CreateForm() {
           </Section>
 
           <Section title="The occasion">
-            <View accessibilityRole="radiogroup" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {/* One row that scrolls sideways, so more occasions fit (Neha, 16 Nov
+                2026). It runs to the card's edges, so the next tile peeks in. */}
+            <ScrollView
+              horizontal
+              accessibilityRole="radiogroup"
+              showsHorizontalScrollIndicator={false}
+              style={{ marginHorizontal: -18 }}
+              contentContainerStyle={{ paddingHorizontal: 18, gap: 8 }}
+            >
               {OCCASIONS.map((o) => <OccasionCard key={o} occasion={o} selected={draft.occasion === o} onPress={() => pickOccasion(o)} />)}
-            </View>
+            </ScrollView>
             {tone && (
               <Animated.View key={draft.occasion} entering={FadeIn.duration(260)} style={{ paddingLeft: 12, borderLeftWidth: 3, borderLeftColor: colors.coral }}>
                 <Text style={[type.accent, { fontSize: 17, lineHeight: 23, color: colors.text }]}>{tone.line}</Text>
               </Animated.View>
             )}
-            {/* An anniversary is for a couple: one name in each box, both sung.
-                Both boxes show here together, so it's plain the second one is
-                the partner, not the person giving the song (15 Nov 2026). */}
-            {draft.occasion === 'Anniversary' && (
+            {/* An anniversary, wedding or Valentine's song is for a couple: one
+                name in each box, each with its own "Sounds like", both sung.
+                Both show here together, so it's plain the second one is the
+                partner, not the person giving the song. */}
+            {forCouple(draft.occasion) && (
               <Animated.View entering={FadeIn.duration(260)} layout={settle} style={{ gap: 14, padding: 14, borderRadius: 18, backgroundColor: colors.bg }}>
                 <View>
                   <Text style={[type.bold, { fontSize: 17, color: colors.text }]}>The couple</Text>
-                  <Body muted size={14} style={{ marginTop: 4 }}>An anniversary song is for two people. Put one name in each box, and we’ll sing both.</Body>
+                  <Body muted size={14} style={{ marginTop: 4 }}>{COUPLE_SONG[draft.occasion] ?? 'This song'} is for two people. Put one name in each box, and we’ll sing both.</Body>
                 </View>
                 <Field
                   label="First name"
@@ -145,6 +164,7 @@ function CreateForm() {
                   autoCapitalize="words"
                   autoCorrect={false}
                 />
+                <SoundsLike name={r.name} value={r.pronunciation} onChange={(pronunciation) => set('recipient', { pronunciation })} />
                 <Field
                   label="Their partner’s name"
                   value={r.partner_name ?? ''}
@@ -157,6 +177,24 @@ function CreateForm() {
                 {r.name.trim() && r.partner_name?.trim() ? (
                   <Text style={[type.accent, { fontSize: 16, color: colors.text }]}>A song for {r.name.trim()} & {r.partner_name.trim()}</Text>
                 ) : null}
+              </Animated.View>
+            )}
+            {/* A couple's song can carry one line in the buyer's own words,
+                sung in the chorus. Optional, like Their story (16 Nov 2026). */}
+            {forCouple(draft.occasion) && (
+              <Animated.View entering={FadeIn.duration(260)} layout={settle} style={{ gap: 12, padding: 14, borderRadius: 18, backgroundColor: colors.bg }}>
+                <View>
+                  <Text style={[type.bold, { fontSize: 17, color: colors.text }]}>A line for the song</Text>
+                  <Body muted size={14} style={{ marginTop: 4 }}>Optional. Something you’d love to hear sung, in your own words.</Body>
+                </View>
+                <Field
+                  value={draft.song_line ?? ''}
+                  onChangeText={(song_line) => set('song_line', song_line)}
+                  placeholder={LINE_EXAMPLES[draft.occasion] ?? 'e.g. You’re still my favourite hello'}
+                  maxLength={150}
+                  multiline
+                  accessibilityLabel="A line for the song, optional"
+                />
               </Animated.View>
             )}
             {/* A milestone could be anything, so the buyer can say which one,
@@ -186,15 +224,13 @@ function CreateForm() {
 
           <Section title="Their story" sub={tone?.gentle
             ? 'Share what you’d like them remembered for. One memory is enough, and this is saved, so you can come back when you feel ready.'
-            : storyOptional(draft)
-              ? 'Optional. A detail or two makes the song even more theirs.'
-              : 'Tell us the details that make them, THEM!'}
+            : 'Optional. A detail or two makes the song sound like them.'}
           >
             <StoryCards memories={draft.memories} />
             <StoryTip />
             <Animated.View layout={settle} style={{ flexDirection: 'row' }}>
               {count === 0 ? (
-                <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>{storyOptional(draft) ? 'Optional' : 'Add one detail to begin'}</Text>
+                <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>Optional</Text>
               ) : (
                 <>
                   {/* The number rolls up as details are added, like iOS counters. */}
@@ -346,7 +382,7 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
   )
 }
 
-// Picture cards for the occasion, three to a row.
+// Picture cards for the occasion, in a row that scrolls sideways.
 function OccasionCard({ occasion, selected, onPress }: { occasion: string; selected: boolean; onPress: () => void }) {
   const picture = occasionPicture(occasion)
   return (
@@ -356,7 +392,7 @@ function OccasionCard({ occasion, selected, onPress }: { occasion: string; selec
       accessibilityLabel={occasionLabel(occasion)}
       to={0.95}
       onPress={() => { tap(); onPress() }}
-      style={{ width: '31%', flexGrow: 1, alignItems: 'center', paddingTop: 8, paddingBottom: 10, borderRadius: 18, backgroundColor: occasionColour(occasion), borderWidth: 3, borderColor: selected ? colors.ink : 'transparent' }}
+      style={{ width: 96, alignItems: 'center', paddingTop: 8, paddingBottom: 10, borderRadius: 18, backgroundColor: occasionColour(occasion), borderWidth: 3, borderColor: selected ? colors.ink : 'transparent' }}
     >
       {picture ? <Image source={picture} style={{ width: 60, height: 60 }} contentFit="contain" accessibilityIgnoresInvertColors /> : <View style={{ height: 16 }} />}
       <Text numberOfLines={1} adjustsFontSizeToFit style={[type.bold, { marginTop: 4, fontSize: 15, color: colors.ink }]}>{occasionLabel(occasion)}</Text>

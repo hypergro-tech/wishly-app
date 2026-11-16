@@ -33,6 +33,8 @@
     "occasion_date": { "type": "string" },
     // Milestones only, optional: what they're celebrating ("Promotion to Head of Design"). The song sings it.
     "occasion_note": { "type": "string", "maxLength": 120 },
+    // Anniversary, wedding and Valentine's only, optional: a line the buyer wants sung, in their words.
+    "song_line": { "type": "string", "maxLength": 150 },
     "memories": {
       "type": "object",
       "properties": {

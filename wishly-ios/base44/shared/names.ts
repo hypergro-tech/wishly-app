@@ -74,6 +74,9 @@ const WISHES: Record<string, { say: (who: string) => string; heard: RegExp }> = 
   Birthday: { say: (who) => `Happy birthday, ${who}`, heard: /happy\s+birthday/i },
   Anniversary: { say: (who) => `Happy anniversary, ${who}`, heard: /happy\s+anniversary/i },
   Milestone: { say: (who) => `Here’s to you, ${who}`, heard: /here[’']?s\s+to\s+you/i },
+  Christmas: { say: (who) => `Merry Christmas, ${who}`, heard: /merry\s+christmas/i },
+  Wedding: { say: (who) => `Congratulations, ${who}`, heard: /congratulations/i },
+  "Valentine's Day": { say: (who) => `Happy Valentine’s Day, ${who}`, heard: /happy\s+valentine/i },
 }
 
 export const wishLine = (occasion: string, who: string): string | null => WISHES[occasion]?.say(who) ?? null

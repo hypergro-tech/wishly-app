@@ -7,9 +7,13 @@ const PICTURES: Record<string, number> = {
   Birthday: require('../../assets/occasions/birthday.png'),
   Anniversary: require('../../assets/occasions/anniversary.png'),
   Milestone: require('../../assets/occasions/milestone.png'),
+  Christmas: require('../../assets/occasions/christmas.png'),
+  Wedding: require('../../assets/occasions/wedding.png'),
+  "Valentine's Day": require('../../assets/occasions/valentines-day.png'),
 }
 
-const COLOURS: Record<string, string> = { Milestone: colors.coral }
+// Christmas gets a wintry pale blue, so the mint tree stands out and no two tiles match.
+const COLOURS: Record<string, string> = { Milestone: colors.coral, Christmas: '#D6ECFF', Wedding: colors.mint, "Valentine's Day": '#FFD6E0' }
 
 export const occasionPicture = (occasion: string): number | undefined => PICTURES[occasion]
 export const occasionColour = (occasion: string) => COLOURS[occasion] ?? tint(OCCASION_TONES[occasion]?.tint ?? 'butter')
