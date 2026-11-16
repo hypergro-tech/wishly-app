@@ -102,10 +102,16 @@ export default function Plans() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <Text style={[type.bold, { fontSize: 17, color: colors.text }]}>{p.name}</Text>
                   {p.id === 'yearly' && <Chip label={`Save ${yearlySaving()}%`} bg={colors.butter} />}
+                  {p.was ? <Chip label="Launch offer" bg={colors.butter} /> : null}
                 </View>
                 <Text style={[type.regular, { marginTop: 3, fontSize: 13, lineHeight: 18, color: colors.muted }]}>{blurb(p)}</Text>
               </View>
-              <Text style={[type.bold, { fontSize: 17, color: colors.text }]}>{priceLabel(p)}</Text>
+              <View style={{ alignItems: 'flex-end' }}>
+                {p.was ? (
+                  <Text accessibilityLabel={`was ${formatPrice(p.was)}`} style={[type.regular, { fontSize: 14, color: colors.muted, textDecorationLine: 'line-through' }]}>{formatPrice(p.was)}</Text>
+                ) : null}
+                <Text style={[type.bold, { fontSize: 17, color: colors.text }]}>{priceLabel(p)}</Text>
+              </View>
             </Squish>
           )
         })}

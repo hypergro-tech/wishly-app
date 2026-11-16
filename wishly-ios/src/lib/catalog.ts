@@ -157,9 +157,12 @@ export const STORY_TIPS = [
 // match the one here. No free trial; unused songs don't carry over.
 export const SONGS_PER_MONTH = 3
 export type PlanId = 'song' | 'monthly' | 'yearly'
-export type Plan = { id: PlanId; productId: string; name: string; price: number; per?: 'month' | 'year' }
+export type Plan = { id: PlanId; productId: string; name: string; price: number; per?: 'month' | 'year'; was?: number }
+// `was` shows crossed out beside the price, as a launch offer (Neha, 16 Nov
+// 2026, for testing). Before the App Store launch it must be a price really
+// charged later (US rules on "was" prices); delete `was` to turn it off.
 export const PLANS: Plan[] = [
-  { id: 'song', productId: 'com.hypergro.wishly.song', name: 'One song', price: 29 },
+  { id: 'song', productId: 'com.hypergro.wishly.song', name: 'One song', price: 29, was: 49 },
   { id: 'monthly', productId: 'com.hypergro.wishly.monthly', name: 'Monthly', price: 39, per: 'month' },
   { id: 'yearly', productId: 'com.hypergro.wishly.yearly', name: 'Yearly', price: 199, per: 'year' },
 ]
