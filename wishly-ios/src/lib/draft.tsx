@@ -22,6 +22,10 @@ export const EMPTY_DRAFT: Brief = {
 
 export const filledMemories = (b: Brief) => MEMORY_PROMPTS.filter((m) => b.memories[m.key]?.trim())
 
+// A milestone with "What are we celebrating?" filled in has enough to write
+// from, so its story details are optional (16 Nov 2026).
+export const storyOptional = (b: Brief) => b.occasion === 'Milestone' && !!b.occasion_note?.trim()
+
 // What still needs choosing before the song can be reviewed, in screen order.
 export function missing(b: Brief): string[] {
   const out: string[] = []
@@ -30,7 +34,9 @@ export function missing(b: Brief): string[] {
   if (!b.occasion) out.push('the occasion')
   // An anniversary is for both of them, so both names are needed.
   if (b.occasion === 'Anniversary' && !b.recipient.partner_name?.trim()) out.push('the second name')
-  if (filledMemories(b).length === 0) out.push('one detail about them')
+  if (filledMemories(b).length === 0 && !storyOptional(b)) {
+    out.push(b.occasion === 'Milestone' ? 'what you’re celebrating, or one detail about them' : 'one detail about them')
+  }
   if (!b.music.mood) out.push('a mood')
   if (!b.music.genre) out.push('a style')
   return out

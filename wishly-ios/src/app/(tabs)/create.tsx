@@ -14,7 +14,7 @@ import { Body, Button, Field, Label, Pills, Segmented, SpeakButton, Title, nudge
 import { CORE_PACKAGE, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
 import { realSongs } from '@/api/base44Client'
 import { suggestSpelling } from '@/api/orders'
-import { filledMemories, missing, useDraft } from '@/lib/draft'
+import { filledMemories, missing, storyOptional, useDraft } from '@/lib/draft'
 import { isTricky, singable, testedSpelling } from '@/lib/names'
 import { useRise } from '@/lib/motion'
 import { occasionColour, occasionPicture } from '@/lib/occasions'
@@ -186,13 +186,15 @@ function CreateForm() {
 
           <Section title="Their story" sub={tone?.gentle
             ? 'Share what you’d like them remembered for. One memory is enough, and this is saved, so you can come back when you feel ready.'
-            : 'Tell us the details that make them, THEM!'}
+            : storyOptional(draft)
+              ? 'Optional. A detail or two makes the song even more theirs.'
+              : 'Tell us the details that make them, THEM!'}
           >
             <StoryCards memories={draft.memories} />
             <StoryTip />
             <Animated.View layout={settle} style={{ flexDirection: 'row' }}>
               {count === 0 ? (
-                <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>Add one detail to begin</Text>
+                <Text style={[type.regular, { fontSize: 13, color: colors.muted }]}>{storyOptional(draft) ? 'Optional' : 'Add one detail to begin'}</Text>
               ) : (
                 <>
                   {/* The number rolls up as details are added, like iOS counters. */}

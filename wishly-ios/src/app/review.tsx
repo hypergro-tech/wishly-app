@@ -111,6 +111,7 @@ export default function Review() {
               </View>
             </View>
           ))}
+          {filledMemories(draft).length > 0 || draft.memories.avoid?.trim() ? (
           <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: colors.line, gap: 12 }}>
             {filledMemories(draft).map((m) => (
               <View key={m.key}>
@@ -120,6 +121,7 @@ export default function Review() {
             ))}
             {draft.memories.avoid?.trim() ? <Body size={14}>Leave out: {draft.memories.avoid}</Body> : null}
           </View>
+          ) : null}
         </Card>
 
         <View style={{ marginTop: 12, paddingVertical: 16, paddingHorizontal: 18, borderRadius: 22, backgroundColor: colors.surface, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
