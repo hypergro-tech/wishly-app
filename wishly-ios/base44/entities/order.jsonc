@@ -31,6 +31,8 @@
     },
     "occasion": { "type": "string" },
     "occasion_date": { "type": "string" },
+    // Milestones only, optional: what they're celebrating ("Promotion to Head of Design"). The song sings it.
+    "occasion_note": { "type": "string", "maxLength": 120 },
     "memories": {
       "type": "object",
       "properties": {

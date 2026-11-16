@@ -22,6 +22,8 @@ export type Order = {
   recipient: { name: string; pronunciation: string; partner_name?: string; partner_pronunciation?: string; pronouns: string; relationship: string }
   occasion: string
   occasion_date: string
+  // Milestones only, optional: what they're celebrating ("Promotion to Head of Design"). Sung in the song.
+  occasion_note?: string
   memories: Record<string, string>
   music: { mood: string; genre: string; voice: string; language: string }
   package: { delivery: string; extras: string[] }
@@ -41,7 +43,7 @@ export type Order = {
   feedback?: { rating: Rating; reason?: string; version?: number; at: string } | null
 }
 
-export type Brief = Pick<Order, 'recipient' | 'occasion' | 'occasion_date' | 'memories' | 'music' | 'package' | 'buyer'>
+export type Brief = Pick<Order, 'recipient' | 'occasion' | 'occasion_date' | 'occasion_note' | 'memories' | 'music' | 'package' | 'buyer'>
 
 // Order.status lifecycle:
 // in_production -> ready_for_review -> (correction_requested -> ready_for_review)* -> approved
@@ -74,9 +76,12 @@ export async function placeOrder(brief: Brief, payload?: SongPayload): Promise<O
   const couple = brief.occasion === 'Anniversary'
   const { partner_name, partner_pronunciation, ...one } = brief.recipient
   const recipient = couple ? { ...one, partner_name: partner_name?.trim() ?? '', partner_pronunciation: partner_pronunciation ?? '' } : one
+  // What's being celebrated is only asked for a milestone.
+  const occasion_note = brief.occasion === 'Milestone' ? brief.occasion_note?.trim() ?? '' : ''
   const order: Order = await Orders().create({
     ...brief,
     recipient,
+    occasion_note,
     cover: earlier.length % 5,
     price_total: q.total,
     ready_by: q.readyBy,

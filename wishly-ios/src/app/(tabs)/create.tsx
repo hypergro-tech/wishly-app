@@ -30,7 +30,11 @@ const VOICES = [
   { id: 'No preference', label: 'Any' },
 ]
 
-const occasionLabel = (o: string) => o.replace("'", '’')
+// One tap fills "What are we celebrating?"; they can type their own instead.
+const MILESTONE_IDEAS = ['Promotion', 'New job', 'Graduation', 'First home', 'Retirement']
+const OTHER_MILESTONE = 'Something else'
+
+const occasionLabel =(o: string) => o.replace("'", '’')
 
 export default function Create() {
   const { version } = useDraft()
@@ -47,6 +51,18 @@ function CreateForm() {
   const tone = OCCASION_TONES[draft.occasion]
   const todo = missing(draft)
   const count = filledMemories(draft).length
+  // Milestone: a quick pick, or "Something else" opens a box to type their own.
+  const note = draft.occasion_note ?? ''
+  const [ownNote, setOwnNote] = useState(() => !!note.trim() && !MILESTONE_IDEAS.includes(note))
+  const pickMilestone = (v: string) => {
+    if (v === OTHER_MILESTONE) {
+      setOwnNote(!ownNote)
+      set('occasion_note', '')
+    } else {
+      setOwnNote(false)
+      set('occasion_note', v === note ? '' : v) // tapping the chosen one again clears it
+    }
+  }
 
   // A light tap the moment the song is ready to review.
   const complete = todo.length === 0
@@ -141,6 +157,29 @@ function CreateForm() {
                 {r.name.trim() && r.partner_name?.trim() ? (
                   <Text style={[type.accent, { fontSize: 16, color: colors.text }]}>A song for {r.name.trim()} & {r.partner_name.trim()}</Text>
                 ) : null}
+              </Animated.View>
+            )}
+            {/* A milestone could be anything, so the buyer can say which one,
+                and the song congratulates them on it. Optional (16 Nov 2026). */}
+            {draft.occasion === 'Milestone' && (
+              <Animated.View entering={FadeIn.duration(260)} layout={settle} style={{ gap: 12, padding: 14, borderRadius: 18, backgroundColor: colors.bg }}>
+                <View>
+                  <Text style={[type.bold, { fontSize: 17, color: colors.text }]}>What are we celebrating?</Text>
+                  <Body muted size={14} style={{ marginTop: 4 }}>Optional. Pick one and the song will congratulate them on it.</Body>
+                </View>
+                <Pills options={[...MILESTONE_IDEAS, OTHER_MILESTONE]} value={ownNote ? OTHER_MILESTONE : note} onChange={pickMilestone} />
+                {ownNote && (
+                  <Animated.View entering={FadeIn.duration(220)}>
+                    <Field
+                      value={note}
+                      onChangeText={(occasion_note) => set('occasion_note', occasion_note)}
+                      placeholder="e.g. Promotion to Head of Design"
+                      maxLength={120}
+                      autoFocus
+                      accessibilityLabel="What are we celebrating?"
+                    />
+                  </Animated.View>
+                )}
               </Animated.View>
             )}
           </Section>

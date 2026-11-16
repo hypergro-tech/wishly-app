@@ -13,6 +13,7 @@ export const EMPTY_DRAFT: Brief = {
   recipient: { name: '', pronunciation: '', partner_name: '', partner_pronunciation: '', pronouns: '', relationship: '' },
   occasion: '',
   occasion_date: '',
+  occasion_note: '',
   memories: { ritual: '', nickname: '', inside_joke: '', memory: '', want_to_say: '', avoid: '' },
   music: { mood: '', genre: '', voice: 'No preference', language: 'English' },
   package: { delivery: 'standard', extras: [] },

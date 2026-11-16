@@ -37,6 +37,7 @@ export function startingSong(brief: BriefLike, { title, lyrics, styleTags }: Son
 type BriefLike = {
   recipient: { name: string; pronunciation?: string; partner_name?: string; partner_pronunciation?: string; pronouns?: string; relationship?: string }
   occasion: string
+  occasion_note?: string
   memories: Record<string, string | undefined>
   music: { mood?: string; genre?: string; voice?: string; language?: string }
   buyer?: { name?: string }
@@ -65,6 +66,7 @@ export function songInputs(brief: BriefLike): SongInputs {
       pronouns: text(r.pronouns),
       relationship: text(r.relationship),
       occasion: text(brief.occasion),
+      milestone: brief.occasion === 'Milestone' ? text(brief.occasion_note) : '',
       nickname: text(m.nickname),
       catchphrase: text(m.inside_joke),
       ritual: text(m.ritual),

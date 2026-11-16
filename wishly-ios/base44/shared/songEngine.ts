@@ -19,6 +19,8 @@ export type UserStoryDetails = {
   pronouns: string
   relationship: string
   occasion: string
+  // A milestone's "what are we celebrating" ("Promotion"), optional; "" otherwise.
+  milestone: string
   nickname: string
   // "The thing they always say".
   catchphrase: string

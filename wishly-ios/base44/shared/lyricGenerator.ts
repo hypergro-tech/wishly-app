@@ -63,7 +63,7 @@ export function buildLyricPrompt(story: UserStoryDetails, mood: Mood, occasion: 
 Who it's for: ${couple
     ? `${couple}, a couple${story.relationship ? ` (the singer's ${story.relationship.toLowerCase()})` : ''}, celebrating together`
     : `${name}${story.pronouns ? ` (${story.pronouns})` : ''}${story.relationship ? `, the singer's ${story.relationship.toLowerCase()}` : ''}`}.
-Occasion: ${occasion || 'just because'}.
+Occasion: ${occasion || 'just because'}${story.milestone ? `: ${story.milestone}` : ''}.
 Mood: ${mood}: ${MOOD_WRITING[mood]}.
 Language: English only.
 Voice: sung by the person giving it${story.fromName ? ` (${story.fromName})` : ''}, speaking to ${couple ? `both of them as "I" and "you two"` : `${name} as "I" and "you"`}. Never sing the giver's name.
@@ -83,6 +83,7 @@ ${couple
     ? `- Use BOTH names, "${name}" and "${partner}", at least three times each: together as "${couple}" twice in the [Chorus] and once in the outro, and each name at least once in the [Verse]. Never leave either name out.`
     : `- Use the name "${name}" at least four times: twice in the [Chorus], once in the [Verse] and once in the outro.`}
 ${wish ? `- This is a ${occasion.toLowerCase()} song, so it must wish them. Sing the line "${wish}" word for word, exactly as written, once in the [Chorus], and make it the whole outro line too.
+` : ''}${story.milestone ? `- The milestone is "${story.milestone}". Congratulate them on it plainly: name it in full once in the [Verse], and once more in the [Chorus] in a short, singable line ("Congratulations on your ${story.milestone.charAt(0).toLowerCase() + story.milestone.slice(1)}", or shorter, e.g. "your promotion" for "Promotion to Head of Design"). Keep their words for it, and don't add details about it that weren't given.
 ` : ''}- Every section needs at least one line that could only be about ${couple || name}. No stock party lines ("raise a glass", "hooray", "special day", "shine so bright").
 - Lines of 6 to 9 syllables with a steady rhythm, rhyming at the line ends where it feels natural.
 - Original lines only; don't quote or imitate existing songs.${story.avoid ? `\n- Leave out completely: ${story.avoid}.` : ''}

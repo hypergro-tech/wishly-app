@@ -91,6 +91,9 @@ export default function Review() {
         <Body muted size={14} style={{ marginTop: 4, textAlign: 'center' }}>
           {[draft.occasion, mood, draft.music.genre, draft.music.language].filter(Boolean).join(' · ')}
         </Body>
+        {draft.occasion === 'Milestone' && draft.occasion_note?.trim() ? (
+          <Text style={[type.accent, { marginTop: 6, textAlign: 'center', fontSize: 16, color: colors.text }]}>Celebrating: {draft.occasion_note.trim()}</Text>
+        ) : null}
 
         <Card style={{ marginTop: 22 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
