@@ -9,12 +9,14 @@
 
 import { createClientFromRequest } from 'npm:@base44/sdk'
 
+import { spendSong } from '../../shared/credits.ts'
 import { generateSongPayload, songInputs, startingSong } from '../../shared/songPipeline.ts'
 
 export default async function (req: Request) {
   try {
     const base44 = createClientFromRequest(req)
-    if (!(await base44.auth.me().catch(() => null))) return Response.json({ error: 'Sign in first' }, { status: 401 })
+    const user = await base44.auth.me().catch(() => null)
+    if (!user?.email) return Response.json({ error: 'Sign in first' }, { status: 401 })
 
     const { order_id } = await req.json()
     if (typeof order_id !== 'string' || !order_id) return Response.json({ error: 'Send the order to start' }, { status: 400 })
@@ -30,7 +32,16 @@ export default async function (req: Request) {
       return Response.json({ error: 'This song is already made' }, { status: 409 })
     }
 
+    // A new song is paid for once, here: a plan song or a single song.
+    // Retries and corrections of a paid song cost nothing.
+    let paid_with = order.paid_with
+    if (!paid_with) {
+      paid_with = await spendSong(base44.asServiceRole, user.email, order.id)
+      if (!paid_with) return Response.json({ error: 'Pay for this song first', code: 'payment_required' }, { status: 402 })
+    }
+
     const changes = {
+      paid_with,
       song: startingSong(order, generateSongPayload(songInputs(order))),
       song_version: (order.song_version || 0) + 1,
       status: 'in_production',

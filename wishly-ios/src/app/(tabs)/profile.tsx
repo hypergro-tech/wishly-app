@@ -1,6 +1,7 @@
 // Who's signed in, settings, and the website's help and policy pages.
 import Constants from 'expo-constants'
 import { router } from 'expo-router'
+import { useState } from 'react'
 import { useBottomTabBarHeight } from 'expo-router/js-tabs'
 import { Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -10,8 +11,9 @@ import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { ChevronRightIcon } from '@/components/icons'
 import { Body, Button, Title, tap } from '@/components/ui'
 import { SONGS_PER_MONTH, planById } from '@/lib/catalog'
+import { sendTestNotification } from '@/lib/notifications'
 import { HELP, LEGAL, openSitePage } from '@/lib/site'
-import { testStore, useWallet } from '@/lib/wallet'
+import { useWallet } from '@/lib/wallet'
 import { colors, type, shade } from '@/theme'
 
 export default function Profile() {
@@ -21,6 +23,7 @@ export default function Profile() {
   const { isBase44, user, signOut, deleteAccount } = useSession()
   const name = user?.full_name?.trim()
   const wallet = useWallet()
+  const [testing, setTesting] = useState(false)
   const plan = wallet.plan ? planById(wallet.plan.id) : null
   const refill = wallet.refillsOn?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
@@ -90,7 +93,7 @@ export default function Profile() {
           {wallet.singles > 0 && <Row label="Single songs" detail={`${wallet.singles} to use`} onPress={() => router.push('/plans')} />}
           {plan && <Row label="Manage subscription" detail="Apple" onPress={() => Linking.openURL('https://apps.apple.com/account/subscriptions')} />}
           <Row label="Restore purchases" onPress={restore} />
-          {testStore && (wallet.plan || wallet.singles > 0) ? <Row label="Clear test purchases" onPress={() => wallet.resetTest()} /> : null}
+          {wallet.isTest && (wallet.plan || wallet.singles > 0) ? <Row label="Clear test purchases" onPress={() => wallet.resetTest()} /> : null}
         </Section>
 
         <Section title="Your songs">
@@ -100,6 +103,14 @@ export default function Profile() {
 
         <Section title="Settings">
           <Row label="Notifications" detail="iPhone Settings" onPress={() => Linking.openSettings()} />
+          {/* For testing: finds out why "your song is ready" doesn't arrive. */}
+          <Row label="Send a test notification" detail={testing ? 'Sending…' : undefined} onPress={async () => {
+            if (testing) return
+            setTesting(true)
+            const result = await sendTestNotification()
+            setTesting(false)
+            Alert.alert('Test notification', result)
+          }} />
         </Section>
 
         <Section title="Help">

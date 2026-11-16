@@ -25,6 +25,8 @@
     "base44/functions",
     "base44/shared/ai.ts",
     "base44/shared/song.ts",
+    "base44/shared/appStore.ts",
+    "base44/shared/credits.ts",
     "scripts/song-tests",
     "node_modules"
   ]

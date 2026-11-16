@@ -48,7 +48,10 @@ export default function Review() {
     router.push({ pathname: '/sign-in', params: { name: r.name } })
   }
 
-  function pay(buyer: User) {
+  async function pay(buyer: User) {
+    // The count lives on the backend once Apple's store is on: check it now
+    // that they're signed in.
+    if (!wallet.isTest) await wallet.refresh()
     if (wallet.songsLeft > 0) return place(buyer)
     wallet.setAfterPurchase(() => place(buyer))
     router.push({ pathname: '/plans', params: { name: r.name } })

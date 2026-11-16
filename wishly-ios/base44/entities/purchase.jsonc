@@ -1,0 +1,33 @@
+// An App Store purchase, checked against Apple's signature before it's saved
+// (base44/shared/appStore.ts). Only the backend functions recordPurchase,
+// getCredits and startSong read or write these; the app never touches them.
+{
+  "name": "Purchase",
+  "type": "object",
+  "title": "Purchase",
+  "description": "A verified App Store purchase: one song, or a month or year of a plan",
+  "properties": {
+    // Apple's transaction id: one per purchase, and one per plan renewal.
+    "transaction_id": { "type": "string" },
+    "original_transaction_id": { "type": "string" },
+    "product_id": { "type": "string" },
+    "kind": { "type": "string", "enum": ["song", "monthly", "yearly"] },
+    // Sandbox for TestFlight and test accounts, Production on the App Store.
+    "environment": { "type": "string" },
+    // The Wishly account that bought it.
+    "buyer": { "type": "string" },
+    "purchased_at": { "type": "string" },
+    // Plans only: when this month or year of the plan ends.
+    "expires_at": { "type": ["string", "null"] },
+    "revoked": { "type": "boolean", "default": false },
+    // One song: the order it paid for, once used.
+    "used_by_order": { "type": ["string", "null"] }
+  },
+  "required": ["transaction_id", "product_id", "kind", "buyer"],
+  "rls": {
+    "create": false,
+    "read": false,
+    "update": false,
+    "delete": false
+  }
+}

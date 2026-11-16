@@ -12,7 +12,11 @@ import { NOTIFY_ASKED, markSeen, seen } from './once'
 // done, so the notification only goes to Notification Centre.
 try {
   Notifications.setNotificationHandler({
-    handleNotification: async () => ({ shouldShowBanner: false, shouldShowList: true, shouldPlaySound: false, shouldSetBadge: false }),
+    // A test from Profile shows as a banner even with the app open.
+    handleNotification: async (n) => {
+      const test = !!n.request.content.data?.test
+      return { shouldShowBanner: test, shouldShowList: true, shouldPlaySound: test, shouldSetBadge: false }
+    },
   })
 } catch {
   // Not available here (e.g. the web preview).
@@ -49,6 +53,47 @@ export async function pushToken(): Promise<string | null> {
     return (await Notifications.getExpoPushTokenAsync({ projectId })).data
   } catch {
     return null // Expo Go, the simulator or the web preview
+  }
+}
+
+// Profile's "Send a test notification": gets this phone's address, sends a
+// notification through Expo, then asks Expo whether Apple took it. Says in
+// plain words what went wrong, so a missing notification can be tracked down.
+export async function sendTestNotification(): Promise<string> {
+  try {
+    const { granted } = await Notifications.getPermissionsAsync()
+    if (!granted) return 'Notifications are off for Wishly. Turn them on in iPhone Settings, then try again.'
+  } catch {
+    return 'Notifications aren’t available here.'
+  }
+  let to: string
+  try {
+    const projectId = Constants.expoConfig?.extra?.eas?.projectId
+    to = (await Notifications.getExpoPushTokenAsync({ projectId })).data
+  } catch (e) {
+    return `Couldn’t get this phone’s notification address: ${(e as Error)?.message ?? e}`
+  }
+  try {
+    const send = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ to, title: 'Wishly test', body: 'Notifications are working.', sound: 'default', data: { test: true } }),
+    }).then((r) => r.json())
+    const ticket = send?.data
+    if (ticket?.status !== 'ok') return `Expo refused it: ${ticket?.details?.error ?? ticket?.message ?? JSON.stringify(send).slice(0, 200)}`
+    // Apple's answer comes back a few seconds later, as a receipt.
+    await new Promise((r) => setTimeout(r, 6000))
+    const receipts = await fetch('https://exp.host/--/api/v2/push/getReceipts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ ids: [ticket.id] }),
+    }).then((r) => r.json())
+    const receipt = receipts?.data?.[ticket.id]
+    if (!receipt) return 'Sent to Expo. Apple hasn’t answered yet, so if nothing arrives, try once more.'
+    if (receipt.status !== 'ok') return `Apple refused it: ${receipt.details?.error ?? ''} ${receipt.message ?? ''}`.trim()
+    return 'Sent, and Apple accepted it. It should be on your screen now.'
+  } catch (e) {
+    return `Couldn’t reach the notification service: ${(e as Error)?.message ?? e}`
   }
 }
 

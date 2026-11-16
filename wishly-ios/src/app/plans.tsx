@@ -11,7 +11,7 @@ import { Squish } from '@/components/motion'
 import { Body, Button, Chip, CheckCircle, success, tap } from '@/components/ui'
 import { PLANS, SONGS_PER_MONTH, formatPrice, pricePerSong, yearlySaving, type Plan, type PlanId } from '@/lib/catalog'
 import { siteUrl } from '@/lib/site'
-import { testStore, useWallet } from '@/lib/wallet'
+import { PurchaseCancelled, SignInFirst, useWallet } from '@/lib/wallet'
 import { colors, radius, shade, type } from '@/theme'
 
 const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL ?? siteUrl('/terms')
@@ -47,15 +47,23 @@ export default function Plans() {
         router.back()
         wallet.runAfterPurchase()
       }, 450)
-    } catch {
+    } catch (e) {
       setBusy(null)
+      if (e instanceof PurchaseCancelled) return // They closed Apple's sheet.
+      if (e instanceof SignInFirst) return router.push('/sign-in')
       Alert.alert('Payment didn’t go through', 'Nothing was charged. Try again in a moment.')
     }
   }
 
   async function restore() {
     setBusy('restore')
-    const found = await wallet.restore().catch(() => false)
+    let found = false
+    try {
+      found = await wallet.restore()
+    } catch (e) {
+      setBusy(null)
+      if (e instanceof SignInFirst) return router.push('/sign-in')
+    }
     setBusy(null)
     if (found) {
       success()
@@ -118,7 +126,7 @@ export default function Plans() {
       </View>
 
       <Button label={buttonLabel(plan)} busy={busy === 'buy'} done={done} disabled={busy === 'restore'} onPress={buy} style={{ marginTop: 22 }} />
-      {testStore && (
+      {wallet.isTest && (
         <Body muted size={12} style={{ marginTop: 10, textAlign: 'center' }}>Test purchase. No money is taken yet.</Body>
       )}
 
