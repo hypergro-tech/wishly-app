@@ -39,6 +39,9 @@ export const OCCASIONS = OCCASIONS_ON.filter((o) => ALL_OCCASIONS.includes(o))
 // "Sounds like") and both are sung.
 export const COUPLE_OCCASIONS = ['Anniversary', 'Wedding', "Valentine's Day"]
 export const forCouple = (occasion: string) => COUPLE_OCCASIONS.includes(occasion)
+// Occasions with the optional "A line for the song" box: the couple ones, and
+// Christmas (17 Nov 2026). The backend checks the same list in songPipeline.ts.
+export const takesSongLine = (occasion: string) => forCouple(occasion) || occasion === 'Christmas'
 
 export const PRONOUNS = ['she/her', 'he/him', 'they/them']
 

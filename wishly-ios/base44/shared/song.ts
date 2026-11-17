@@ -120,8 +120,8 @@ export async function makeTakes(order: Order, keys: Keys, lyrics: { prompt: stri
       const occasion = order.occasion || ''
       // What a milestone celebrates, if the buyer said ("Promotion").
       const note = occasion === 'Milestone' ? (order.occasion_note || '').trim() : ''
-      // A couple's own line for the song, if the buyer gave one.
-      const line = names.length > 1 ? (order.song_line || '').trim() : ''
+      // The buyer's own line for a couple's or Christmas song, if they gave one.
+      const line = names.length > 1 || occasion === 'Christmas' ? (order.song_line || '').trim() : ''
       let written = await writeLyrics(lyrics.prompt, lyrics.schema, names, keys.gemini)
       if (!fits(written, names, occasion, note, line)) {
         const again = await writeLyrics(lyrics.prompt, lyrics.schema, names, keys.gemini).catch(() => null)

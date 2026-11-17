@@ -68,8 +68,9 @@ export function songInputs(brief: BriefLike): SongInputs {
       relationship: text(r.relationship),
       occasion: text(brief.occasion),
       milestone: brief.occasion === 'Milestone' ? text(brief.occasion_note) : '',
-      // Only couples' songs (two names) get the buyer's own line.
-      songLine: text(r.partner_name) ? text(brief.song_line) : '',
+      // Couples' songs (two names) and Christmas songs get the buyer's own
+      // line (Christmas since 17 Nov 2026; the app's takesSongLine).
+      songLine: text(r.partner_name) || brief.occasion === 'Christmas' ? text(brief.song_line) : '',
       nickname: text(m.nickname),
       catchphrase: text(m.inside_joke),
       ritual: text(m.ritual),

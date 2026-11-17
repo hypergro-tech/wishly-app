@@ -11,7 +11,7 @@ import { StoryCards, StoryTip } from '@/components/StoryCards'
 import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { Squish } from '@/components/motion'
 import { Body, Button, Field, Label, Pills, Segmented, SpeakButton, Title, nudge, styles as ui, tap } from '@/components/ui'
-import { CORE_PACKAGE, forCouple, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
+import { CORE_PACKAGE, forCouple, takesSongLine, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
 import { realSongs } from '@/api/base44Client'
 import { suggestSpelling } from '@/api/orders'
 import { filledMemories, missing, useDraft } from '@/lib/draft'
@@ -38,6 +38,7 @@ const LINE_EXAMPLES: Record<string, string> = {
   Anniversary: 'e.g. Ten years in, and I’d still choose you',
   Wedding: 'e.g. From that rainy bus stop to forever',
   "Valentine's Day": 'e.g. You’re still my favorite hello',
+  Christmas: 'e.g. Every Christmas is better with you home',
 }
 
 const COUPLE_SONG: Record<string, string> = { Anniversary: 'An anniversary song', Wedding: 'A wedding song', "Valentine's Day": 'A Valentine’s song' }
@@ -179,9 +180,9 @@ function CreateForm() {
                 ) : null}
               </Animated.View>
             )}
-            {/* A couple's song can carry one line in the buyer's own words,
-                sung in the chorus. Optional, like Their story (16 Nov 2026). */}
-            {forCouple(draft.occasion) && (
+            {/* A couple's or Christmas song can carry one line in the buyer's own
+                words, sung in the chorus. Optional, like Their story (16 Nov 2026). */}
+            {takesSongLine(draft.occasion) && (
               <Animated.View entering={FadeIn.duration(260)} layout={settle} style={{ gap: 12, padding: 14, borderRadius: 18, backgroundColor: colors.bg }}>
                 <View>
                   <Text style={[type.bold, { fontSize: 17, color: colors.text }]}>A line for the song</Text>

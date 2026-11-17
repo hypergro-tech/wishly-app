@@ -7,7 +7,7 @@ import { useSession, type User } from '@/api/session'
 import { Spark } from '@/components/brand'
 import Cover from '@/components/Cover'
 import { Accent, Body, Button, Card, CheckCircle, Footer, SpeakPill, success, tap } from '@/components/ui'
-import { CORE_PACKAGE, EXTRAS, MOODS, OCCASION_TONES, formatPrice, forCouple } from '@/lib/catalog'
+import { CORE_PACKAGE, EXTRAS, MOODS, OCCASION_TONES, formatPrice, takesSongLine } from '@/lib/catalog'
 import { filledMemories, useDraft } from '@/lib/draft'
 import { wait } from '@/lib/motion'
 import { shouldAskForNotifications } from '@/lib/notifications'
@@ -94,7 +94,7 @@ export default function Review() {
         <Body muted size={14} style={{ marginTop: 4, textAlign: 'center' }}>
           {[draft.occasion, mood, draft.music.genre, draft.music.language].filter(Boolean).join(' · ')}
         </Body>
-        {forCouple(draft.occasion) && draft.song_line?.trim() ? (
+        {takesSongLine(draft.occasion) && draft.song_line?.trim() ? (
           <Text style={[type.accent, { marginTop: 6, textAlign: 'center', fontSize: 16, color: colors.text }]}>Your line: “{draft.song_line.trim()}”</Text>
         ) : null}
         {draft.occasion === 'Milestone' && draft.occasion_note?.trim() ? (

@@ -1,7 +1,7 @@
 // Orders, the one Base44 entity Wishly uses (schema: base44/entities/order.jsonc).
 // The web app reads and writes the same records.
 
-import { forCouple, quote, type Tint } from '@/lib/catalog'
+import { forCouple, quote, takesSongLine, type Tint } from '@/lib/catalog'
 import { type Song } from '@shared/songwriter'
 import { LYRICS_SCHEMA, parseLyrics } from '@shared/lyricGenerator'
 import { generateSongPayload, songInputs, startingSong } from '@shared/songPipeline'
@@ -84,8 +84,8 @@ export async function placeOrder(brief: Brief, payload?: SongPayload): Promise<O
     ...brief,
     recipient,
     occasion_note,
-    // The line to sing is only asked for a couple's song.
-    song_line: couple ? brief.song_line?.trim() ?? '' : '',
+    // The line to sing is only asked for a couple's or Christmas song.
+    song_line: takesSongLine(brief.occasion) ? brief.song_line?.trim() ?? '' : '',
     cover: earlier.length % 5,
     price_total: q.total,
     ready_by: q.readyBy,
