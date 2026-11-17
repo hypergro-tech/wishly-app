@@ -236,6 +236,54 @@ export type Example = {
 }
 
 const ALL_EXAMPLES: Example[] = [
+  // Made 17 Nov 2026 with the live song engine; photos are Wishly's own.
+  {
+    id: 'ex-christmas',
+    title: 'One More Christmas Movie',
+    for: 'For Nora, from her brother',
+    occasion: 'Christmas',
+    mood: 'joyful',
+    tags: ['Christmas', 'Upbeat', 'Pop'],
+    photo: require('../../assets/brand/christmas-cookies.jpg'),
+    photoAlt: 'A woman laughing with a tray of gingerbread cookies while her little brother sneaks one, a Christmas tree behind them',
+    tint: 'mint',
+    coverName: 'Nora',
+    lines: [
+      'December is here again, Nora',
+      'You bake way too many gingerbread men',
+      'You always say, "One more Christmas movie"',
+      'Merry Christmas, Nora',
+    ],
+    audio: require('../../assets/audio/examples/nora.mp3'),
+    sections: [
+      {
+        label: 'Verse',
+        lines: [
+          'December is here again, Nora',
+          'You bake way too many gingerbread men',
+          'Then you go and hide the burnt ones away',
+          'Out in the cold with your little brother',
+          'We build our lopsided snowman each year',
+        ],
+      },
+      {
+        label: 'Chorus',
+        lines: [
+          'Merry Christmas, Nora',
+          'You always say, "One more Christmas movie"',
+          'Before we ever go to sleep tonight',
+          'You make December so much fun, Nora',
+          'Best sister I could ever ask to have',
+        ],
+      },
+      {
+        label: 'Outro',
+        lines: [
+          'Merry Christmas, Nora',
+        ],
+      },
+    ],
+  },
   {
     id: 'ex1',
     title: 'Five More Minutes',
@@ -314,6 +362,99 @@ const ALL_EXAMPLES: Example[] = [
         ],
       },
       { label: 'Outro', lines: ['Walking and singing with you, dear Mei'] },
+    ],
+  },
+  {
+    id: 'ex-wedding',
+    title: 'Two Lopsided Mugs',
+    for: 'For Sofia & James, from their best friend',
+    occasion: 'Wedding',
+    mood: 'tender',
+    tags: ['Wedding', 'Romantic', 'Acoustic'],
+    photo: require('../../assets/brand/wedding-mugs.jpg'),
+    photoAlt: 'A just-married couple laughing at their garden reception, each holding a handmade mug',
+    tint: 'butter',
+    coverName: 'Sofia & James',
+    lines: [
+      'Back in that pottery class you met',
+      'Hands covered in clay that was still wet',
+      'Two lopsided mugs, one perfect pair',
+      'Congratulations, Sofia and James',
+    ],
+    audio: require('../../assets/audio/examples/sofia.mp3'),
+    sections: [
+      {
+        label: 'Verse',
+        lines: [
+          'Back in that pottery class you met,',
+          'Hands covered in clay that was still wet.',
+          'Sofia laughed as the wheel spun round,',
+          'James had the sweetest smile in town.',
+          'I saw you two and I just knew.',
+        ],
+      },
+      {
+        label: 'Chorus',
+        lines: [
+          'I knew you two were meant to be,',
+          'Right from day one, so plain to see.',
+          'Two lopsided mugs, one perfect pair,',
+          'Sofia and James, a love so rare.',
+          'Congratulations, Sofia and James.',
+        ],
+      },
+      {
+        label: 'Outro',
+        lines: [
+          'Congratulations, Sofia and James.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ex-valentine',
+    title: 'Team E and M',
+    for: 'For Ella & Marcus, from a friend',
+    occasion: 'Valentine\'s Day',
+    mood: 'tender',
+    tags: ['Valentine’s Day', 'Romantic', 'Pop'],
+    photo: require('../../assets/brand/valentine-tacos.jpg'),
+    photoAlt: 'A couple laughing on the couch over late-night tacos by candlelight',
+    tint: 'lilac',
+    coverName: 'Ella & Marcus',
+    lines: [
+      'I love watching you two together',
+      'The quiet way that Ella smiles',
+      'Tacos at midnight, you and me',
+      'Happy Valentine’s Day, Ella and Marcus',
+    ],
+    audio: require('../../assets/audio/examples/ella.mp3'),
+    sections: [
+      {
+        label: 'Verse',
+        lines: [
+          'I love watching you two together',
+          'The quiet way that Ella smiles',
+          'When Marcus holds her hand in his',
+          'I call you two Team E and M',
+          'Through every late-night movie run',
+        ],
+      },
+      {
+        label: 'Chorus',
+        lines: [
+          'Tacos at midnight, you and me',
+          'Just Ella and Marcus side by side',
+          'You make this love look warm and true',
+          'Happy Valentine’s Day, Ella and Marcus',
+        ],
+      },
+      {
+        label: 'Outro',
+        lines: [
+          'Happy Valentine’s Day, Ella and Marcus',
+        ],
+      },
     ],
   },
   {
