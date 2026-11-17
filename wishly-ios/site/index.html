@@ -76,6 +76,70 @@
     .made { margin-top: 32px; text-align: center; font-size: 14px; }
     .made a { color: #143438; font-weight: 700; }
     .made .get-app { display: inline-block; margin-top: 14px; padding: 12px 20px; border-radius: 999px; background: #143438; color: #FFF5EB; text-decoration: none; font-size: 15px; }
+
+    /* The homepage (trywishly.co): shown for any address that isn't a gift
+       link or a sign-in hand-off, so old links land somewhere useful. */
+    body.landing { display: block; text-align: left; padding: 0; }
+    .landing [hidden] { display: none !important; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 22px; }
+    .top { display: flex; align-items: center; justify-content: space-between; padding-top: 22px; padding-bottom: 22px; }
+    .top .logo { font-size: 26px; letter-spacing: -1px; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 15px; }
+    .pill.dark { background: #143438; color: #FFF5EB; }
+    .pill.coral { background: #FF6B7A; color: #143438; font-size: 17px; padding: 16px 26px; }
+    .pill svg { width: 18px; height: 18px; }
+    .hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: 44px; align-items: center; padding-top: 18px; padding-bottom: 56px; }
+    .hero h1 { font-size: 56px; line-height: 1.02; letter-spacing: -2px; margin: 0; }
+    .hero .lede { font-size: 19px; color: #3D5458; margin: 18px 0 26px; max-width: 470px; }
+    .hero .small { font-size: 14px; color: #5B6466; margin-top: 14px; }
+    .hero .photo { position: relative; border-radius: 34px; overflow: hidden; aspect-ratio: 4 / 3.4; box-shadow: 0 30px 70px rgba(20,52,56,.18); }
+    .hero .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero .quote { position: absolute; left: 18px; right: 18px; bottom: 18px; background: rgba(255,255,255,.93); border-radius: 18px; padding: 14px 16px; font: italic 17px/1.4 Georgia, "Times New Roman", serif; color: #143438; }
+    section.band { padding: 56px 0; }
+    section.band.white { background: #fff; }
+    h2.sec { font-size: 36px; letter-spacing: -1px; margin: 0 0 8px; }
+    p.secsub { color: #5B6466; margin: 0 0 28px; font-size: 17px; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .step { background: #FFF5EB; border-radius: 22px; padding: 22px; }
+    .white .step { background: #FFF5EB; }
+    .step b { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; margin-bottom: 12px; }
+    .step h3 { margin: 0 0 6px; font-size: 20px; }
+    .step p { margin: 0; color: #3D5458; font-size: 16px; }
+    .songs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .song { background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(20,52,56,.08); }
+    .song .pic { position: relative; aspect-ratio: 4 / 3; }
+    .song .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .song button { position: absolute; right: 14px; bottom: 14px; width: 54px; height: 54px; border-radius: 50%; border: 0; background: #FF6B7A; color: #143438; cursor: pointer; display: grid; place-items: center; box-shadow: 0 8px 20px rgba(255,107,122,.4); }
+    .song .info { padding: 16px 18px 18px; }
+    .song h3 { margin: 0; font-size: 19px; }
+    .song .meta { color: #5B6466; font-size: 14px; margin-top: 2px; }
+    .song .line { font: italic 16px/1.4 Georgia, "Times New Roman", serif; color: #143438; margin-top: 10px; }
+    .occasions { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .occ { border-radius: 20px; padding: 14px 8px 12px; text-align: center; font-weight: 700; font-size: 15px; }
+    .occ img { width: 76px; height: 76px; object-fit: contain; display: block; margin: 0 auto 6px; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: center; }
+    .split img { width: 100%; border-radius: 28px; display: block; }
+    .split ul { padding-left: 20px; color: #3D5458; font-size: 17px; }
+    .split li { margin: 8px 0; }
+    .prices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .price { background: #fff; border-radius: 22px; padding: 22px; border: 1px solid rgba(20,52,56,.08); }
+    .price h3 { margin: 0; font-size: 20px; }
+    .price .amt { font-size: 34px; font-weight: 700; letter-spacing: -1px; margin: 8px 0 4px; }
+    .price .amt small { font-size: 16px; font-weight: 400; color: #5B6466; }
+    .price p { margin: 0; color: #3D5458; font-size: 15px; }
+    .price .tag { display: inline-block; background: #FFE07A; border-radius: 999px; font-size: 12px; font-weight: 700; padding: 4px 10px; margin-left: 6px; vertical-align: middle; }
+    .cta { text-align: center; padding-top: 64px; padding-bottom: 64px; }
+    .cta h2 { font-size: 40px; letter-spacing: -1.2px; margin: 0 0 22px; }
+    .foot { border-top: 1px solid rgba(20,52,56,.1); padding-top: 26px; padding-bottom: 40px; display: flex; flex-wrap: wrap; gap: 18px; justify-content: space-between; color: #5B6466; font-size: 14px; }
+    .foot a { color: #143438; font-weight: 700; margin-right: 18px; }
+    @media (max-width: 820px) {
+      .hero, .split { grid-template-columns: 1fr; gap: 26px; }
+      .hero h1 { font-size: 42px; }
+      .hero .photo { order: -1; }
+      .steps, .songs, .prices { grid-template-columns: 1fr; }
+      .occasions { grid-template-columns: repeat(3, 1fr); }
+      h2.sec, .cta h2 { font-size: 30px; }
+    }
   </style>
 </head>
 <body>
@@ -84,6 +148,111 @@
     <p id="message">Personal songs from the memories that matter.</p>
     <a id="back" class="button" hidden>Back to Wishly</a>
   </main>
+
+
+  <div id="landing" hidden>
+    <div class="wrap top">
+      <div class="logo">✱ wishly<span>.</span></div>
+      <a class="pill dark" href="https://apps.apple.com/us/app/id6834450274"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.4-.9-2.4-3.9zM14 5.3c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4z"/></svg> Get the app</a>
+    </div>
+    <div class="wrap hero">
+      <div>
+        <h1>A song only they could recognize.</h1>
+        <p class="lede">Tell us who it’s for and a detail or two only you know. Wishly writes and sings a one-minute song with their name in it, ready in minutes.</p>
+        <a class="pill coral" href="https://apps.apple.com/us/app/id6834450274"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.4-.9-2.4-3.9zM14 5.3c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4z"/></svg> Download on the App Store</a>
+        <div class="small">iPhone app · from $29 a song · you check every name first</div>
+      </div>
+      <div class="photo">
+        <img src="/home/christmas-cookies.jpg" alt="A woman laughing with a tray of gingerbread cookies while her little brother sneaks one">
+        <div class="quote">“You always say, ‘One more Christmas movie’. Merry Christmas, Nora.”</div>
+      </div>
+    </div>
+
+    <section class="band white">
+      <div class="wrap">
+        <h2 class="sec">Hear a Wishly song</h2>
+        <p class="secsub">Real songs made with Wishly. Press play.</p>
+        <div class="songs">
+        <div class="song">
+          <div class="pic"><img src="/home/christmas-cookies.jpg" alt="A woman with a tray of gingerbread cookies and her little brother" loading="lazy"><button data-src="/home/nora.mp3" aria-label="Play One More Christmas Movie"><svg width="22" height="22" viewBox="0 0 26 26" aria-hidden="true"><path class="i-play" d="M8 4.8v16.4a1 1 0 0 0 1.5.86l13-8.2a1 1 0 0 0 0-1.72l-13-8.2A1 1 0 0 0 8 4.8z" fill="currentColor"/><g class="i-pause" style="display:none"><rect x="6" y="4.5" width="5" height="17" rx="1.6" fill="currentColor"/><rect x="15" y="4.5" width="5" height="17" rx="1.6" fill="currentColor"/></g></svg></button></div>
+          <div class="info"><h3>One More Christmas Movie</h3><div class="meta">Christmas · for Nora, from her brother</div><div class="line">“Merry Christmas, Nora”</div></div>
+        </div>
+        <div class="song">
+          <div class="pic"><img src="/home/sunday-pancakes.jpg" alt="A couple laughing on the kitchen floor over pancakes" loading="lazy"><button data-src="/home/maya.mp3" aria-label="Play Five More Minutes"><svg width="22" height="22" viewBox="0 0 26 26" aria-hidden="true"><path class="i-play" d="M8 4.8v16.4a1 1 0 0 0 1.5.86l13-8.2a1 1 0 0 0 0-1.72l-13-8.2A1 1 0 0 0 8 4.8z" fill="currentColor"/><g class="i-pause" style="display:none"><rect x="6" y="4.5" width="5" height="17" rx="1.6" fill="currentColor"/><rect x="15" y="4.5" width="5" height="17" rx="1.6" fill="currentColor"/></g></svg></button></div>
+          <div class="info"><h3>Five More Minutes</h3><div class="meta">Anniversary · for Maya, from her husband</div><div class="line">“On Sunday mornings, Maya, at the stove”</div></div>
+        </div>
+        <div class="song">
+          <div class="pic"><img src="/home/wedding-mugs.jpg" alt="A just-married couple laughing, each holding a handmade mug" loading="lazy"><button data-src="/home/sofia.mp3" aria-label="Play Two Lopsided Mugs"><svg width="22" height="22" viewBox="0 0 26 26" aria-hidden="true"><path class="i-play" d="M8 4.8v16.4a1 1 0 0 0 1.5.86l13-8.2a1 1 0 0 0 0-1.72l-13-8.2A1 1 0 0 0 8 4.8z" fill="currentColor"/><g class="i-pause" style="display:none"><rect x="6" y="4.5" width="5" height="17" rx="1.6" fill="currentColor"/><rect x="15" y="4.5" width="5" height="17" rx="1.6" fill="currentColor"/></g></svg></button></div>
+          <div class="info"><h3>Two Lopsided Mugs</h3><div class="meta">Wedding · for Sofia & James</div><div class="line">“Two lopsided mugs, one perfect pair”</div></div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap">
+        <h2 class="sec">How it works</h2>
+        <p class="secsub">About five minutes from you, a few minutes from us.</p>
+        <div class="steps">
+          <div class="step"><b style="background:#E6D6FF">1</b><h3>Tell us about them</h3><p>Their name, the occasion, and anything you like: a nickname, the thing they always say, a moment you remember.</p></div>
+          <div class="step"><b style="background:#FFE07A">2</b><h3>We write and sing it</h3><p>A one-minute song in the mood and style you pick, with their name sung clearly.</p></div>
+          <div class="step"><b style="background:#BDF2D5">3</b><h3>You listen, then give</h3><p>Check every name and detail, ask for a free fix if anything’s off, then send them a private link.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band white">
+      <div class="wrap">
+        <h2 class="sec">For the moments that matter</h2>
+        <p class="secsub">Birthdays, anniversaries, Christmas, milestones, weddings and Valentine’s Day.</p>
+        <div class="occasions">
+          <div class="occ" style="background:#FFE07A"><img src="/home/birthday.png" alt="">Birthday</div>
+          <div class="occ" style="background:#E6D6FF"><img src="/home/anniversary.png" alt="">Anniversary</div>
+          <div class="occ" style="background:#D6ECFF"><img src="/home/christmas.png" alt="">Christmas</div>
+          <div class="occ" style="background:#FF6B7A"><img src="/home/milestone.png" alt="">Milestone</div>
+          <div class="occ" style="background:#BDF2D5"><img src="/home/wedding.png" alt="">Wedding</div>
+          <div class="occ" style="background:#FFD6E0"><img src="/home/valentines-day.png" alt="">Valentine’s</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="wrap split">
+        <img src="/home/valentine-tacos.jpg" alt="A couple laughing on the couch over late-night tacos" loading="lazy">
+        <div>
+          <h2 class="sec">Their name, sung right</h2>
+          <ul>
+            <li>Hear how their name will be sung before the song is made.</li>
+            <li>Tricky names are spelled the way they sound, so the singer gets them right.</li>
+            <li>Every song includes one free correction.</li>
+            <li>They open their song with a link: no app, no account.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="band white">
+      <div class="wrap">
+        <h2 class="sec">Simple pricing</h2>
+        <p class="secsub">Paid securely through Apple in the app.</p>
+        <div class="prices">
+          <div class="price"><h3>One song</h3><div class="amt">$29</div><p>One personal song with one free correction.</p></div>
+          <div class="price"><h3>Monthly</h3><div class="amt">$39 <small>/ month</small></div><p>3 songs every month. Cancel any time.</p></div>
+          <div class="price"><h3>Yearly <span class="tag">Save 57%</span></h3><div class="amt">$199 <small>/ year</small></div><p>3 songs every month, billed yearly.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap cta">
+      <h2>Make someone’s day sound like them.</h2>
+      <a class="pill coral" href="https://apps.apple.com/us/app/id6834450274"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.1-1.2 2.9-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.4-.9-2.4-3.9zM14 5.3c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4z"/></svg> Download on the App Store</a>
+    </div>
+
+    <div class="wrap foot">
+      <div><a href="/blog.html">Blog</a><a href="/support.html">Support</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></div>
+      <div>© 2026 [Company legal name] · Songs are made with AI.</div>
+    </div>
+  </div>
 
   <main id="gift" hidden>
     <div class="logo">✱ wishly<span>.</span></div>
@@ -161,6 +330,55 @@
         button.href = link
         button.hidden = false
         location.replace(link)
+      } else if (!provider) {
+        // Addresses from the old trywishly.co (in older app builds and App
+        // Store Connect) go to the matching page; anything else, the homepage.
+        var OLD = {
+          '/privacy': '/privacy.html', '/privacy-choices': '/privacy.html', '/ai-disclosure': '/privacy.html',
+          '/terms': '/terms.html', '/refund-policy': '/terms.html', '/delivery-policy': '/terms.html',
+          '/song-licence': '/terms.html', '/copyright': '/terms.html', '/seller': '/terms.html',
+          '/contact': '/support.html', '/support': '/support.html', '/faq': '/support.html', '/help': '/support.html',
+        }
+        // The blog moved here as static pages (site/blog/<slug>.html); the
+        // old guides (built on the old pricing) go to the closest article.
+        OLD['/blog'] = '/blog.html'
+        OLD['/guides'] = '/blog.html'
+        OLD['/guides/how-much-does-a-custom-song-cost'] = '/blog/is-a-custom-song-a-good-gift.html'
+        OLD['/guides/custom-song-services-compared'] = '/blog/is-a-custom-song-a-good-gift.html'
+        OLD['/guides/ai-vs-human-custom-song'] = '/blog/is-a-custom-song-a-good-gift.html'
+        OLD['/guides/how-to-give-a-song-as-a-gift'] = '/blog/what-to-write-for-a-custom-song.html'
+        OLD['/guides/songfinch-alternative'] = '/'
+        var BLOG = ['anniversary-song-for-instagram-post', 'birthday-song-for-best-friend-instagram-story', 'christmas-gifts-for-elderly-parents', 'christmas-gifts-for-grandparents', 'free-personalized-song', 'gift-for-someone-who-has-everything', 'is-a-custom-song-a-good-gift', 'last-minute-gift-ideas-for-her', 'long-distance-relationship-gift-ideas', 'mothers-day-gift-from-daughter', 'songs-to-dedicate-to-your-boyfriend', 'songs-to-dedicate-to-your-child', 'songs-to-dedicate-to-your-husband', 'songs-to-dedicate-to-your-mom', 'songs-to-dedicate-to-your-wife', 'unique-anniversary-gifts-for-him', 'unique-birthday-gift-for-wife', 'valentines-day-gift-ideas-for-him', 'what-is-a-good-anniversary-song', 'what-to-write-for-a-custom-song']
+        var path = location.pathname.replace(/\/+$/, '')
+        var post = (path.match(/^\/blog\/([a-z0-9-]+)$/) || [])[1]
+        var page = OLD[path] || (post && BLOG.indexOf(post) !== -1 ? '/blog/' + post + '.html' : '')
+        if (page && page !== path) location.replace(page)
+        else showLanding()
+      }
+
+      // The homepage, with a play button on each example song.
+      function showLanding() {
+        document.body.className = 'landing'
+        document.title = 'Wishly · A song only they could recognize'
+        document.getElementById('home').hidden = true
+        document.getElementById('landing').hidden = false
+        var playing = null
+        Array.prototype.forEach.call(document.querySelectorAll('.song button'), function (b) {
+          var a = new Audio(); a.preload = 'none'
+          var show = function (on) {
+            b.querySelector('.i-play').style.display = on ? 'none' : ''
+            b.querySelector('.i-pause').style.display = on ? '' : 'none'
+          }
+          a.addEventListener('ended', function () { show(false) })
+          b.addEventListener('click', function () {
+            if (!a.src) a.src = b.getAttribute('data-src')
+            if (a.paused) {
+              if (playing && playing !== a) playing.pause()
+              a.play(); playing = a; show(true)
+            } else { a.pause(); show(false) }
+          })
+          a.addEventListener('pause', function () { show(false) })
+        })
       }
 
       function showGift(token) {

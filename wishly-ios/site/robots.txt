@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /gift/
+Disallow: /api/
+
+Sitemap: https://trywishly.co/sitemap.xml

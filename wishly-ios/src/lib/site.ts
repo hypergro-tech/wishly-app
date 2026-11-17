@@ -6,28 +6,22 @@ import { colors } from '@/theme'
 
 export const SITE_URL = (process.env.EXPO_PUBLIC_SITE_URL ?? 'https://trywishly.co').replace(/\/$/, '')
 
+// Wishly's own pages, published from this repo's site/ folder (the same
+// Base44 site as the gift pages) and served at trywishly.co once the domain
+// points there. Old trywishly.co addresses land on the homepage.
 export const HELP = [
-  { label: 'Frequently asked questions', path: '/faq' },
-  { label: 'Contact us', path: '/contact' },
-  { label: 'How it works', path: '/how-it-works' },
-  { label: 'About Wishly', path: '/about' },
+  { label: 'Help & support', path: '/support.html' },
+  { label: 'About Wishly', path: '/' },
 ]
 
-// The order of the website's "Help & legal" footer.
 export const LEGAL = [
-  { label: 'Privacy', path: '/privacy' },
-  { label: 'Terms', path: '/terms' },
-  { label: 'Refund policy', path: '/refund-policy' },
-  { label: 'Delivery policy', path: '/delivery-policy' },
-  { label: 'Song licence', path: '/song-licence' },
-  { label: 'AI disclosure', path: '/ai-disclosure' },
-  { label: 'Copyright & IP', path: '/copyright' },
-  { label: 'Accessibility', path: '/accessibility' },
-  { label: 'Your privacy choices', path: '/privacy-choices' },
-  { label: 'Seller & contact details', path: '/seller' },
+  { label: 'Privacy Policy', path: '/privacy.html' },
+  { label: 'Terms of Use', path: '/terms.html' },
 ]
 
 export const siteUrl = (path: string) => `${SITE_URL}${path}`
+export const TERMS_URL = siteUrl('/terms.html')
+export const PRIVACY_URL = siteUrl('/privacy.html')
 
 export const openSitePage = (path: string) =>
   WebBrowser.openBrowserAsync(siteUrl(path), {

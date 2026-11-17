@@ -10,12 +10,10 @@ import { Alert, Pressable, ScrollView, Text, View } from 'react-native'
 import { Squish } from '@/components/motion'
 import { Body, Button, Chip, CheckCircle, success, tap } from '@/components/ui'
 import { PLANS, SONGS_PER_MONTH, formatPrice, pricePerSong, yearlySaving, type Plan, type PlanId } from '@/lib/catalog'
-import { siteUrl } from '@/lib/site'
+import { PRIVACY_URL, TERMS_URL } from '@/lib/site'
 import { PurchaseCancelled, SignInFirst, useWallet } from '@/lib/wallet'
 import { colors, radius, shade, type } from '@/theme'
 
-const TERMS_URL = process.env.EXPO_PUBLIC_TERMS_URL ?? siteUrl('/terms')
-const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL ?? siteUrl('/privacy')
 
 const blurb = (p: Plan) =>
   p.per
