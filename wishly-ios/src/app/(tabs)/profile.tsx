@@ -103,14 +103,17 @@ export default function Profile() {
 
         <Section title="Settings">
           <Row label="Notifications" detail="iPhone Settings" onPress={() => Linking.openSettings()} />
-          {/* For testing: finds out why "your song is ready" doesn't arrive. */}
-          <Row label="Send a test notification" detail={testing ? 'Sending…' : undefined} onPress={async () => {
-            if (testing) return
-            setTesting(true)
-            const result = await sendTestNotification()
-            setTesting(false)
-            Alert.alert('Test notification', result)
-          }} />
+          {/* For testing: finds out why "your song is ready" doesn't arrive.
+              Hidden once Wishly is launched (base44/shared/launch.ts). */}
+          {!wallet.launched && (
+            <Row label="Send a test notification" detail={testing ? 'Sending…' : undefined} onPress={async () => {
+              if (testing) return
+              setTesting(true)
+              const result = await sendTestNotification()
+              setTesting(false)
+              Alert.alert('Test notification', result)
+            }} />
+          )}
         </Section>
 
         <Section title="Help">

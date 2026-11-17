@@ -6,13 +6,13 @@
 // the 20th. Plan songs are used first, then single songs.
 
 import { PRODUCTS, type Transaction } from './appStore.ts'
+import { LAUNCHED } from './launch.ts'
 
 export const SONGS_PER_MONTH = 3
 
-// While false, a buyer with nothing left still gets their song (marked
-// "test"), so the app can be tried before Apple's Paid Apps Agreement is
-// signed. Set true before the App Store launch.
-export const PAYMENT_REQUIRED = false
+// Payment is required once Wishly is launched (shared/launch.ts). Before
+// that, a buyer with nothing left still gets their song, marked "test".
+export const PAYMENT_REQUIRED = LAUNCHED
 
 type Purchase = {
   id: string

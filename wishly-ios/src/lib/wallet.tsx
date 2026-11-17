@@ -8,7 +8,9 @@
 //
 // Until Apple serves the products (they need the Paid Apps Agreement), and in
 // the web preview, purchases are TEST purchases saved on this phone: no money
-// moves. `isTest` says which.
+// moves. `isTest` says which. Once Wishly is launched (the backend's switch,
+// base44/shared/launch.ts, read through getCredits) there are no test
+// purchases at all: only Apple's.
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { AppState, Platform } from 'react-native'
@@ -85,6 +87,7 @@ type Wallet = {
   spendSong: () => Promise<void>
   resetTest: () => Promise<void>
   isTest: boolean // test purchases on this phone, not Apple
+  launched: boolean // the backend's launch switch: real purchases only
   refresh: () => Promise<void>
   // What to do once a purchase on the plans screen goes through.
   setAfterPurchase: (fn: (() => void) | null) => void
@@ -115,8 +118,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const refresh = useCallback(async () => {
-    if (!realSongs || !userRef.current) return setCredits(null)
-    setCredits(await call('getCredits').catch(() => null))
+    // Signed out, getCredits still says whether Wishly is launched.
+    if (!realSongs) return // demo mode: test purchases only
+    const next = await call('getCredits').catch(() => null)
+    setCredits(next)
   }, [])
 
   // Records a purchase Apple reports (a new one, a renewal, or a restore)
@@ -167,7 +172,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [settle])
 
   // The backend's count, whenever the buyer changes or the app comes back.
-  useEffect(() => { refresh() }, [user, refresh])
+  useEffect(() => {
+    const t = setTimeout(refresh, 0)
+    return () => clearTimeout(t)
+  }, [user, refresh])
   useEffect(() => {
     const sub = AppState.addEventListener('change', (s) => { if (s === 'active') refresh() })
     return () => sub.remove()
@@ -187,6 +195,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       await IAP.requestPurchase({ request: { apple: { sku } }, type: id === 'song' ? 'in-app' : 'subs' })
       return done
     }
+    if (launched) throw new Error('The App Store isn’t available right now')
     await wait(900) // stands in for Apple's purchase sheet
     const w = latest.current
     if (id === 'song') return save({ ...w, singles: w.singles + 1 })
@@ -205,6 +214,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setCredits(next)
       return Boolean(next?.plan || next?.singles)
     }
+    if (launched) return false
     await wait(600)
     return Boolean(latest.current.plan || latest.current.singles)
   }
@@ -224,6 +234,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }
 
   const left = planSongsLeft(saved)
+  const launched = credits?.required === true
   const real = storeOn && credits
   const value: Wallet = {
     ready,
@@ -232,7 +243,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     singles: real ? credits.singles : saved.singles,
     songsLeft: real ? credits.songs_left : left + saved.singles,
     refillsOn: real ? (credits.plan ? new Date(credits.plan.refills_on) : null) : saved.plan ? nextRefill(saved.plan.since) : null,
-    isTest: !storeOn,
+    isTest: !storeOn && !launched,
+    launched,
     refresh,
     buy,
     restore,
