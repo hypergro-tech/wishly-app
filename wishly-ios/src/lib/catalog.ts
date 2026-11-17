@@ -161,11 +161,12 @@ export const STORY_TIPS = [
 export const SONGS_PER_MONTH = 3
 export type PlanId = 'song' | 'monthly' | 'yearly'
 export type Plan = { id: PlanId; productId: string; name: string; price: number; per?: 'month' | 'year'; was?: number }
-// `was` shows crossed out beside the price, as a launch offer (Neha, 16 Nov
-// 2026, for testing). Before the App Store launch it must be a price really
-// charged later (US rules on "was" prices); delete `was` to turn it off.
+// `was` shows crossed out beside the price, with a "Launch offer" chip. The
+// $49 test of it (16 Nov 2026) was removed before App Store review on 17 Nov:
+// Apple and US rules need a "was" price that's really charged. Set it again
+// only for a price Wishly has actually sold at.
 export const PLANS: Plan[] = [
-  { id: 'song', productId: 'com.hypergro.wishly.song', name: 'One song', price: 29, was: 49 },
+  { id: 'song', productId: 'com.hypergro.wishly.song', name: 'One song', price: 29 },
   { id: 'monthly', productId: 'com.hypergro.wishly.monthly', name: 'Monthly', price: 39, per: 'month' },
   { id: 'yearly', productId: 'com.hypergro.wishly.yearly', name: 'Yearly', price: 199, per: 'year' },
 ]

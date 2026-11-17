@@ -9,4 +9,4 @@
 // To launch: set LAUNCHED = true, then `base44 functions deploy`. The app reads
 // it from getCredits, so no app update is needed. Before that: the Paid Apps
 // Agreement is active and a sandbox purchase has been tested end to end.
-export const LAUNCHED = false
+export const LAUNCHED = true // switched on 17 Nov 2026, before App Store review
