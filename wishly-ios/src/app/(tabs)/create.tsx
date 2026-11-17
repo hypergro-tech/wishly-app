@@ -37,7 +37,7 @@ const OTHER_MILESTONE = 'Something else'
 const LINE_EXAMPLES: Record<string, string> = {
   Anniversary: 'e.g. Ten years in, and I’d still choose you',
   Wedding: 'e.g. From that rainy bus stop to forever',
-  "Valentine's Day": 'e.g. You’re still my favourite hello',
+  "Valentine's Day": 'e.g. You’re still my favorite hello',
 }
 
 const COUPLE_SONG: Record<string, string> = { Anniversary: 'An anniversary song', Wedding: 'A wedding song', "Valentine's Day": 'A Valentine’s song' }
@@ -81,7 +81,7 @@ function CreateForm() {
     wasComplete.current = complete
   }, [complete])
 
-  // "Kaku and Kartik" typed as one name, then Anniversary picked: split it
+  // "Emma and Jake" typed as one name, then Anniversary picked: split it
   // into the two boxes, so each name is sung and checked on its own.
   const pickOccasion = (o: string) => {
     set('occasion', o)
@@ -160,7 +160,7 @@ function CreateForm() {
                   label="First name"
                   value={r.name}
                   onChangeText={(name) => set('recipient', { name })}
-                  placeholder="e.g. Kaku"
+                  placeholder="e.g. Emma"
                   autoCapitalize="words"
                   autoCorrect={false}
                 />
@@ -169,7 +169,7 @@ function CreateForm() {
                   label="Their partner’s name"
                   value={r.partner_name ?? ''}
                   onChangeText={(partner_name) => set('recipient', { partner_name })}
-                  placeholder="e.g. Kartik"
+                  placeholder="e.g. Jake"
                   autoCapitalize="words"
                   autoCorrect={false}
                 />
@@ -190,7 +190,7 @@ function CreateForm() {
                 <Field
                   value={draft.song_line ?? ''}
                   onChangeText={(song_line) => set('song_line', song_line)}
-                  placeholder={LINE_EXAMPLES[draft.occasion] ?? 'e.g. You’re still my favourite hello'}
+                  placeholder={LINE_EXAMPLES[draft.occasion] ?? 'e.g. You’re still my favorite hello'}
                   maxLength={150}
                   multiline
                   accessibilityLabel="A line for the song, optional"

@@ -44,13 +44,20 @@ export async function turnOnNotifications() {
 
 export const notNow = () => markSeen(NOTIFY_ASKED)
 
+// This phone's Expo push address. Without an answer from Apple (no network,
+// or a simulator) the request can wait forever, so it gives up after 15 seconds.
+async function expoPushToken(): Promise<string> {
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId
+  const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('no answer from Apple after 15 seconds')), 15000))
+  return (await Promise.race([Notifications.getExpoPushTokenAsync({ projectId }), timeout])).data
+}
+
 // This phone's address for push notifications, if they're allowed.
 export async function pushToken(): Promise<string | null> {
   try {
     const { granted } = await Notifications.getPermissionsAsync()
     if (!granted) return null
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId
-    return (await Notifications.getExpoPushTokenAsync({ projectId })).data
+    return await expoPushToken()
   } catch {
     return null // Expo Go, the simulator or the web preview
   }
@@ -68,8 +75,7 @@ export async function sendTestNotification(): Promise<string> {
   }
   let to: string
   try {
-    const projectId = Constants.expoConfig?.extra?.eas?.projectId
-    to = (await Notifications.getExpoPushTokenAsync({ projectId })).data
+    to = await expoPushToken()
   } catch (e) {
     return `Couldn’t get this phone’s notification address: ${(e as Error)?.message ?? e}`
   }

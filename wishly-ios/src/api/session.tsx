@@ -134,7 +134,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       // Base44 says why a new account was refused (e.g. "Password must be at
       // least 8 characters long"); otherwise the account exists and the
       // password is wrong, or it was made with Apple / Google and has none.
-      const reason = (error as { data?: { detail?: string } })?.data?.detail
+      // Base44 puts it in data.detail, or in data.error.message (e.g. "This
+      // email address can't receive mail" for a mistyped domain).
+      const data = (error as { data?: { detail?: string; message?: string; error?: { message?: string } } })?.data
+      const reason = data?.detail || data?.error?.message || data?.message
       if (reason && !/exist|registered|already/i.test(reason)) throw new AuthError(reason.replace(/\.?$/, '.'))
       throw new AuthError('That email and password don’t match. Try again, or reset your password. If you signed up with Apple or Google, use that button instead.')
     }

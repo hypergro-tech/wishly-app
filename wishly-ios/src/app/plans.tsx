@@ -27,7 +27,9 @@ const buttonLabel = (p: Plan) => (p.per ? `Subscribe for ${formatPrice(p.price)}
 export default function Plans() {
   const { name, plan: preset } = useLocalSearchParams<{ name?: string; plan?: PlanId }>()
   const wallet = useWallet()
-  const [chosen, setChosen] = useState<PlanId>(preset ?? 'song')
+  // From Review (a song waiting) the single song comes first; from Profile's
+  // "See plans" the person is looking at plans, so the monthly plan does.
+  const [chosen, setChosen] = useState<PlanId>(preset ?? (name ? 'song' : 'monthly'))
   const [busy, setBusy] = useState<'buy' | 'restore' | null>(null)
   const [done, setDone] = useState(false)
   const plan = PLANS.find((p) => p.id === chosen)!

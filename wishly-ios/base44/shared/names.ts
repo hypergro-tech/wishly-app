@@ -68,8 +68,8 @@ export const coverIndex = (o: { id: string; cover?: number | null }) =>
   typeof o.cover === 'number' ? o.cover % 5 : [...o.id].reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 9973, 7) % 5
 
 // The wish every song sings for its occasion (15 Nov 2026), word for word:
-// "Happy birthday, Rebel", "Happy anniversary, Kaku and Kartik",
-// "Here's to you, Rebel". `who` is the name(s) as sung ("Kaku and Kartik").
+// "Happy birthday, Rebel", "Happy anniversary, Emma and Jake",
+// "Here's to you, Rebel". `who` is the name(s) as sung ("Emma and Jake").
 const WISHES: Record<string, { say: (who: string) => string; heard: RegExp }> = {
   Birthday: { say: (who) => `Happy birthday, ${who}`, heard: /happy\s+birthday/i },
   Anniversary: { say: (who) => `Happy anniversary, ${who}`, heard: /happy\s+anniversary/i },

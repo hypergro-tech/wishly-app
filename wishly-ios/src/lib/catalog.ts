@@ -59,7 +59,7 @@ export const OCCASION_TONES: Record<string, { line: string; tint: Tint; gentle?:
   Birthday: { line: 'Make this birthday sound like them.', tint: 'butter' },
   Anniversary: { line: 'Your love story deserves its own song.', tint: 'lilac' },
   Wedding: { line: 'Give their beginning a soundtrack.', tint: 'butter' },
-  "Valentine's Day": { line: 'Your love story deserves its own song.', tint: 'lilac' },
+  "Valentine's Day": { line: 'Say “I love you” the way only you can.', tint: 'lilac' },
   "Mother's Day": { line: 'For the ways she made ordinary days better.', tint: 'mint' },
   "Father's Day": { line: 'For the ways he made ordinary days better.', tint: 'mint' },
   Christmas: { line: 'The best thing under the tree is a story only you could tell.', tint: 'butter' },

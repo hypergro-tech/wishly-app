@@ -108,11 +108,11 @@ export default function Review() {
               <Text style={[type.bold, { fontSize: 15, color: colors.text, textDecorationLine: 'underline', textDecorationColor: colors.coral }]}>Edit</Text>
             </Pressable>
           </View>
-          {honourees(r).map((h, i) => (
+          {honourees(r).map((h, i, all) => (
             <View key={i}>
               <Text style={[type.bold, { marginTop: 14, fontSize: 28, letterSpacing: -0.5, color: colors.text }]}>{h.name}</Text>
               <View style={{ marginTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                <Body muted style={{ flex: 1 }}>Sung as “{h.pronunciation || h.name}”{i === 0 ? ` · your ${r.relationship.toLowerCase()}` : ''}</Body>
+                <Body muted style={{ flex: 1 }}>Sung as “{h.pronunciation || h.name}”{i === 0 && all.length === 1 && r.relationship && !['Someone else', 'Couple'].includes(r.relationship) ? ` · your ${r.relationship.toLowerCase()}` : ''}</Body>
                 <SpeakPill text={h.pronunciation || h.name} />
               </View>
             </View>
