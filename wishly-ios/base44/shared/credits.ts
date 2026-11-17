@@ -44,10 +44,10 @@ async function purchasesOf(admin: Admin, buyer: string): Promise<Purchase[]> {
   return ((await admin.entities.Purchase.filter({ buyer })) || []).filter((p: Purchase) => !p.revoked)
 }
 
-// The plan running now: the newest unexpired plan purchase.
+// The plan running now: the newest plan period that has started and not ended.
 function activePlan(purchases: Purchase[], now = new Date()) {
   return purchases
-    .filter((p) => p.kind !== 'song' && p.expires_at && new Date(p.expires_at) > now)
+    .filter((p) => p.kind !== 'song' && p.expires_at && new Date(p.expires_at) > now && new Date(p.purchased_at) <= now)
     .sort((a, b) => String(b.expires_at).localeCompare(String(a.expires_at)))[0] ?? null
 }
 
@@ -76,6 +76,14 @@ export async function creditsOf(admin: Admin, buyer: string) {
     singles,
     songs_left: planSongsLeft + singles,
   }
+}
+
+// Who bought a purchase, from any saved transaction in its chain (a plan's
+// renewals share the first purchase's original transaction id). Null when
+// the app hasn't sent that purchase yet.
+export async function buyerOf(admin: Admin, originalTransactionId: string): Promise<string | null> {
+  const [p] = (await admin.entities.Purchase.filter({ original_transaction_id: originalTransactionId })) || []
+  return p?.buyer ?? null
 }
 
 // Saves a verified transaction for this buyer. A transaction is saved once;

@@ -40,9 +40,10 @@ export type Transaction = {
   type: string
 }
 
-// The verified transaction, or an error saying why it isn't trusted. `root`
-// is only swapped in tests.
-export async function verifyTransaction(jws: string, root = fromB64(APPLE_ROOT_G3)): Promise<Transaction> {
+// Anything Apple signs for the App Store (a transaction, or a server
+// notification): checks the certificate chain up to Apple's root and the
+// signature, then returns the signed content. `root` is only swapped in tests.
+export async function verifySigned<T = unknown>(jws: string, root = fromB64(APPLE_ROOT_G3)): Promise<T> {
   const { x5c, alg } = decodeProtectedHeader(jws)
   if (alg !== 'ES256' || !Array.isArray(x5c) || x5c.length !== 3) throw new Error('Not an App Store signature')
   const [leaf, middle, top] = x5c.map((c) => new x509.X509Certificate(fromB64(c)))
@@ -54,8 +55,30 @@ export async function verifyTransaction(jws: string, root = fromB64(APPLE_ROOT_G
   }
   const key = await leaf.publicKey.export({ name: 'ECDSA', namedCurve: 'P-256' }, ['verify'])
   const { payload } = await compactVerify(jws, key)
-  const t = JSON.parse(new TextDecoder().decode(payload)) as Transaction
+  return JSON.parse(new TextDecoder().decode(payload)) as T
+}
+
+// The verified transaction, or an error saying why it isn't trusted.
+export async function verifyTransaction(jws: string, root = fromB64(APPLE_ROOT_G3)): Promise<Transaction> {
+  const t = await verifySigned<Transaction>(jws, root)
   if (t.bundleId !== BUNDLE_ID) throw new Error('Bought in another app')
   if (!PRODUCTS[t.productId]) throw new Error('Not a Wishly product')
   return { ...t, transactionId: String(t.transactionId), originalTransactionId: String(t.originalTransactionId) }
+}
+
+// App Store Server Notifications (version 2): Apple's message when a plan
+// renews, lapses or is cancelled, or a purchase is refunded or revoked.
+export type Notification = {
+  notificationType: string
+  subtype?: string
+  notificationUUID: string
+  data?: { bundleId?: string; environment?: string; signedTransactionInfo?: string }
+}
+
+// The verified notification and, when it carries one, its verified transaction.
+export async function verifyNotification(signedPayload: string, root = fromB64(APPLE_ROOT_G3)) {
+  const n = await verifySigned<Notification>(signedPayload, root)
+  if (n.data?.bundleId && n.data.bundleId !== BUNDLE_ID) throw new Error('For another app')
+  const transaction = n.data?.signedTransactionInfo ? await verifyTransaction(n.data.signedTransactionInfo, root) : null
+  return { notification: n, transaction }
 }
