@@ -24,3 +24,7 @@ export async function signIn(who = 'A') {
   base44.auth.setToken(access_token)
   return base44
 }
+
+// Nobody signed in, for checks that the backend refuses anonymous calls.
+export const anonymous = () =>
+  createClient({ appId: env.EXPO_PUBLIC_BASE44_APP_ID, ...(process.env.WISHLY_SERVER_URL ? { serverUrl: process.env.WISHLY_SERVER_URL } : {}) })

@@ -7,7 +7,7 @@
 // base44/entities/order.jsonc), so the song is always built here from the saved
 // order, never from anything the app sends.
 
-import { createClientFromRequest } from 'npm:@base44/sdk'
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57'
 
 import { confirmSpend, spendSong } from '../../shared/credits.ts'
 

@@ -5,7 +5,7 @@
 // A removed Base44 user sits in "Recently deleted" for 30 days, where an app
 // editor can restore it, and is then deleted for good.
 
-import { createClientFromRequest } from 'npm:@base44/sdk'
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57'
 
 export default async function (req: Request) {
   try {

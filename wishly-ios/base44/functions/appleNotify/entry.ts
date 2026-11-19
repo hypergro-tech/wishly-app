@@ -6,7 +6,7 @@
 // https://wishly-61fd03a5.base44.app/api/apps/6ae33a4fc9fab5ae61fd03a5/functions/appleNotify
 // POST { signedPayload } -> 200 when handled (Apple retries anything else).
 
-import { createClientFromRequest } from 'npm:@base44/sdk'
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57'
 
 import { verifyNotification } from '../../shared/appStore.ts'
 import { buyerOf, savePurchase } from '../../shared/credits.ts'

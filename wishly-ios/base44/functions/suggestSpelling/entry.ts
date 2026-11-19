@@ -1,7 +1,7 @@
 // A sounds-like spelling for a tricky name, for the Create screen.
 // POST { name } -> { said, spellings, heard_as }
 
-import { createClientFromRequest } from 'npm:@base44/sdk'
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57'
 import { secrets } from 'base44:runtime'
 
 import { cleanKey, suggestSpellings } from '../../shared/ai.ts'

@@ -24,8 +24,8 @@
         // An anniversary is for a couple: the second name, sung and checked too.
         "partner_name": { "type": "string", "maxLength": 80 },
         "partner_pronunciation": { "type": "string", "maxLength": 80 },
-        "pronouns": { "type": "string" },
-        "relationship": { "type": "string" }
+        "pronouns": { "type": "string", "maxLength": 40 },
+        "relationship": { "type": "string", "maxLength": 80 }
       },
       "required": ["name"]
     },
@@ -99,15 +99,44 @@
       }
     },
     "song_version": { "type": "integer", "minimum": 0, "default": 0, "rls": { "write": false } },
+    // A buyer's asks for another version. Capped in number and size: the
+    // song can only be remade a few times anyway (startSong), and this text
+    // is stored, never sent to the AI.
     "corrections": {
       "type": "array",
+      "maxItems": 20,
       "items": {
         "type": "object",
         "properties": {
-          "kind": { "type": "string" },
-          "note": { "type": "string" },
-          "changes": { "type": "object" },
-          "at": { "type": "string" },
+          "kind": { "type": "string", "maxLength": 40 },
+          "note": { "type": "string", "maxLength": 1000 },
+          // What the buyer corrected: the names and how they sound, or one detail.
+          "changes": {
+            "type": "object",
+            "properties": {
+              "recipient": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "maxLength": 80 },
+                  "pronunciation": { "type": "string", "maxLength": 80 },
+                  "partner_name": { "type": "string", "maxLength": 80 },
+                  "partner_pronunciation": { "type": "string", "maxLength": 80 }
+                }
+              },
+              "memories": {
+                "type": "object",
+                "properties": {
+                  "ritual": { "type": "string", "maxLength": 600 },
+                  "nickname": { "type": "string", "maxLength": 80 },
+                  "inside_joke": { "type": "string", "maxLength": 600 },
+                  "memory": { "type": "string", "maxLength": 600 },
+                  "want_to_say": { "type": "string", "maxLength": 600 },
+                  "avoid": { "type": "string", "maxLength": 300 }
+                }
+              }
+            }
+          },
+          "at": { "type": "string", "maxLength": 40 },
           "resolved": { "type": "boolean" }
         }
       }
@@ -180,8 +209,9 @@
   // that returns only the song and message for a valid gift_token.
   // Buyers can't delete orders: a plan's songs are counted from its orders,
   // so a deleted one would hand the song back. deleteAccount removes them.
+  // Only a signed-in person can place an order.
   "rls": {
-    "create": true,
+    "create": { "$or": [{ "user_condition": { "role": "user" } }, { "user_condition": { "role": "admin" } }] },
     "read": { "created_by": "{{user.email}}" },
     "update": { "created_by": "{{user.email}}" },
     "delete": false

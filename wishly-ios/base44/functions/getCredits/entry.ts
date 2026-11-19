@@ -4,7 +4,7 @@
 // Signed out, it still answers with `required` (whether Wishly is launched,
 // shared/launch.ts) and no songs, so the app knows which mode it's in.
 
-import { createClientFromRequest } from 'npm:@base44/sdk'
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57'
 
 import { PAYMENT_REQUIRED, creditsOf } from '../../shared/credits.ts'
 

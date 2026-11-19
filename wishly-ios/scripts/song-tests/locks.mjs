@@ -5,7 +5,7 @@
 // Signs in as the test buyer, places one order, tries each forbidden change,
 // and prints a pass or fail per check.
 
-import { signIn } from './client.mjs'
+import { anonymous, signIn } from './client.mjs'
 
 const base44 = await signIn()
 const Orders = base44.entities.Order
@@ -58,6 +58,10 @@ await check('Create an order already paid for', () => Orders.create({ ...brief, 
 await check('Mark the order as paid', () => Orders.update(order.id, { paid_with: 'song:locktest' }))
 await check('Clear the making mark', () => Orders.update(order.id, { making: { version: 0, runs: 0 } }))
 await check('Delete the order', () => Orders.delete(order.id))
+// Only a signed-in buyer can place an order, and corrections stay small.
+await check('Place an order without signing in', () => anonymous().entities.Order.create(brief))
+await check('Send a huge correction note', () => Orders.update(order.id, { corrections: [{ kind: 'other', note: 'x'.repeat(5000), changes: {}, at: new Date().toISOString(), resolved: false }] }))
+await check('Send a normal correction (still allowed)', () => Orders.update(order.id, { corrections: [{ kind: 'name', note: 'Say it like Keeva', changes: { recipient: { name: 'Maya', pronunciation: 'My-uh' } }, at: new Date().toISOString(), resolved: false }] }), { allowed: true })
 // Purchases are read and written only by the backend.
 const seen = await base44.entities.Purchase.list().catch(() => [])
 results.push({ check: 'Read purchases', passed: seen.length === 0, detail: `${seen.length} seen` })

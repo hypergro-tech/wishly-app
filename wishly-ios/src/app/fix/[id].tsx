@@ -98,21 +98,21 @@ export default function FixSomething() {
         {kind === 'name' && (
           <View style={{ padding: 16, borderRadius: 18, backgroundColor: colors.bg, gap: 14 }}>
             <Body>That name needs another look? You can correct it here.</Body>
-            <Field label="Name" value={name} onChangeText={setName} autoCorrect={false} style={{ fontWeight: '700' }} />
+            <Field label="Name" value={name} onChangeText={setName} maxLength={80} autoCorrect={false} style={{ fontWeight: '700' }} />
             <View style={{ gap: 8 }}>
               <Text style={[type.bold, { fontSize: 13, color: colors.muted }]}>Sounds like (one word)</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <View style={{ flex: 1 }}><Field value={pronunciation} onChangeText={setPronunciation} autoCorrect={false} accessibilityLabel="Sounds like" autoCapitalize="words" /></View>
+                <View style={{ flex: 1 }}><Field value={pronunciation} onChangeText={setPronunciation} maxLength={80} autoCorrect={false} accessibilityLabel="Sounds like" autoCapitalize="words" /></View>
                 <SpeakButton text={pronunciation || name} size={50} />
               </View>
             </View>
             {couple && (
               <>
-                <Field label="Second name" value={partner} onChangeText={setPartner} autoCorrect={false} style={{ fontWeight: '700' }} />
+                <Field label="Second name" value={partner} onChangeText={setPartner} maxLength={80} autoCorrect={false} style={{ fontWeight: '700' }} />
                 <View style={{ gap: 8 }}>
                   <Text style={[type.bold, { fontSize: 13, color: colors.muted }]}>Sounds like (one word)</Text>
                   <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <View style={{ flex: 1 }}><Field value={partnerSays} onChangeText={setPartnerSays} autoCorrect={false} accessibilityLabel="Second name sounds like" autoCapitalize="words" /></View>
+                    <View style={{ flex: 1 }}><Field value={partnerSays} onChangeText={setPartnerSays} maxLength={80} autoCorrect={false} accessibilityLabel="Second name sounds like" autoCapitalize="words" /></View>
                     <SpeakButton text={partnerSays || partner} size={50} />
                   </View>
                 </View>
@@ -135,7 +135,7 @@ export default function FixSomething() {
                 }}
               />
             </View>
-            <Field label="What it should say" value={value} onChangeText={setValue} multiline />
+            <Field label="What it should say" value={value} onChangeText={setValue} multiline maxLength={field === 'nickname' ? 80 : field === 'avoid' ? 300 : 600} />
           </View>
         )}
 
@@ -144,6 +144,7 @@ export default function FixSomething() {
           value={note}
           onChangeText={setNote}
           multiline
+          maxLength={1000}
           placeholder={kind === 'name' ? `e.g. It should sound like ${pronunciation || 'Keeva'}, not Kay-oh-im` : undefined}
         />
 

@@ -7,7 +7,7 @@
 // base44/entities/order.jsonc), so a song can only become a gift once it has
 // been sung and checked.
 
-import { createClientFromRequest } from 'npm:@base44/sdk'
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57'
 
 const LETTERS = '0123456789abcdefghijklmnopqrstuvwxyz'
 

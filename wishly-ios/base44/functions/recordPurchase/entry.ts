@@ -2,7 +2,7 @@
 // signature on it. The app calls this for each new purchase, and on Restore.
 // POST { signed: <StoreKit 2 signed transaction> } -> the buyer's credits.
 
-import { createClientFromRequest } from 'npm:@base44/sdk'
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57'
 
 import { verifyTransaction } from '../../shared/appStore.ts'
 import { creditsOf, savePurchase } from '../../shared/credits.ts'

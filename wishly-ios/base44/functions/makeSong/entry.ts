@@ -15,7 +15,7 @@
 //   4. Save the best take. If no try passed, the order stays in production and
 //      is flagged (name_check.needs_person) for someone to listen first.
 
-import { createClientFromRequest } from 'npm:@base44/sdk'
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57'
 import { secrets } from 'base44:runtime'
 
 import { cleanKey } from '../../shared/ai.ts'

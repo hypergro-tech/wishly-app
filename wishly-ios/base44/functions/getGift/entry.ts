@@ -6,7 +6,7 @@
 // shows, and only for songs the buyer has approved. The Order entity itself
 // stays private to its buyer. `opened: true` counts a visit.
 
-import { createClientFromRequest } from 'npm:@base44/sdk'
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.57'
 
 import { coverIndex, honourees } from '../../shared/names.ts'
 
