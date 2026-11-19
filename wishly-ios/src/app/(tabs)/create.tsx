@@ -11,13 +11,14 @@ import { StoryCards, StoryTip } from '@/components/StoryCards'
 import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { Squish } from '@/components/motion'
 import { Body, Button, Field, Label, Pills, Segmented, SpeakButton, Title, nudge, styles as ui, tap } from '@/components/ui'
-import { CORE_PACKAGE, forCouple, takesSongLine, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS, formatPrice } from '@/lib/catalog'
+import { forCouple, takesSongLine, GENRES, LANGUAGES, MEMORY_PROMPTS, MOODS, OCCASIONS, OCCASION_TONES, RELATIONSHIPS } from '@/lib/catalog'
 import { realSongs } from '@/api/base44Client'
 import { suggestSpelling } from '@/api/orders'
 import { filledMemories, missing, useDraft } from '@/lib/draft'
 import { isTricky, singable, testedSpelling } from '@/lib/names'
 import { useRise } from '@/lib/motion'
 import { occasionColour, occasionPicture } from '@/lib/occasions'
+import { useWallet } from '@/lib/wallet'
 import { colors, tint, type } from '@/theme'
 
 // Cards and choices glide to their new places when details are added.
@@ -52,6 +53,7 @@ export default function Create() {
 }
 
 function CreateForm() {
+  const wallet = useWallet()
   const insets = useSafeAreaInsets()
   const tabBar = useBottomTabBarHeight()
   const header = useScrollHeader(10)
@@ -294,7 +296,7 @@ function CreateForm() {
               <Body muted size={13} style={{ marginTop: 12, textAlign: 'center' }}>
                 {todo.length > 0
                   ? `Still to add: ${todo.join(', ')}`
-                  : `From ${formatPrice(CORE_PACKAGE.price)} · ready in minutes · you check every name first`}
+                  : `From ${wallet.price('song').label} · ready in minutes · you check every name first`}
               </Body>
             </Animated.View>
           </Animated.View>

@@ -13,13 +13,14 @@ import { ScrollHeader, useScrollHeader } from '@/components/glass'
 import { ArrowIcon, PlayIcon } from '@/components/icons'
 import { PlayPause, Squish } from '@/components/motion'
 import { Accent, Body, Eyebrow, IconButton, Title, tap } from '@/components/ui'
-import { CORE_PACKAGE, EXAMPLES, OCCASIONS, OCCASION_TONES, formatPrice, type Example } from '@/lib/catalog'
+import { EXAMPLES, OCCASIONS, OCCASION_TONES, type Example } from '@/lib/catalog'
 import { useDraft } from '@/lib/draft'
 import { openPlayer } from '@/lib/flight'
 import { occasionColour, occasionPicture } from '@/lib/occasions'
 import { WELCOMED, seen } from '@/lib/once'
 import { exampleTrack, usePlayer } from '@/lib/player'
 import { forWhom, orderCover, songTitle } from '@/lib/songs'
+import { useWallet } from '@/lib/wallet'
 import { colors, tint, type, shade } from '@/theme'
 
 // Examples without a photo are listed under the occasion tiles.
@@ -40,6 +41,7 @@ const STEPS = [
 ]
 
 export default function Home() {
+  const wallet = useWallet()
   const insets = useSafeAreaInsets()
   const tabBar = useBottomTabBarHeight()
   const header = useScrollHeader(56)
@@ -181,7 +183,7 @@ export default function Home() {
               ))}
             </View>
             <Body muted size={13} style={{ marginTop: 12, marginHorizontal: 20 }}>
-              From {formatPrice(CORE_PACKAGE.price)} a song · one correction round included
+              From {wallet.price('song').label} a song · one correction round included
             </Body>
           </>
         )}

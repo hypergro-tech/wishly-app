@@ -148,7 +148,7 @@ export default function Review() {
         <Card style={{ marginTop: 12, gap: 14 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>{CORE_PACKAGE.name}</Text>
-            <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>{wallet.songsLeft > 0 ? 'Paid' : formatPrice(CORE_PACKAGE.price)}</Text>
+            <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>{wallet.songsLeft > 0 ? 'Paid' : wallet.price('song').label}</Text>
           </View>
           <Body muted size={14}>A one-minute song, a private page {she} can open without an account, and one free correction.</Body>
           <Body muted size={14}>
@@ -186,7 +186,7 @@ export default function Review() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
           <View style={{ flex: 1 }}>
             <Text style={[type.bold, { fontSize: 26, color: colors.text }]}>
-              {wallet.songsLeft > 0 ? `${wallet.songsLeft} song${wallet.songsLeft === 1 ? '' : 's'} left` : formatPrice(CORE_PACKAGE.price)}
+              {wallet.songsLeft > 0 ? `${wallet.songsLeft} song${wallet.songsLeft === 1 ? '' : 's'} left` : wallet.price('song').label}
             </Text>
             <Text style={[type.regular, { fontSize: 13, color: colors.muted, marginTop: 2 }]}>Ready in a few minutes</Text>
           </View>

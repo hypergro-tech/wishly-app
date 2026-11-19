@@ -18,10 +18,17 @@ const offered = (choice: string) => live(MARKET_ONLY[choice])
 export const CURRENCY = 'USD'
 
 // Whole dollars show without cents ($29); anything else shows cents ($5.53).
-export const formatPrice = (n: number) => {
-  const digits = Number.isInteger(n) ? 0 : 2
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: CURRENCY, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(n)
-}
+export const formatPrice = (n: number, currency = CURRENCY) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    ...(Number.isInteger(n) ? { minimumFractionDigits: 0, maximumFractionDigits: 0 } : {}),
+  }).format(n)
+
+// A price as Apple charges it in the buyer's App Store country (the wallet
+// reads it from the store), or the US price when the store isn't connected.
+// `amount` is null when Apple gives only the label.
+export type Price = { amount: number | null; currency: string; label: string }
 
 export const RELATIONSHIPS = ['Partner', 'Parent', 'Friend', 'Sibling', 'Child', 'Couple', 'Grandparent', 'Colleague', 'Someone else']
 
@@ -173,11 +180,13 @@ export const PLANS: Plan[] = [
 export const planById = (id: PlanId) => PLANS.find((p) => p.id === id)!
 
 // What one song works out to on each plan, rounded to the cent.
-export const pricePerSong = (p: Plan) =>
-  Math.round((p.per === 'year' ? p.price / (SONGS_PER_MONTH * 12) : p.per === 'month' ? p.price / SONGS_PER_MONTH : p.price) * 100) / 100
+export const pricePerSong = (p: Plan, amount = p.price) =>
+  Math.round((p.per === 'year' ? amount / (SONGS_PER_MONTH * 12) : p.per === 'month' ? amount / SONGS_PER_MONTH : amount) * 100) / 100
 
 // "Save 57%": yearly against twelve months of the monthly plan.
-export const yearlySaving = () => Math.round((1 - planById('yearly').price / (planById('monthly').price * 12)) * 100)
+export const yearlySaving = (year = planById('yearly').price, month = planById('monthly').price) => Math.round((1 - year / (month * 12)) * 100)
+
+export const usPrice = (id: PlanId): Price => ({ amount: planById(id).price, currency: CURRENCY, label: formatPrice(planById(id).price) })
 
 export const CORE_PACKAGE = {
   id: 'core',

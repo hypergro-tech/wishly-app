@@ -17,7 +17,7 @@ import { AppState, Platform } from 'react-native'
 
 import { b44, realSongs } from '@/api/base44Client'
 import { useSession } from '@/api/session'
-import { PLANS, SONGS_PER_MONTH, planById, type PlanId } from '@/lib/catalog'
+import { CURRENCY, PLANS, SONGS_PER_MONTH, planById, usPrice, type PlanId, type Price } from '@/lib/catalog'
 import { wait } from '@/lib/motion'
 
 // expo-iap is native code: only in the iPhone app, never the web preview.
@@ -92,6 +92,9 @@ type Wallet = {
   // What to do once a purchase on the plans screen goes through.
   setAfterPurchase: (fn: (() => void) | null) => void
   runAfterPurchase: () => void
+  // What Apple charges for it in the buyer's App Store country (pounds in
+  // the UK, rupees in India…); the US price until the store answers.
+  price: (id: PlanId) => Price
 }
 
 const WalletContext = createContext<Wallet | null>(null)
@@ -100,6 +103,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const { user } = useSession()
   // Apple's store: on once the products load. Credits come from the backend.
   const [storeOn, setStoreOn] = useState(false)
+  const [prices, setPrices] = useState<Partial<Record<PlanId, Price>>>({})
   const [credits, setCredits] = useState<Credits | null>(null)
   const pending = useRef<{ sku: string; resolve: () => void; reject: (e: unknown) => void } | null>(null)
   const userRef = useRef(user)
@@ -164,6 +168,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           IAP.fetchProducts({ skus: PLAN_SKUS, type: 'subs' }),
         ])
         if (live) setStoreOn(Boolean(songs?.length && plans?.length))
+        // Each country's own price, as Apple shows it on its payment sheet.
+        const found = [...(songs ?? []), ...(plans ?? [])] as { id: string; displayPrice?: string; price?: number | null; currency?: string }[]
+        const local: Partial<Record<PlanId, Price>> = {}
+        for (const p of PLANS) {
+          const s = found.find((x) => x.id === p.productId)
+          if (s?.displayPrice) local[p.id] = { amount: typeof s.price === 'number' ? s.price : null, currency: s.currency || CURRENCY, label: s.displayPrice }
+        }
+        if (live) setPrices(local)
       } catch {
         if (live) setStoreOn(false) // No products yet: test purchases instead.
       }
@@ -256,6 +268,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       after.current = null
       fn?.()
     },
+    price: (id) => prices[id] ?? usPrice(id),
   }
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
 }
