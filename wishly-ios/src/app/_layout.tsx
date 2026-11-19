@@ -9,6 +9,7 @@ import { useEffect } from 'react'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 import { SessionProvider, useSession } from '@/api/session'
+import { AnalyticsProvider } from '@/lib/analytics'
 import { DraftProvider } from '@/lib/draft'
 import { useOpenedNotification } from '@/lib/notifications'
 import { PlayerProvider } from '@/lib/player'
@@ -32,17 +33,19 @@ const sheet = {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <SessionProvider>
-        <WalletProvider>
-          <DraftProvider>
-            <PlayerProvider>
-              <SongReadyProvider>
-                <RootStack />
-              </SongReadyProvider>
-            </PlayerProvider>
-          </DraftProvider>
-        </WalletProvider>
-      </SessionProvider>
+      <AnalyticsProvider>
+        <SessionProvider>
+          <WalletProvider>
+            <DraftProvider>
+              <PlayerProvider>
+                <SongReadyProvider>
+                  <RootStack />
+                </SongReadyProvider>
+              </PlayerProvider>
+            </DraftProvider>
+          </WalletProvider>
+        </SessionProvider>
+      </AnalyticsProvider>
     </GestureHandlerRootView>
   )
 }

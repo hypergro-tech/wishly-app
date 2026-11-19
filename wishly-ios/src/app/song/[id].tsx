@@ -1,11 +1,12 @@
 import * as Clipboard from 'expo-clipboard'
+import { track } from '@/lib/analytics'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, Share, Text, View } from 'react-native'
 import Animated, { useReducedMotion } from 'react-native-reanimated'
 
 import { realSongs } from '@/api/base44Client'
-import { applyCorrection, finishProduction, getOrder, giftUrl, wakeGiftLink, type Order } from '@/api/orders'
+import { applyCorrection, finishProduction, getOrder, giftUrl, retryMaking, songHeldUp, wakeGiftLink, type Order } from '@/api/orders'
 import { Rhythm, Ribbon } from '@/components/brand'
 import Cover from '@/components/Cover'
 import { DownloadIcon, EmailIcon, InstagramIcon, LinkIcon, MessageIcon, MoreIcon, WhatsAppIcon } from '@/components/icons'
@@ -94,8 +95,38 @@ function Header({ order, size, badge, celebrate, ribbon }: { order: Order; size:
   )
 }
 
+// A song that's taking too long or didn't pass the name check: another try,
+// or a note that the team is looking. Never "writing" forever.
+function HeldUp({ order, held }: { order: Order; held: 'retry' | 'person' }) {
+  const [tried, setTried] = useState(false)
+  if (held === 'person') {
+    return (
+      <Card style={{ marginTop: 22 }}>
+        <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>We’re giving this one a closer listen.</Text>
+        <Body muted style={{ marginTop: 8 }}>
+          The singer didn’t get it quite right, so someone from our team is checking it. We’ll let you know when it’s ready. Questions? hello@trywishly.co
+        </Body>
+      </Card>
+    )
+  }
+  return (
+    <Card style={{ marginTop: 22 }}>
+      <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>This is taking longer than usual.</Text>
+      <Body muted style={{ marginTop: 8 }}>Something slowed down on our side. Try again. It won’t use another song.</Body>
+      <Button
+        label={tried ? 'Trying again…' : 'Try again'}
+        disabled={tried}
+        size="md"
+        onPress={() => { setTried(true); track('song_retry'); retryMaking(order) }}
+        style={{ marginTop: 14 }}
+      />
+    </Card>
+  )
+}
+
 function Writing({ order, demo }: { order: Order; demo: ReactNode }) {
   const correcting = order.status === 'correction_requested'
+  const held = songHeldUp(order)
   const cover = orderCover(order)
   const stages = [
     ['Brief', 'done'],
@@ -136,6 +167,9 @@ function Writing({ order, demo }: { order: Order; demo: ReactNode }) {
         ))}
       </View>
 
+      {held && realSongs ? (
+        <HeldUp order={order} held={held} />
+      ) : (
       <Card style={{ marginTop: 22 }}>
         <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>
           {correcting ? 'We’re making your correction.' : `We’re writing ${forWhom(order)}’s song.`}
@@ -150,6 +184,7 @@ function Writing({ order, demo }: { order: Order; demo: ReactNode }) {
           </Body>
         )}
       </Card>
+      )}
       {demo}
     </ScrollView>
   )
@@ -209,12 +244,12 @@ function Check({ order }: { order: Order }) {
           <View style={{ marginTop: 14, gap: 12 }}>
             {items.map((label, i) => (
               <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: ticks[i] }} accessibilityLabel={label} onPress={() => { tap(); toggle(i) }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                <Pressable ph-label="Name check box" accessibilityRole="checkbox" accessibilityState={{ checked: ticks[i] }} accessibilityLabel={label} onPress={() => { tap(); toggle(i) }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
                   <CheckCircle checked={ticks[i]} size={22} />
                   <Body style={{ flex: 1 }}>{label}</Body>
                 </Pressable>
                 {i === 0 && (
-                  <Pressable accessibilityRole="button" accessibilityLabel={`Hear ${forWhom(order)}`} hitSlop={10} onPress={() => { tap(); say(honourees(order.recipient).map((h) => h.pronunciation || h.name).join(' and ')) }}>
+                  <Pressable ph-label="Hear the name" accessibilityRole="button" accessibilityLabel={`Hear ${forWhom(order)}`} hitSlop={10} onPress={() => { tap(); say(honourees(order.recipient).map((h) => h.pronunciation || h.name).join(' and ')) }}>
                     <Text style={[type.bold, { fontSize: 14, color: colors.text, textDecorationLine: 'underline', textDecorationColor: colors.coral }]}>Hear it</Text>
                   </Pressable>
                 )}
@@ -265,7 +300,7 @@ function SaveSong({ order, button }: { order: Order; button?: boolean }) {
   }
   if (button) return <Button label="Download the song" variant="ghost" size="md" icon={<DownloadIcon size={20} />} busy={saving} onPress={save} style={{ marginTop: 10 }} />
   return (
-    <Pressable accessibilityRole="button" accessibilityState={{ busy: saving }} disabled={saving} hitSlop={10} onPress={save} style={{ marginTop: 14, paddingVertical: 6, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+    <Pressable ph-label="Download song" accessibilityRole="button" accessibilityState={{ busy: saving }} disabled={saving} hitSlop={10} onPress={save} style={{ marginTop: 14, paddingVertical: 6, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
       <DownloadIcon size={18} />
       <Text style={[type.bold, { fontSize: 15, color: colors.text, textDecorationLine: 'underline' }]}>{saving ? 'Saving…' : 'Download song'}</Text>
     </Pressable>
@@ -320,7 +355,7 @@ function Give({ order }: { order: Order }) {
         <Body muted style={{ marginTop: 6 }}>A private link. {she[0].toUpperCase() + she.slice(1)} can listen without an account or the app.</Body>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 16, rowGap: 16 }}>
           {targets.map((t) => (
-            <Squish key={t.label} accessibilityRole="button" accessibilityLabel={t.label} to={0.92} onPress={() => { tap(); t.go() }} style={{ width: '33.33%', alignItems: 'center', gap: 6 }}>
+            <Squish ph-label={t.label} key={t.label} accessibilityRole="button" accessibilityLabel={t.label} to={0.92} onPress={() => { tap(); track('gift_shared', { via: t.label }); t.go() }} style={{ width: '33.33%', alignItems: 'center', gap: 6 }}>
               <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: t.bg ?? shade(0.08), alignItems: 'center', justifyContent: 'center' }}>{t.icon}</View>
               <Text style={[type.bold, { fontSize: 12, color: colors.text }]}>{t.label}</Text>
             </Squish>
@@ -336,7 +371,7 @@ function Give({ order }: { order: Order }) {
         <Card style={{ marginTop: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Eyebrow>Your message</Eyebrow>
-            <Pressable accessibilityRole="button" accessibilityLabel="Edit your message" hitSlop={12} onPress={() => { tap(); router.push(`/message/${order.id}`) }}>
+            <Pressable ph-label="Edit your message" accessibilityRole="button" accessibilityLabel="Edit your message" hitSlop={12} onPress={() => { tap(); router.push(`/message/${order.id}`) }}>
               <Text style={[type.bold, { fontSize: 14, color: colors.text, textDecorationLine: 'underline', textDecorationColor: colors.coral }]}>Edit</Text>
             </Pressable>
           </View>
@@ -348,9 +383,9 @@ function Give({ order }: { order: Order }) {
       <View style={{ marginTop: 18 }}>
         <SongFeedback songId={order.id} initial={order.feedback} version={order.song_version} />
       </View>
-      <Button label={`Send to ${name}`} onPress={share} style={{ marginTop: 18 }} />
+      <Button label={`Send to ${name}`} trackAs="Send to them" onPress={share} style={{ marginTop: 18 }} />
       <SaveSong order={order} button />
-      <Button label={`Preview what ${she}’ll see`} variant="ghost" size="md" onPress={() => router.push(`/gift/${order.gift_token}`)} style={{ marginTop: 10 }} />
+      <Button label={`Preview what ${she}’ll see`} trackAs="Preview the gift" variant="ghost" size="md" onPress={() => router.push(`/gift/${order.gift_token}`)} style={{ marginTop: 10 }} />
     </ScrollView>
   )
 }

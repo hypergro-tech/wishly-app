@@ -23,11 +23,13 @@ import { buildLyricPrompt, LYRICS_SCHEMA } from '../../shared/lyricGenerator.ts'
 import { makeTakes, type Keys, type Order } from '../../shared/song.ts'
 import { songInputs } from '../../shared/songPipeline.ts'
 import { together } from '../../shared/names.ts'
+import { overLimit } from '../../shared/limits.ts'
 
 export default async function (req: Request) {
   try {
     const base44 = createClientFromRequest(req)
-    if (!(await base44.auth.me().catch(() => null))) return Response.json({ error: 'Sign in first' }, { status: 401 })
+    const user = await base44.auth.me().catch(() => null)
+    if (!user?.email) return Response.json({ error: 'Sign in first' }, { status: 401 })
 
     const { order_id } = await req.json()
     if (typeof order_id !== 'string' || !order_id) return Response.json({ error: 'Send the order to sing' }, { status: 400 })
@@ -42,6 +44,8 @@ export default async function (req: Request) {
     const admin = base44.asServiceRole
     // Each run costs real money (lyrics, singing, listening), so one version
     // is made by one run at a time, and at most twice.
+    const limited = await overLimit(admin, user.email, 'makeSong')
+    if (limited) return Response.json({ error: limited, code: 'rate_limited' }, { status: 429 })
     const claim = await claimMaking(admin, order)
     if (claim) return Response.json({ error: claim }, { status: 409 })
 
@@ -51,9 +55,11 @@ export default async function (req: Request) {
       return Response.json({ done: true, ...(await produce(admin, order, { gemini }, lyrics)) })
     } catch (error) {
       console.error('makeSong failed', order.id, error)
-      const message = String((error as Error)?.message ?? error)
+      // The cause is kept on the order for whoever looks at it; the app gets a
+      // plain message, never the AI provider's own error.
+      const message = String((error as Error)?.message ?? error).slice(0, 300)
       await admin.entities.Order.update(order.id, { name_check: { passed: false, needs_person: true, tries: [], error: message } })
-      return Response.json({ done: false, error: message }, { status: 500 })
+      return Response.json({ done: false, error: 'We couldn’t finish this song yet. We’ll take a look and let you know.' }, { status: 500 })
     }
   } catch (error) {
     console.error('makeSong failed before singing', error)

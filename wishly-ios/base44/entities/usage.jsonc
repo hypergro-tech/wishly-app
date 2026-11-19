@@ -1,0 +1,25 @@
+// How often each buyer has called a costly backend function today
+// (base44/shared/limits.ts): one row per buyer, function and day. Only the
+// backend functions read or write these; the app never touches them.
+{
+  "name": "Usage",
+  "type": "object",
+  "title": "Usage",
+  "description": "Calls to a costly backend function, per buyer per day, for rate limits",
+  "properties": {
+    "buyer": { "type": "string" }, // the account's email
+    "action": { "type": "string" }, // the function, e.g. "makeSong"
+    "day": { "type": "string" }, // UTC date, 2026-11-19
+    "count": { "type": "integer", "minimum": 0 },
+    // The current minute (UTC, 2026-11-19T08:15) and the calls in it.
+    "minute": { "type": "string" },
+    "minute_count": { "type": "integer", "minimum": 0 }
+  },
+  "required": ["buyer", "action", "day"],
+  "rls": {
+    "create": false,
+    "read": false,
+    "update": false,
+    "delete": false
+  }
+}

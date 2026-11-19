@@ -2,6 +2,7 @@
 // Opens from Create song when the buyer has no songs left, and from Profile.
 // Apple asks a subscription screen to show each plan's length and price, how
 // renewal and cancelling work, Restore purchases, and the Terms and Privacy.
+import { track, trackFailure } from '@/lib/analytics'
 import * as WebBrowser from 'expo-web-browser'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
@@ -38,8 +39,10 @@ export default function Plans() {
 
   async function buy() {
     setBusy('buy')
+    track('purchase_started', { plan: chosen })
     try {
       await wallet.buy(chosen)
+      track('purchase_done', { plan: chosen })
       setBusy(null)
       setDone(true)
       success()
@@ -49,8 +52,9 @@ export default function Plans() {
       }, 450)
     } catch (e) {
       setBusy(null)
-      if (e instanceof PurchaseCancelled) return // They closed Apple's sheet.
+      if (e instanceof PurchaseCancelled) return track('purchase_cancelled', { plan: chosen }) // They closed Apple's sheet.
       if (e instanceof SignInFirst) return router.push('/sign-in')
+      trackFailure('purchase', e)
       Alert.alert('Payment didn’t go through', 'Nothing was charged. Try again in a moment.')
     }
   }
@@ -65,6 +69,7 @@ export default function Plans() {
       if (e instanceof SignInFirst) return router.push('/sign-in')
     }
     setBusy(null)
+    track('restore', { found })
     if (found) {
       success()
       router.back()
@@ -87,7 +92,7 @@ export default function Plans() {
         {options.map((p) => {
           const on = p.id === chosen
           return (
-            <Squish
+            <Squish ph-label={`Plan: ${p.name}`}
               key={p.id}
               accessibilityRole="radio"
               accessibilityState={{ selected: on }}
@@ -147,7 +152,7 @@ export default function Plans() {
 
 function Link({ label, onPress }: { label: string; onPress: () => void }) {
   return (
-    <Pressable accessibilityRole="link" hitSlop={8} onPress={() => { tap(); onPress() }}>
+    <Pressable ph-label={label} accessibilityRole="link" hitSlop={8} onPress={() => { tap(); onPress() }}>
       <Text style={[type.bold, { fontSize: 13, color: colors.text, textDecorationLine: 'underline' }]}>{label}</Text>
     </Pressable>
   )

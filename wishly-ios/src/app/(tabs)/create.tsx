@@ -114,7 +114,7 @@ function CreateForm() {
           <View style={{ paddingHorizontal: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Title size={34}>Create</Title>
             {(r.name || count > 0) && (
-              <Pressable accessibilityRole="button" onPress={() => { tap(); startOver() }} hitSlop={10}>
+              <Pressable ph-label="Start over" accessibilityRole="button" onPress={() => { tap(); startOver() }} hitSlop={10}>
                 <Text style={[type.bold, { fontSize: 15, color: colors.muted }]}>Start over</Text>
               </Pressable>
             )}
@@ -249,7 +249,7 @@ function CreateForm() {
                 {MOODS.map((m) => {
                   const on = draft.music.mood === m.id
                   return (
-                    <Squish
+                    <Squish ph-label={m.label}
                       key={m.id}
                       accessibilityRole="button"
                       accessibilityState={{ selected: on }}
@@ -387,7 +387,7 @@ function Section({ title, sub, children }: { title: string; sub?: string; childr
 function OccasionCard({ occasion, selected, onPress }: { occasion: string; selected: boolean; onPress: () => void }) {
   const picture = occasionPicture(occasion)
   return (
-    <Squish
+    <Squish ph-label={occasionLabel(occasion)}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       accessibilityLabel={occasionLabel(occasion)}

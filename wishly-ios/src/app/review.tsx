@@ -1,4 +1,5 @@
 import { router } from 'expo-router'
+import { track, trackFailure } from '@/lib/analytics'
 import { useState } from 'react'
 import { Alert, Pressable, ScrollView, Switch, Text, View } from 'react-native'
 
@@ -69,6 +70,7 @@ export default function Review() {
         placeOrder(brief, payload),
         wait(700),
       ])
+      track('song_ordered', { occasion: draft.occasion })
       await wallet.spendSong().catch(() => {})
       setPlacing(false)
       setPlaced(true)
@@ -78,7 +80,8 @@ export default function Review() {
       router.replace(`/song/${order.id}`)
       if (await shouldAskForNotifications()) router.push({ pathname: '/notify', params: { name: forWhom(order), id: order.id } })
       else rememberPushToken(order.id)
-    } catch {
+    } catch (error) {
+      trackFailure('place order', error)
       Alert.alert('We couldn’t create your song', 'Check your connection and try again. Nothing has been charged.')
       setPlacing(false)
     }
@@ -104,7 +107,7 @@ export default function Review() {
         <Card style={{ marginTop: 22 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text style={[type.bold, { fontSize: 19, color: colors.text }]}>Check the details</Text>
-            <Pressable accessibilityRole="button" accessibilityLabel="Edit the details" hitSlop={12} onPress={() => { tap(); router.back() }}>
+            <Pressable ph-label="Edit the details" accessibilityRole="button" accessibilityLabel="Edit the details" hitSlop={12} onPress={() => { tap(); router.back() }}>
               <Text style={[type.bold, { fontSize: 15, color: colors.text, textDecorationLine: 'underline', textDecorationColor: colors.coral }]}>Edit</Text>
             </Pressable>
           </View>
@@ -131,14 +134,14 @@ export default function Review() {
         </Card>
 
         <View style={{ marginTop: 12, paddingVertical: 16, paddingHorizontal: 18, borderRadius: 22, backgroundColor: colors.surface, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-          <Pressable accessible={false} onPress={() => { tap(); setConfirmed(!confirmed) }} style={{ flex: 1 }}>
-            <Body>I’ve checked the name and the facts. I’ll hear the song before it’s given.</Body>
+          <Pressable ph-label="Confirm checked" accessible={false} onPress={() => { tap(); setConfirmed(!confirmed) }} style={{ flex: 1 }}>
+            <Body>I’ve checked the name and the facts, and I’m OK with Google’s Gemini AI using these details to write and sing the song. I’ll hear it before it’s given.</Body>
           </Pressable>
           <Switch
             value={confirmed}
             onValueChange={(v) => { tap(); setConfirmed(v) }}
             trackColor={{ true: colors.coral, false: shade(0.2) }}
-            accessibilityLabel="I’ve checked the name and the facts. I’ll hear the song before it’s given."
+            accessibilityLabel="I’ve checked the name and the facts, and I’m OK with Google’s Gemini AI using these details to write and sing the song."
           />
         </View>
 
@@ -158,7 +161,7 @@ export default function Review() {
             {EXTRAS.map((e) => {
               const on = draft.package.extras.includes(e.id)
               return (
-                <Pressable
+                <Pressable ph-label={e.label}
                   key={e.id}
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: on }}

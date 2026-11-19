@@ -203,7 +203,7 @@ export default function SignIn() {
                     selectionColor={colors.coral}
                     style={[type.regular, styles.input, { paddingRight: 72 }]}
                   />
-                  <Pressable
+                  <Pressable ph-label="Show or hide password"
                     accessibilityRole="button"
                     accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
                     hitSlop={8}
@@ -220,7 +220,7 @@ export default function SignIn() {
             <Problem text={error} />
 
             <Button label="Continue" busy={busy === 'email'} disabled={!validEmail || password.length < 8} onPress={withEmail} style={{ marginTop: 20 }} />
-            <Pressable accessibilityRole="button" hitSlop={10} onPress={() => { tap(); forgot() }} style={{ alignSelf: 'center', marginTop: 16 }}>
+            <Pressable ph-label="Forgot your password" accessibilityRole="button" hitSlop={10} onPress={() => { tap(); forgot() }} style={{ alignSelf: 'center', marginTop: 16 }}>
               <Text style={[type.bold, { fontSize: 14, color: colors.muted }]}>Forgot your password?</Text>
             </Pressable>
           </Animated.View>
@@ -304,10 +304,10 @@ export default function SignIn() {
             {note && <Text accessibilityLiveRegion="polite" style={[type.regular, { marginTop: 14, fontSize: 14, color: colors.text }]}>{note}</Text>}
 
             <View style={{ marginTop: 20, flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Pressable accessibilityRole="button" hitSlop={10} disabled={busy === 'code'} onPress={() => { tap(); resend() }}>
+              <Pressable ph-label="Resend code" accessibilityRole="button" hitSlop={10} disabled={busy === 'code'} onPress={() => { tap(); resend() }}>
                 <Text style={[type.bold, { fontSize: 14, color: colors.text, textDecorationLine: 'underline', textDecorationColor: colors.coral }]}>Resend code</Text>
               </Pressable>
-              <Pressable accessibilityRole="button" hitSlop={10} onPress={() => { tap(); setCode(''); setError(null); setNote(null); go('email') }}>
+              <Pressable ph-label="Change email" accessibilityRole="button" hitSlop={10} onPress={() => { tap(); setCode(''); setError(null); setNote(null); go('email') }}>
                 <Text style={[type.bold, { fontSize: 14, color: colors.muted }]}>Use a different email</Text>
               </Pressable>
             </View>
@@ -321,7 +321,7 @@ export default function SignIn() {
 // `solid` is Apple's black button, the style Apple asks for on light screens.
 function ProviderButton({ label, onPress, icon, solid, busy }: { label: string; onPress: () => void; icon: ReactNode; solid?: boolean; busy?: boolean }) {
   return (
-    <Squish
+    <Squish ph-label={label}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ busy }}

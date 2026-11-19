@@ -88,7 +88,7 @@ export default function Home() {
         <View style={{ paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Logo size={25} />
           {user ? (
-            <Squish
+            <Squish ph-label="Your profile"
               accessibilityRole="button"
               accessibilityLabel="Your profile"
               to={0.9}
@@ -98,7 +98,7 @@ export default function Home() {
               <Text style={[type.bold, { fontSize: 15, color: colors.ink }]}>{(first ?? user.email)[0].toUpperCase()}</Text>
             </Squish>
           ) : (
-            <Squish
+            <Squish ph-label="Home: Sign in"
               accessibilityRole="button"
               to={0.94}
               onPress={() => { tap(); router.push('/sign-in') }}
@@ -121,7 +121,7 @@ export default function Home() {
                 <>
                   <Text style={[type.bold, { marginTop: 8, fontSize: 24, lineHeight: 28, color: colors.text }]}>A song for {forWhom(draft)}</Text>
                   <Body muted size={14} style={{ marginTop: 4 }}>Your details are saved. Pick up where you left off.</Body>
-                  <Squish
+                  <Squish ph-label="Home: Create a song"
                     accessibilityRole="button"
                     to={0.95}
                     onPress={() => { tap(); router.navigate('/create') }}
@@ -149,7 +149,7 @@ export default function Home() {
                       accessibilityLabel="Their name"
                       style={[type.bold, { flex: 1, height: 56, paddingHorizontal: 16, borderRadius: 16, borderWidth: 1, borderColor: shade(0.14), backgroundColor: colors.fill, color: colors.text, fontSize: 18 }]}
                     />
-                    <Squish
+                    <Squish ph-label="Start their song"
                       accessibilityRole="button"
                       accessibilityLabel="Start their song"
                       accessibilityState={{ disabled: !firstName.trim() }}
@@ -187,7 +187,7 @@ export default function Home() {
         )}
 
         {ready && (
-          <Squish
+          <Squish ph-label="Home: Ready song"
             accessibilityRole="button"
             onPress={() => { tap(); router.push(`/song/${ready.id}`) }}
             style={{ marginTop: 16, marginHorizontal: 20, padding: 14, borderRadius: 22, backgroundColor: colors.surface, flexDirection: 'row', gap: 14, alignItems: 'center' }}
@@ -206,7 +206,7 @@ export default function Home() {
         )}
 
         {working.map((o) => (
-          <Squish
+          <Squish ph-label="Home: Song in list"
             key={o.id}
             accessibilityRole="button"
             onPress={() => { tap(); router.push(`/song/${o.id}`) }}
@@ -239,7 +239,7 @@ export default function Home() {
         <Text accessibilityRole="header" style={[type.bold, { marginTop: 32, marginHorizontal: 20, fontSize: 21, color: colors.text }]}>Start a song for…</Text>
         <View style={{ marginTop: 14, marginHorizontal: 20, flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
           {OCCASION_TILES.map((o) => (
-            <Squish
+            <Squish ph-label="Home: Song again for them"
               key={o}
               accessibilityRole="button"
               to={0.95}
@@ -288,7 +288,7 @@ function ExampleCard({ example: e }: { example: Example }) {
   const player = usePlayer()
   const cover = useRef<ComponentRef<typeof View>>(null)
   return (
-    <Squish
+    <Squish ph-label="Play example"
       accessibilityRole="button"
       accessibilityLabel={`Play ${e.title}`}
       onPress={() => { tap(); player.play(exampleTrack(e)); openPlayer(cover.current) }}

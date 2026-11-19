@@ -69,7 +69,7 @@ export function SongReadyModal({ order, onClose }: { order: Order | null; onClos
               style={{ marginTop: 20, alignSelf: 'stretch' }}
             />
             <Button label="View song" variant="ghost" size="md" onPress={view} style={{ marginTop: 10, alignSelf: 'stretch' }} />
-            <Pressable accessibilityRole="button" hitSlop={8} onPress={onClose} style={{ marginTop: 6, height: 40, paddingHorizontal: 16, justifyContent: 'center' }}>
+            <Pressable ph-label="Song ready: Later" accessibilityRole="button" hitSlop={8} onPress={onClose} style={{ marginTop: 6, height: 40, paddingHorizontal: 16, justifyContent: 'center' }}>
               <Text style={[type.bold, { fontSize: 14, color: colors.muted }]}>Later</Text>
             </Pressable>
           </Animated.View>

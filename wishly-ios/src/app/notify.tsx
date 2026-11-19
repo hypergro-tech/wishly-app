@@ -45,7 +45,7 @@ export default function Notify() {
         One notification{day ? ` on ${day}` : ''}, when it’s ready to listen and check. Nothing else.
       </Body>
       <Button label="Turn on notifications" onPress={async () => { if ((await turnOnNotifications()) && id) rememberPushToken(id); router.back() }} style={{ marginTop: 22, alignSelf: 'stretch' }} />
-      <Pressable accessibilityRole="button" onPress={() => { tap(); notNow(); router.back() }} style={{ marginTop: 6, height: 44, paddingHorizontal: 16, justifyContent: 'center' }}>
+      <Pressable ph-label="Notifications: Not now" accessibilityRole="button" onPress={() => { tap(); notNow(); router.back() }} style={{ marginTop: 6, height: 44, paddingHorizontal: 16, justifyContent: 'center' }}>
         <Text style={[type.bold, { fontSize: 15, color: colors.muted }]}>Not now</Text>
       </Pressable>
     </ScrollView>

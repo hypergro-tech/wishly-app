@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router'
+import { track, trackFailure } from '@/lib/analytics'
 import { useEffect, useState } from 'react'
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native'
 
@@ -56,12 +57,14 @@ export default function FixSomething() {
     try {
       await requestCorrection(order!, { kind, note: note || KINDS.find((k) => k.id === kind)!.label, changes })
     } catch (error) {
+      trackFailure('send correction', error)
       // The backend says why (e.g. a song remade the most times the app allows).
       const reason = (error as { response?: { data?: { error?: string } }; data?: { error?: string } })
       Alert.alert('We couldn’t remake this song', reason?.response?.data?.error || reason?.data?.error || 'Check your connection and try again.')
       setSending(false)
       return
     }
+    track('correction_sent', { kind })
     success()
     router.back()
   }
@@ -78,7 +81,7 @@ export default function FixSomething() {
           {KINDS.map((k) => {
             const on = kind === k.id
             return (
-              <Pressable
+              <Pressable ph-label={k.label}
                 key={k.id}
                 accessibilityRole="radio"
                 accessibilityState={{ checked: on }}

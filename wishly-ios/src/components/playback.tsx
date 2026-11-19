@@ -76,7 +76,7 @@ export function Scrubber({ elapsed, total, onSeek }: { elapsed: number; total: n
 export function SkipButton({ by, onPress, size = 48 }: { by: -10 | 10; onPress: () => void; size?: number }) {
   const back = by < 0
   return (
-    <Squish
+    <Squish ph-label={back ? 'Back 10 seconds' : 'Forward 10 seconds'}
       accessibilityRole="button"
       accessibilityLabel={back ? 'Back 10 seconds' : 'Forward 10 seconds'}
       to={0.88}
@@ -94,7 +94,7 @@ export function SkipButton({ by, onPress, size = 48 }: { by: -10 | 10; onPress: 
 
 export function BigPlay({ playing, onPress, size = 72 }: { playing: boolean; onPress: () => void; size?: number }) {
   return (
-    <Squish
+    <Squish ph-label={playing ? 'Pause' : 'Play'}
       accessibilityRole="button"
       accessibilityLabel={playing ? 'Pause' : 'Play'}
       to={0.9}

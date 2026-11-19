@@ -33,7 +33,7 @@ export default function GiftPreview() {
   useEffect(() => { findGift(token).then(setOrder) }, [token])
 
   const close = (
-    <Pressable
+    <Pressable ph-label="Close preview"
       accessibilityRole="button"
       accessibilityLabel="Close preview"
       hitSlop={12}

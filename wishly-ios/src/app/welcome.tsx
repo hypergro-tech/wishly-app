@@ -76,7 +76,7 @@ export default function Welcome() {
             onPress={() => leave(() => { player.play(exampleTrack(HERO)); openPlayer() })}
             style={{ marginTop: 10 }}
           />
-          <Pressable accessibilityRole="button" hitSlop={10} onPress={() => { tap(); leave(() => router.push('/sign-in')) }} style={{ alignSelf: 'center', marginTop: 16 }}>
+          <Pressable ph-label="I already have an account" accessibilityRole="button" hitSlop={10} onPress={() => { tap(); leave(() => router.push('/sign-in')) }} style={{ alignSelf: 'center', marginTop: 16 }}>
             <Text style={[type.bold, { fontSize: 14, color: colors.muted }]}>I already have an account</Text>
           </Pressable>
         </Animated.View>

@@ -52,6 +52,32 @@ results.push({
   passed: saved.status === 'in_production' && saved.song_version === 1 && saved.song?.sections?.length > 0 && !saved.song?.audio_url && !saved.gift_token,
   detail: `status ${saved.status}, version ${saved.song_version}, ${saved.song?.sections?.length ?? 0} sections, audio ${saved.song?.audio_url ? 'set' : 'none'}, link ${saved.gift_token ? 'set' : 'none'}`,
 })
+// Payment and the one-run-at-a-time mark are the backend's alone too, and a
+// buyer can't delete an order (a plan's songs are counted from its orders).
+await check('Create an order already paid for', () => Orders.create({ ...brief, paid_with: 'song:locktest' }))
+await check('Mark the order as paid', () => Orders.update(order.id, { paid_with: 'song:locktest' }))
+await check('Clear the making mark', () => Orders.update(order.id, { making: { version: 0, runs: 0 } }))
+await check('Delete the order', () => Orders.delete(order.id))
+// Purchases are read and written only by the backend.
+const seen = await base44.entities.Purchase.list().catch(() => [])
+results.push({ check: 'Read purchases', passed: seen.length === 0, detail: `${seen.length} seen` })
+await check('Add a purchase', () => base44.entities.Purchase.create({ transaction_id: 'locktest', kind: 'song', buyer: 'x@example.com', purchased_at: new Date().toISOString() }))
+
+// A second buyer (WISHLY_TOKEN_B, local backend only) gets "not found" for
+// the first buyer's order, whatever they try with its ID.
+const other = await signIn('B').catch(() => null)
+if (other) {
+  const theirs = other.entities.Order
+  await check('Another buyer reads the order', () => theirs.get(order.id))
+  await check('Another buyer lists orders and sees none of it', async () => { if ((await theirs.list()).some((o) => o.id === order.id)) throw new Error('saw it') }, { allowed: true })
+  await check('Another buyer looks it up by ID', async () => { if ((await theirs.filter({ id: order.id })).length) throw new Error('saw it') }, { allowed: true })
+  await check('Another buyer changes the details', () => theirs.update(order.id, { memories: { memory: 'changed' } }))
+  await check('Another buyer deletes it', () => theirs.delete(order.id))
+  await check('Another buyer starts the song', () => other.functions.invoke('startSong', { order_id: order.id }))
+  await check('Another buyer sings it', () => other.functions.invoke('makeSong', { order_id: order.id }))
+  await check('Another buyer approves it', () => other.functions.invoke('approveSong', { order_id: order.id, message: 'hi', from_name: 'x' }))
+  await check('Another buyer opens it as a gift by its ID', () => other.functions.invoke('getGift', { token: order.id }))
+}
 // The test order stays in the test buyer's account, in production with no audio.
 
 for (const r of results) console.log(`${r.passed ? 'PASS' : 'FAIL'}  ${r.check}  (${r.detail})`)

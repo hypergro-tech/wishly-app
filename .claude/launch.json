@@ -29,6 +29,15 @@
         "8099"
       ],
       "port": 8099
+    },
+    {
+      "name": "wishly-backend-local",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-lc",
+        "cd wishly-ios && base44 dev --port 4400"
+      ],
+      "port": 4400
     }
   ]
 }

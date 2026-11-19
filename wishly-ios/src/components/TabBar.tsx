@@ -39,7 +39,7 @@ function Tab({ name, active, onPress }: { name: string; active: boolean; onPress
   const color = active ? colors.text : colors.muted
   if (name === 'create') {
     return (
-      <Squish accessibilityRole="tab" accessibilityState={{ selected: active }} accessibilityLabel="Create" to={0.9} onPress={onPress} style={styles.item}>
+      <Squish ph-label="Tab: Create" accessibilityRole="tab" accessibilityState={{ selected: active }} accessibilityLabel="Create" to={0.9} onPress={onPress} style={styles.item}>
         <Animated.View style={[styles.create, pop]}><PlusIcon /></Animated.View>
         <Text style={[type.bold, styles.label, { color }]}>Create</Text>
       </Squish>
@@ -48,7 +48,7 @@ function Tab({ name, active, onPress }: { name: string; active: boolean; onPress
   const label = LABELS[name]
   const Icon = name === 'index' ? HomeIcon : name === 'songs' ? SongsIcon : ProfileIcon
   return (
-    <Pressable accessibilityRole="tab" accessibilityState={{ selected: active }} accessibilityLabel={label} onPress={onPress} style={styles.item}>
+    <Pressable ph-label={`Tab: ${label}`} accessibilityRole="tab" accessibilityState={{ selected: active }} accessibilityLabel={label} onPress={onPress} style={styles.item}>
       <Animated.View style={pop}>
         <Icon color={color} filled={active} />
       </Animated.View>
@@ -71,7 +71,7 @@ function MiniPlayer() {
   return (
     <Animated.View entering={rise(0, 48)} style={styles.lift}>
       <Glass style={styles.mini} fallback={colors.raised}>
-        <Pressable
+        <Pressable ph-label="Open player"
           accessibilityRole="button"
           accessibilityLabel={`Now playing: ${track.title}. Open player`}
           onPress={() => { tap(); openPlayer(cover.current) }}

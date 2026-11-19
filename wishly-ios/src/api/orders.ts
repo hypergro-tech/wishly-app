@@ -41,6 +41,8 @@ export type Order = {
   gift: { message: string; from_name: string; opened_count: number } | null
   // Set by the makeSong function: which spellings were sung and whether the name was heard.
   name_check?: { passed: boolean; needs_person: boolean; tries: { spelling: string; heard: number; refused?: boolean }[]; error?: string }
+  // makeSong's run on the current version (base44/functions/makeSong): when it started and how many runs it's had.
+  making?: { version?: number; since?: string; runs?: number }
   // The buyer's thumbs up or down (src/api/feedbackApi.ts).
   feedback?: { rating: Rating; reason?: string; version?: number; at: string } | null
 }
@@ -119,6 +121,26 @@ async function compose(order: Order, payload = generateSongPayload(songInputs(or
   const sections = typeof result?.lyrics === 'string' ? parseLyrics(result.lyrics) : result?.sections
   const song: Song = sections?.length ? { ...fallback, title: result.title || title, sections } : fallback
   return Orders().update(order.id, { song, song_version: version, status: 'ready_for_review' })
+}
+
+// Sings the current version again after a run that stalled or didn't pass.
+// The backend allows two runs per version, one at a time.
+export function retryMaking(order: Order) {
+  if (!realSongs) return
+  watchSong(order.id)
+  b44().functions.invoke('makeSong', { order_id: order.id }).catch(() => {})
+}
+
+// Why a song in production isn't arriving on its own, if it isn't: 'retry'
+// when a run stalled or didn't pass and another is allowed, 'person' when the
+// team has to look. Null while it's still being made.
+export function songHeldUp(order: Order, now = Date.now()): 'retry' | 'person' | null {
+  const version = order.song_version || 0
+  const run = order.making?.version === version ? order.making : null
+  const since = Date.parse(run?.since ?? order.updated_date ?? order.created_date)
+  // A run takes up to Base44's 5-minute limit; one that never started shows after 3.
+  if (now - since < (run ? 6 : 3) * 60_000) return null
+  return (run?.runs || 0) >= 2 ? 'person' : 'retry'
 }
 
 // A sounds-like spelling for a tricky name nobody has tested yet (Gemini, on the backend).

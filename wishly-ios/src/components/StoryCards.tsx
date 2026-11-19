@@ -43,7 +43,7 @@ function StoryCard({ prompt, value }: { prompt: StoryPrompt; value: string }) {
   // Sayings and nicknames read as quotes, like on Review.
   const snippet = prompt.key === 'inside_joke' || prompt.key === 'nickname' ? quoted(value) : value
   return (
-    <Squish
+    <Squish ph-label={`Memory: ${prompt.title}`}
       accessibilityRole="button"
       accessibilityLabel={filled ? `${prompt.tag}: ${value}. Edit` : `Add ${prompt.title.toLowerCase()}. For example ${prompt.examples.join(', or ')}`}
       to={0.96}
@@ -100,7 +100,7 @@ export function StoryTip() {
   }, [i])
 
   return (
-    <Pressable
+    <Pressable ph-label="Next tip"
       accessibilityRole="button"
       accessibilityLabel={`Tip: ${STORY_TIPS[i]} Next tip`}
       onPress={() => setI((n) => (n + 1) % STORY_TIPS.length)}

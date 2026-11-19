@@ -14,6 +14,7 @@ import * as WebBrowser from 'expo-web-browser'
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Platform } from 'react-native'
 
+import { forgetUser, identify, track } from '@/lib/analytics'
 import { BASE44_APP_ID, b44, forgetSession, initBase44, isBase44, rememberToken, TOKEN_KEY, tokenStore } from './base44Client'
 
 export type User = { id: string; email: string; full_name?: string }
@@ -62,6 +63,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       try {
         latest.current = await b44().auth.me()
         setUser(latest.current)
+        identify(latest.current?.id)
       } catch {
         setUser(null) // Not signed in yet, or the saved token expired.
       }
@@ -88,6 +90,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const who = signedIn ?? (await b44().auth.me())
     latest.current = who
     setUser(who)
+    identify(who?.id)
+    track('signed_in')
   }
 
   async function login(email: string, password: string) {
@@ -164,6 +168,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     await forgetSession()
     latest.current = null
     setUser(null)
+    forgetUser()
   }
 
   // Removes the account and every song in it (base44/functions/deleteAccount).

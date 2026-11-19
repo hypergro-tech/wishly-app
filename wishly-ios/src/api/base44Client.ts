@@ -16,6 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
 
+import { trackFailure } from '@/lib/analytics'
+
 import { createLocalClient } from './localClient'
 
 export const BASE44_APP_ID = process.env.EXPO_PUBLIC_BASE44_APP_ID
@@ -46,8 +48,24 @@ let client: Client = null
 const remoteClient = (token?: string | null) =>
   createClient({ appId: BASE44_APP_ID as string, ...(SERVER_URL ? { serverUrl: SERVER_URL } : {}), ...(token ? { token } : {}) })
 
+// Every backend function the app calls reports a failure (which function,
+// the status and the backend's short reason) to analytics.
+function reportFailures(c: Client): Client {
+  if (!c?.functions?.invoke) return c // the on-device demo has no backend functions
+  const invoke = c.functions.invoke.bind(c.functions)
+  c.functions.invoke = async (name: string, body: object) => {
+    try {
+      return await invoke(name, body)
+    } catch (error) {
+      trackFailure(name, error)
+      throw error
+    }
+  }
+  return c
+}
+
 export async function initBase44(): Promise<Client> {
-  client = isBase44 ? remoteClient(await tokenStore.get()) : createLocalClient()
+  client = reportFailures(isBase44 ? remoteClient(await tokenStore.get()) : createLocalClient())
   return client
 }
 
@@ -62,5 +80,5 @@ export async function rememberToken(token: string) {
 
 export async function forgetSession() {
   await tokenStore.clear()
-  if (isBase44) client = remoteClient(null)
+  if (isBase44) client = reportFailures(remoteClient(null))
 }

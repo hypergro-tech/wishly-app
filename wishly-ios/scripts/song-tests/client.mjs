@@ -9,12 +9,16 @@ const env = Object.fromEntries(
     .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]),
 )
 
-export async function signIn() {
+export async function signIn(who = 'A') {
   // Against `base44 dev` instead: WISHLY_SERVER_URL=http://localhost:4400 and
-  // WISHLY_TOKEN from a buyer registered on that local server.
+  // WISHLY_TOKEN from a buyer registered on that local server
+  // (WISHLY_TOKEN_B: a second buyer, for the checks between buyers).
   if (process.env.WISHLY_SERVER_URL) {
-    return createClient({ appId: env.EXPO_PUBLIC_BASE44_APP_ID, serverUrl: process.env.WISHLY_SERVER_URL, token: process.env.WISHLY_TOKEN })
+    const token = who === 'B' ? process.env.WISHLY_TOKEN_B : process.env.WISHLY_TOKEN
+    if (!token) throw new Error(`No token for buyer ${who}`)
+    return createClient({ appId: env.EXPO_PUBLIC_BASE44_APP_ID, serverUrl: process.env.WISHLY_SERVER_URL, token })
   }
+  if (who !== 'A') throw new Error('A second buyer is only for the local backend')
   const base44 = createClient({ appId: env.EXPO_PUBLIC_BASE44_APP_ID })
   const { access_token } = await base44.auth.loginViaEmailPassword(env.WISHLY_TEST_EMAIL, env.WISHLY_TEST_PASSWORD)
   base44.auth.setToken(access_token)

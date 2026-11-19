@@ -7,8 +7,7 @@
   returns a sign-in to this address, so the app opens it first:
     /?start=google&app_id=…&to=wishly://auth   remembers `to`, then starts Base44's sign-in
     /?access_token=…                            Base44's return: hands the token to the app
-  It only ever hands a token to the Wishly app (wishly://) or, while testing in
-  Expo Go, to a dev server on this computer or the local network (exp://).
+  It only ever hands a token to the Wishly app (wishly://).
 
   It is also the gift page. Every path on this address serves this file, so
     /gift/<token>                               plays the song a buyer sent, with their message
@@ -308,8 +307,10 @@
       var query = new URLSearchParams(location.search)
       var KEY = 'wishly_return'
       var allowed = function (to) {
-        return /^wishly:\/\//.test(to) ||
-          /^exp:\/\/(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?\//.test(to)
+        // Only the Wishly app. (Expo Go's exp:// addresses were allowed for
+        // testing; a link could have sent a sign-in to someone's computer on
+        // the same Wi-Fi, so testing uses a development build instead.)
+        return /^wishly:\/\//.test(to)
       }
       var say = function (text) { document.getElementById('message').textContent = text }
 

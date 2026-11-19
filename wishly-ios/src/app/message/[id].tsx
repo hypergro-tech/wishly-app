@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router'
+import { track, trackFailure } from '@/lib/analytics'
 import { useEffect, useState } from 'react'
 import { Alert, ScrollView, View } from 'react-native'
 
@@ -30,9 +31,11 @@ export default function AddMessage() {
     setSaving(true)
     try {
       await approveAndWrap(order!, { message: message.trim(), from_name: from.trim() })
+      track('song_approved')
       success()
       router.back()
-    } catch {
+    } catch (error) {
+      trackFailure('approve song', error)
       Alert.alert('Couldn’t make the link', 'Check your connection and try again. Your message is still here.')
     } finally {
       setSaving(false)

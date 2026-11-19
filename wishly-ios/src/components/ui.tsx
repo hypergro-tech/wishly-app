@@ -50,8 +50,10 @@ const BUTTON: Record<Variant, { bg: string; pressed: string; fg: string; border?
   ghost: { bg: 'transparent', pressed: colors.fill, fg: colors.text, border: shade(0.28) },
 }
 
-export function Button({ label, onPress, variant = 'primary', disabled, busy, done, celebrate, size = 'lg', icon, style }: {
+export function Button({ label, trackAs, onPress, variant = 'primary', disabled, busy, done, celebrate, size = 'lg', icon, style }: {
   label: string
+  // The name analytics records for a tap; set it when the label holds a name.
+  trackAs?: string
   onPress: () => void
   variant?: Variant
   disabled?: boolean
@@ -70,6 +72,7 @@ export function Button({ label, onPress, variant = 'primary', disabled, busy, do
   const inset = (busy || done) && !still && width > h ? (width - h) / 2 : 0
   return (
     <Squish
+      ph-label={trackAs ?? label}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: disabled || busy || done, busy }}
@@ -113,6 +116,7 @@ const show = (on: boolean) => ({ opacity: on ? 1 : 0, transitionProperty: 'opaci
 export function IconButton({ label, onPress, children, size = 44, style }: { label: string; onPress: () => void; children: ReactNode; size?: number; style?: ViewStyle }) {
   return (
     <Pressable
+      ph-label={label}
       accessibilityRole="button"
       accessibilityLabel={label}
       hitSlop={6}
@@ -129,6 +133,7 @@ export function IconButton({ label, onPress, children, size = 44, style }: { lab
 export function Pill({ label, selected, onPress, dashed }: { label: string; selected?: boolean; onPress: () => void; dashed?: boolean }) {
   return (
     <Squish
+      ph-label={label}
       accessibilityRole="button"
       accessibilityState={{ selected }}
       to={0.94}
@@ -188,6 +193,7 @@ export function Segmented({ options, value, onChange, label }: { options: { id: 
         return (
           <Pressable
             key={o.id}
+            ph-label={o.id}
             accessibilityRole="radio"
             accessibilityState={{ checked: on }}
             onPress={() => { tap(); onChange(o.id) }}
@@ -243,6 +249,7 @@ export function SpeakButton({ text, size = 52 }: { text: string; size?: number }
   return (
     <Pressable
       accessibilityRole="button"
+      ph-label="Hear the name"
       accessibilityLabel={`Hear it: ${text}`}
       onPress={() => { tap(); say(text) }}
       style={({ pressed }) => ({ width: size, height: size, borderRadius: 14, borderWidth: 1, borderColor: colors.outline, alignItems: 'center', justifyContent: 'center', backgroundColor: pressed ? colors.fill : 'transparent' })}
@@ -256,6 +263,7 @@ export function SpeakPill({ text, label = 'Hear it' }: { text: string; label?: s
   return (
     <Pressable
       accessibilityRole="button"
+      ph-label={label}
       accessibilityLabel={`${label}: ${text}`}
       onPress={() => { tap(); say(text) }}
       style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 14, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.outline, backgroundColor: pressed ? colors.fill : 'transparent' })}

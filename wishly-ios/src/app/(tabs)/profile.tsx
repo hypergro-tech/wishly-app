@@ -41,7 +41,7 @@ export default function Profile() {
   const deleteForGood = () =>
     Alert.alert(
       'Delete your account?',
-      'This deletes your account and every song in it. Gift links you’ve sent will stop working. This can’t be undone.',
+      'This deletes your account and every song in it. Gift links you’ve sent will stop working. This can’t be undone.\n\nIf you have a plan, Apple keeps charging for it until you cancel it in Settings → your name → Subscriptions.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -126,7 +126,7 @@ export default function Profile() {
 
         {user && <Button label="Log out" variant="ghost" size="md" onPress={logOut} style={{ marginTop: 28 }} />}
         {user && (
-          <Pressable accessibilityRole="button" onPress={deleteForGood} hitSlop={8} style={{ marginTop: 14, alignSelf: 'center' }}>
+          <Pressable ph-label="Delete my account" accessibilityRole="button" onPress={deleteForGood} hitSlop={8} style={{ marginTop: 14, alignSelf: 'center' }}>
             <Text style={[type.regular, { fontSize: 14, color: colors.muted, textDecorationLine: 'underline' }]}>Delete my account</Text>
           </Pressable>
         )}
@@ -151,7 +151,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Row({ label, detail, onPress }: { label: string; detail?: string; onPress: () => void }) {
   return (
-    <Pressable
+    <Pressable ph-label={label}
       accessibilityRole="button"
       onPress={() => { tap(); onPress() }}
       style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 52, paddingHorizontal: 16, backgroundColor: pressed ? colors.fill : 'transparent', borderBottomWidth: 1, borderBottomColor: shade(0.06) })}

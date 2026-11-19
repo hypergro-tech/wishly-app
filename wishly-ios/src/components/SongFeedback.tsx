@@ -40,7 +40,7 @@ export function SongFeedback({ songId, initial, version, compact }: Props) {
     const on = rating === r
     const size = compact ? 36 : 48
     return (
-      <Squish
+      <Squish ph-label={LOOK[r].label}
         key={r}
         accessibilityRole="button"
         accessibilityState={{ selected: on }}

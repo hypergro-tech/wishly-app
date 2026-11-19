@@ -63,7 +63,7 @@ export default function StoryDetail() {
 
         <Button label={value.trim() ? 'Done' : 'Close'} variant={value.trim() ? 'primary' : 'ghost'} onPress={() => router.back()} style={{ marginTop: 4 }} />
         {value.trim() ? (
-          <Pressable accessibilityRole="button" onPress={() => { tap(); change('') }} style={{ alignSelf: 'center', height: 44, paddingHorizontal: 16, justifyContent: 'center' }}>
+          <Pressable ph-label="Clear memory" accessibilityRole="button" onPress={() => { tap(); change('') }} style={{ alignSelf: 'center', height: 44, paddingHorizontal: 16, justifyContent: 'center' }}>
             <Text style={[type.bold, { fontSize: 15, color: colors.muted }]}>Clear</Text>
           </Pressable>
         ) : null}

@@ -69,7 +69,7 @@ export default function MySongs() {
               {shown.map((o, i) => {
                 const chip = statusChip(o)
                 return (
-                  <Squish
+                  <Squish ph-label="Songs: Open song"
                     key={o.id}
                     accessibilityRole="button"
                     to={0.98}
