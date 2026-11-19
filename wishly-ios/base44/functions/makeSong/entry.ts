@@ -40,6 +40,11 @@ export default async function (req: Request) {
     if (!gemini) return Response.json({ error: 'GEMINI_API_KEY must be set' }, { status: 500 })
 
     const admin = base44.asServiceRole
+    // Each run costs real money (lyrics, singing, listening), so one version
+    // is made by one run at a time, and at most twice.
+    const claim = await claimMaking(admin, order)
+    if (claim) return Response.json({ error: claim }, { status: 409 })
+
     const { story, mood } = songInputs(order)
     const lyrics = { prompt: buildLyricPrompt(story, mood, story.occasion), schema: LYRICS_SCHEMA }
     try {
@@ -51,8 +56,31 @@ export default async function (req: Request) {
       return Response.json({ done: false, error: message }, { status: 500 })
     }
   } catch (error) {
-    return Response.json({ error: String((error as Error).message ?? error) }, { status: 500 })
+    console.error('makeSong failed before singing', error)
+    return Response.json({ error: 'Something went wrong. Try again in a moment.' }, { status: 500 })
   }
+}
+
+// A run is longer than Base44's 5-minute limit only if it crashed.
+const RUN_MS = 6 * 60_000
+const RUNS_PER_VERSION = 2
+const pause = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+// Marks this version as being made by this run. Null when it may go ahead,
+// else why not. Two runs sent together both write their mark; after a short
+// wait only the one whose mark stuck goes on.
+// deno-lint-ignore no-explicit-any
+async function claimMaking(admin: any, order: Order & { making?: { version?: number; since?: string; runs?: number; by?: string } }) {
+  const version = order.song_version || 0
+  const m = order.making?.version === version ? order.making : null
+  if (m?.since && Date.now() - Date.parse(m.since) < RUN_MS) return 'This song is already being made'
+  if ((m?.runs || 0) >= RUNS_PER_VERSION) return 'This version needs a person to look at it. We’ll be in touch.'
+
+  const by = crypto.randomUUID()
+  await admin.entities.Order.update(order.id, { making: { version, since: new Date().toISOString(), runs: (m?.runs || 0) + 1, by } })
+  await pause(1500)
+  const fresh = await admin.entities.Order.get(order.id).catch(() => null)
+  return fresh?.making?.by === by ? null : 'This song is already being made'
 }
 
 // deno-lint-ignore no-explicit-any

@@ -34,6 +34,7 @@ export default async function (req: Request) {
       from_name: order.gift?.from_name ?? '',
     })
   } catch (error) {
-    return Response.json({ error: String((error as Error).message ?? error) }, { status: 500 })
+    console.error('getGift failed', error)
+    return Response.json({ error: 'Something went wrong. Try again in a moment.' }, { status: 500 })
   }
 }

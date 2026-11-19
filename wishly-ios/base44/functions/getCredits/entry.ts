@@ -15,6 +15,7 @@ export default async function (req: Request) {
     if (!user?.email) return Response.json({ required: PAYMENT_REQUIRED, plan: null, plan_songs_left: 0, singles: 0, songs_left: 0 })
     return Response.json(await creditsOf(base44.asServiceRole, user.email))
   } catch (error) {
-    return Response.json({ error: String((error as Error).message ?? error) }, { status: 500 })
+    console.error('getCredits failed', error)
+    return Response.json({ error: 'Something went wrong. Try again in a moment.' }, { status: 500 })
   }
 }

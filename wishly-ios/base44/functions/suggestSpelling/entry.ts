@@ -25,6 +25,7 @@ export default async function (req: Request) {
     if (!key) return Response.json({ error: 'GEMINI_API_KEY is not set' }, { status: 500 })
     return Response.json(await suggestSpellings(name.trim(), key))
   } catch (error) {
-    return Response.json({ error: String((error as Error).message ?? error) }, { status: 500 })
+    console.error('suggestSpelling failed', error)
+    return Response.json({ error: 'Something went wrong. Try again in a moment.' }, { status: 500 })
   }
 }

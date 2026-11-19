@@ -127,3 +127,26 @@ export async function spendSong(admin: Admin, buyer: string, orderId: string): P
   }
   return PAYMENT_REQUIRED ? null : 'test'
 }
+
+// Run once the order holds its charge (`paid_with` saved). Requests sent at
+// the same moment can each see the same song as still free, so count the
+// orders holding this charge: over the limit, this order gives it back and
+// the buyer tries again. True when the charge stands.
+export async function confirmSpend(admin: Admin, paidWith: string, orderId: string): Promise<boolean> {
+  if (paidWith === 'test') return true
+  const limit = paidWith.startsWith('plan:') ? SONGS_PER_MONTH : 1
+  const holders = (await admin.entities.Order.filter({ paid_with: paidWith })) || []
+  if (holders.length <= limit) return true
+
+  await admin.entities.Order.update(orderId, { paid_with: '' })
+  if (paidWith.startsWith('song:')) {
+    // The single song stays marked as used only by an order still holding it.
+    const [p] = (await admin.entities.Purchase.filter({ transaction_id: paidWith.slice('song:'.length) })) || []
+    if (p && p.used_by_order === orderId) {
+      const [still] = ((await admin.entities.Order.filter({ paid_with: paidWith })) || []).filter((o: { id: string }) => o.id !== orderId)
+      await admin.entities.Purchase.update(p.id, { used_by_order: still?.id ?? null })
+    }
+  }
+  console.warn('confirmSpend: gave back a charge sent at the same moment', paidWith, orderId)
+  return false
+}

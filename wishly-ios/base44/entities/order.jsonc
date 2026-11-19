@@ -132,6 +132,19 @@
       }
     },
     "gift_token": { "type": "string", "rls": { "write": false } },
+    // makeSong's run on the current version: when it started, how many runs
+    // this version has had, and which run holds it. One run at a time, two
+    // per version, so the costly singing can't be set off over and over.
+    "making": {
+      "type": "object",
+      "rls": { "write": false },
+      "properties": {
+        "version": { "type": "integer" },
+        "since": { "type": "string" },
+        "runs": { "type": "integer" },
+        "by": { "type": "string" }
+      }
+    },
     // What paid for this song (base44/shared/credits.ts): a plan month
     // ("plan:<transaction>#<month>"), one song ("song:<transaction>"), or
     // "test" while payments aren't required. Set by startSong only.
@@ -165,10 +178,12 @@
   // Buyers see and change only their own orders. Recipients never read this
   // entity directly: the gift page should fetch through a backend function
   // that returns only the song and message for a valid gift_token.
+  // Buyers can't delete orders: a plan's songs are counted from its orders,
+  // so a deleted one would hand the song back. deleteAccount removes them.
   "rls": {
     "create": true,
     "read": { "created_by": "{{user.email}}" },
     "update": { "created_by": "{{user.email}}" },
-    "delete": { "created_by": "{{user.email}}" }
+    "delete": false
   }
 }

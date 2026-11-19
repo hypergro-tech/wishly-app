@@ -9,7 +9,10 @@
 
 import { createClientFromRequest } from 'npm:@base44/sdk'
 
-import { spendSong } from '../../shared/credits.ts'
+import { confirmSpend, spendSong } from '../../shared/credits.ts'
+
+// The first version plus up to three corrections or retries.
+const MAX_VERSIONS = 4
 import { generateSongPayload, songInputs, startingSong } from '../../shared/songPipeline.ts'
 
 export default async function (req: Request) {
@@ -32,12 +35,26 @@ export default async function (req: Request) {
       return Response.json({ error: 'This song is already made' }, { status: 409 })
     }
 
+    // Each version is a new recording, and a correction can change the name,
+    // so a song is made at most MAX_VERSIONS times (the first and three
+    // corrections or retries). Past that, support fixes it by hand.
+    if ((order.song_version || 0) >= MAX_VERSIONS) {
+      return Response.json({ error: 'This song has been remade as many times as we can do in the app. Email hello@trywishly.co and we’ll fix it for you.', code: 'version_limit' }, { status: 409 })
+    }
+
     // A new song is paid for once, here: a plan song or a single song.
     // Retries and corrections of a paid song cost nothing.
+    const admin = base44.asServiceRole
     let paid_with = order.paid_with
     if (!paid_with) {
-      paid_with = await spendSong(base44.asServiceRole, user.email, order.id)
+      paid_with = await spendSong(admin, user.email, order.id)
       if (!paid_with) return Response.json({ error: 'Pay for this song first', code: 'payment_required' }, { status: 402 })
+      // Save the charge first, then check that requests sent at the same
+      // moment didn't spend the same song twice (credits.ts).
+      await admin.entities.Order.update(order.id, { paid_with })
+      if (!(await confirmSpend(admin, paid_with, order.id))) {
+        return Response.json({ error: 'Something went wrong. Try again in a moment.', code: 'busy' }, { status: 409 })
+      }
     }
 
     const changes = {
@@ -47,9 +64,10 @@ export default async function (req: Request) {
       status: 'in_production',
       corrections: corrections.map((c: object) => ({ ...c, resolved: true })),
     }
-    await base44.asServiceRole.entities.Order.update(order.id, changes)
+    await admin.entities.Order.update(order.id, changes)
     return Response.json({ ...order, ...changes })
   } catch (error) {
-    return Response.json({ error: String((error as Error).message ?? error) }, { status: 500 })
+    console.error('startSong failed', error)
+    return Response.json({ error: 'Something went wrong. Try again in a moment.' }, { status: 500 })
   }
 }

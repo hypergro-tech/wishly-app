@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native'
 
 import { getOrder, requestCorrection, type Order } from '@/api/orders'
 import { Body, Button, CheckCircle, Field, Label, Pills, SheetBody, SpeakButton, Title, success, tap } from '@/components/ui'
@@ -53,7 +53,15 @@ export default function FixSomething() {
     const changes = kind === 'name'
       ? { recipient: { name: name.trim(), pronunciation: pronunciation.trim(), ...(couple ? { partner_name: partner.trim(), partner_pronunciation: partnerSays.trim() } : {}) } }
       : kind === 'fact' ? { memories: { [field]: value.trim() } } : {}
-    await requestCorrection(order!, { kind, note: note || KINDS.find((k) => k.id === kind)!.label, changes })
+    try {
+      await requestCorrection(order!, { kind, note: note || KINDS.find((k) => k.id === kind)!.label, changes })
+    } catch (error) {
+      // The backend says why (e.g. a song remade the most times the app allows).
+      const reason = (error as { response?: { data?: { error?: string } }; data?: { error?: string } })
+      Alert.alert('We couldn’t remake this song', reason?.response?.data?.error || reason?.data?.error || 'Check your connection and try again.')
+      setSending(false)
+      return
+    }
     success()
     router.back()
   }

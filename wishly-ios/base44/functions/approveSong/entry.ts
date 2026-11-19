@@ -39,6 +39,7 @@ export default async function (req: Request) {
     await base44.asServiceRole.entities.Order.update(order.id, changes)
     return Response.json({ ...order, ...changes })
   } catch (error) {
-    return Response.json({ error: String((error as Error).message ?? error) }, { status: 500 })
+    console.error('approveSong failed', error)
+    return Response.json({ error: 'Something went wrong. Try again in a moment.' }, { status: 500 })
   }
 }
