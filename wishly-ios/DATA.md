@@ -9,7 +9,7 @@ Change all three together.
 | --- | --- | --- | --- |
 | Email, name (if given) | Sign-in, support | Base44 (sign-in, database) | Until the account is deleted |
 | Song details: names, how they sound, relationship, occasion, story, song line | To write and sing the song | Base44; Google Gemini (lyrics, singing, listening for the name) | Until the song or account is deleted |
-| Lyrics and audio | The product | Base44 (database, file storage) | Until the song or account is deleted |
+| Lyrics and audio | The product | Base44 (database, file storage) | Until the song or account is deleted (the audio file can stay in storage; see below) |
 | Gift message, from-name | Shown on the gift page | Base44; anyone with the gift link | Until the song or account is deleted |
 | Purchases (product, date, Apple transaction id) | Songs and plans paid for | Apple; Base44 | Kept for accounting after deletion |
 | Push address | "Your song is ready" | Base44; Expo push service; Apple | Until the account is deleted |
@@ -29,3 +29,12 @@ lyrics or messages (see `src/lib/analytics.tsx`).
 - Usage data: product interaction. Linked. Analytics.
 - Diagnostics: crash data, other diagnostic data. Linked. App functionality, analytics.
 - Used to track the user: no.
+
+## Known gap
+
+Song audio is stored with Base44's public file upload, and Base44 has no way to
+delete a stored file. Deleting an account removes the songs and turns off their
+gift links, but each audio file stays at its own long random address. The
+privacy policy says so. A later version could store audio privately
+(UploadPrivateFile) and hand out one-hour signed links through getGift and a new
+function for the app; each link costs Base44 credits, so weigh that first.
